@@ -97,7 +97,11 @@ const PokedexApp = {
     // BGM 토글 (없으면 무시)
     if (this.els.bgmBtn) this.els.bgmBtn.addEventListener('click', () => this.toggleBGM());
     
-    this.preloadGenerationList(1);
+    // 전 세대 리스트 백그라운드 프리로드
+    const totalGens = Object.keys(PokeAPI.GENERATION_RANGES).length;
+    for (let g = 1; g <= totalGens; g++) {
+      this.preloadGenerationList(g);
+    }
   },
 
   handleIntroTap() {
@@ -560,22 +564,35 @@ const PokedexApp = {
         return;
       }
       
-      const list = this.state.generationCache.get(this.state.currentGen) || [];
-      const matches = list.filter(p => 
-        p.name.includes(query) || 
-        p.id.toString() === query || 
-        this.formatNumber(p.id).includes(query) ||
-        (p.nameKr && p.nameKr.includes(query))
-      ).slice(0, 8);
+      // 전 세대 캐시를 합쳐서 검색
+      const allMatches = [];
+      for (const [gen, list] of this.state.generationCache.entries()) {
+        const filtered = list.filter(p => 
+          p.name.includes(query) || 
+          p.id.toString() === query || 
+          this.formatNumber(p.id).includes(query) ||
+          (p.nameKr && p.nameKr.includes(query))
+        );
+        filtered.forEach(p => allMatches.push({ ...p, gen: parseInt(gen, 10) }));
+      }
+      // ID 순 정렬 후 최대 10개
+      allMatches.sort((a, b) => a.id - b.id);
+      const matches = allMatches.slice(0, 10);
       
       if (matches.length > 0) {
         this.els.searchResults.innerHTML = '';
         matches.forEach(m => {
           const div = document.createElement('div');
           div.className = 'search-result-item';
-          div.textContent = `${this.formatNumber(m.id)} ${m.nameKr || m.name}`;
+          const genLabel = `[${m.gen}세대]`;
+          div.innerHTML = `${this.formatNumber(m.id)} ${m.nameKr || m.name} <span class="search-gen-tag">${genLabel}</span>`;
           div.addEventListener('mousedown', () => {
-            this.loadPokemon(m.id);
+            // 세대 자동 전환
+            if (m.gen !== this.state.currentGen) {
+              this.switchGeneration(m.gen, m.id);
+            } else {
+              this.loadPokemon(m.id);
+            }
             this.els.searchInput.value = '';
             this.els.searchResults.classList.add('hidden');
           });

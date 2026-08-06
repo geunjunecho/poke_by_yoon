@@ -1062,8 +1062,18 @@ body {
   font-size: 12px;
   transition: background 0.15s;
 }
+.search-result-item:hover { background: #2a2a3a; }
 .search-result-item:active { background: #333; }
 .search-result-item img { width: 28px; height: 28px; }
+.search-gen-tag {
+  margin-left: auto;
+  font-size: 10px;
+  color: #888;
+  background: #1a1a2a;
+  padding: 1px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
 
 /* Controls Row: D-Pad + Gen Buttons */
 .controls-row {
