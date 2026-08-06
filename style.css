@@ -1233,6 +1233,22 @@ body {
     flex: 1;
     min-height: 0;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 정보 영역 스크롤 가능하게 */
+  .info-screen-wrapper {
+    flex: 1;
+    min-height: 0;
+  }
+  .info-screen {
+    height: 100%;
+  }
+  .info-scroll-content {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* 헤더 컴팩트 */
