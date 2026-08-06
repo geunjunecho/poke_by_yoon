@@ -309,6 +309,9 @@ body {
   height: 100dvh;
   height: var(--real-vh, 100vh);
   overflow: hidden;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   
   /* 핵심: flexbox row로 강제 가로 배치 */
   display: flex;
