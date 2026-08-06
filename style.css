@@ -307,6 +307,7 @@ body {
   width: 100vw;
   height: 100vh;
   height: 100dvh;
+  height: var(--real-vh, 100vh);
   overflow: hidden;
   
   /* 핵심: flexbox row로 강제 가로 배치 */
@@ -1200,6 +1201,7 @@ body {
     width: 100vw;
     height: 100vh;
     height: 100dvh;
+    height: var(--real-vh, 100vh);
   }
   
   .panel-left {

@@ -16,6 +16,15 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <script>
+    // 모바일 브라우저 실제 높이 계산 (주소창/메뉴바 제외)
+    function setRealVH() {
+      document.documentElement.style.setProperty('--real-vh', window.innerHeight + 'px');
+    }
+    setRealVH();
+    window.addEventListener('resize', setRealVH);
+    window.addEventListener('orientationchange', () => setTimeout(setRealVH, 150));
+  </script>
   <!-- 닫힌 도감 인트로 -->
   <div id="intro-overlay" class="intro-overlay">
     <div class="closed-pokedex">
