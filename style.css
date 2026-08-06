@@ -1203,18 +1203,21 @@ body {
   
   .panel-left {
     flex: 0 0 auto;
-    height: 45vh;
     min-height: 0;
+    display: flex;
+    flex-direction: column;
+    max-height: 42%;
   }
   
   .hinge {
     width: 100%;
-    height: 10px;
+    height: 6px;
     flex-direction: row;
     padding: 0;
     gap: 8px;
     justify-content: center;
     align-items: center;
+    flex-shrink: 0;
   }
   .hinge-line {
     width: 30%;
@@ -1232,41 +1235,67 @@ body {
     overflow: hidden;
   }
 
-  /* 헤더를 간결하게 */
+  /* 헤더 컴팩트 */
   .device-header {
-    padding: 6px 10px;
-    gap: 8px;
+    padding: 4px 10px;
+    gap: 6px;
+    flex-shrink: 0;
   }
   .blue-lens {
-    width: 28px;
-    height: 28px;
+    width: 22px;
+    height: 22px;
   }
   .header-title {
-    font-size: 11px;
+    font-size: 10px;
+  }
+  .led { width: 6px; height: 6px; }
+
+  /* 메인스크린을 꽉 채우기 */
+  .main-screen-wrapper {
+    flex: 1;
+    min-height: 0;
+  }
+  .main-screen {
+    height: 100%;
+  }
+  .pokemon-image {
+    max-width: 140px;
+    max-height: 140px;
+  }
+  .image-mode-bar {
+    bottom: 32px;
   }
 
   /* 타입+스피커 바 */
   .type-speaker-bar {
     padding: 2px 4px;
+    flex-shrink: 0;
   }
   .speaker-grill {
-    height: 3px;
+    height: 2px;
+    flex-shrink: 0;
   }
 
   /* 컨트롤 영역 세로형 */
   .controls-area {
-    padding: 4px 8px;
-    gap: 4px;
+    padding: 3px 8px;
+    gap: 3px;
+    flex-shrink: 0;
   }
   .controls-row {
     flex-direction: row;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+  }
+  .search-input {
+    padding: 4px 8px;
+    font-size: 10px;
   }
   .dpad-container {
-    grid-template-columns: repeat(3, 26px);
-    grid-template-rows: repeat(3, 26px);
+    grid-template-columns: repeat(3, 22px);
+    grid-template-rows: repeat(3, 22px);
   }
+  .dpad-btn { font-size: 8px; }
   .gen-buttons-container {
     flex: 1;
   }
@@ -1274,14 +1303,8 @@ body {
     gap: 2px;
   }
   .gen-btn {
-    font-size: 8px;
-    padding: 4px 0;
-  }
-
-  /* 포켓몬 이미지 세로 화면에 맞게 */
-  .pokemon-image {
-    max-width: 200px;
-    max-height: 200px;
+    font-size: 7px;
+    padding: 3px 0;
   }
 
   /* 하단 장식 숨김 */
