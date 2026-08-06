@@ -22,7 +22,7 @@
 
 html, body {
   width: 100%;
-  height: 100%;
+  height: var(--real-vh, 100vh);
   overflow: hidden;
 }
 
@@ -113,6 +113,7 @@ body {
 .intro-overlay {
   position: fixed;
   inset: 0;
+  height: var(--real-vh, 100vh);
   background: radial-gradient(ellipse at center, #1a0a0a 0%, #000 100%);
   z-index: 1000;
   display: flex;
@@ -278,6 +279,7 @@ body {
 .loading-overlay {
   position: fixed;
   inset: 0;
+  height: var(--real-vh, 100vh);
   background: rgba(0,0,0,0.85);
   z-index: 500;
   display: flex;
@@ -303,19 +305,21 @@ body {
    Pokédex Device — FORCED Landscape Layout
    ======================================== */
 .pokedex-device {
-  /* position:fixed + inset:0 = 모바일에서 가장 정확한 전체화면 */
+  /* position:fixed + inset:0 + height:var(--real-vh) = 모바일에서 가장 정확한 전체화면
+     (삼성 인터넷 등 하단 툴바가 뷰포트를 누르는 브라우저 대응, index.html의 visualViewport 스크립트가 값을 채움) */
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  height: var(--real-vh, 100vh);
   overflow: hidden;
-  
+
   /* 핵심: flexbox row로 강제 가로 배치 */
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  
+
   background: linear-gradient(
     160deg,
     var(--pokedex-light-red) 0%,
@@ -325,8 +329,7 @@ body {
   border-radius: 0;
   border: none;
   box-shadow: none;
-  overflow: hidden;
-  position: relative;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 /* ========================================
