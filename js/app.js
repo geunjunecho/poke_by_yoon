@@ -8,6 +8,22 @@ const PokedexApp = {
     imageVariants: [],
     imageIndex: 0,
     tcgLoaded: false,
+    autoCry: true,
+    bgmPlaying: false,
+    bgmAudio: null,
+    favorites: new Set(JSON.parse(localStorage.getItem('pokeFavorites') || '[]')),
+  },
+
+  BGM_URLS: {
+    1: 'https://play.pokemonshowdown.com/audio/dpp-rival.mp3',
+    2: 'https://play.pokemonshowdown.com/audio/dpp-rival.mp3',
+    3: 'https://play.pokemonshowdown.com/audio/oras-trainer.mp3',
+    4: 'https://play.pokemonshowdown.com/audio/dpp-trainer.mp3',
+    5: 'https://play.pokemonshowdown.com/audio/bw-trainer.mp3',
+    6: 'https://play.pokemonshowdown.com/audio/xy-trainer.mp3',
+    7: 'https://play.pokemonshowdown.com/audio/sm-trainer.mp3',
+    8: 'https://play.pokemonshowdown.com/audio/xy-rival.mp3',
+    9: 'https://play.pokemonshowdown.com/audio/sm-rival.mp3',
   },
 
   els: {},
@@ -51,7 +67,10 @@ const PokedexApp = {
       
       ledRed: document.getElementById('led-red'),
       ledYellow: document.getElementById('led-yellow'),
-      ledGreen: document.getElementById('led-green')
+      ledGreen: document.getElementById('led-green'),
+      favBtn: document.getElementById('fav-btn'),
+      bgmBtn: document.getElementById('bgm-btn'),
+      typeEffectiveness: document.getElementById('type-effectiveness'),
     };
 
     // Bind event listeners
@@ -71,6 +90,12 @@ const PokedexApp = {
     // 이미지 클릭으로 스타일 전환
     this.els.pokemonImage.addEventListener('click', () => this.cycleImage());
     this.els.pokemonImage.style.cursor = 'pointer';
+
+    // 즐겨찾기 버튼
+    this.els.favBtn.addEventListener('click', () => this.toggleFavorite());
+
+    // BGM 토글
+    this.els.bgmBtn.addEventListener('click', () => this.toggleBGM());
     
     this.preloadGenerationList(1);
   },
@@ -132,6 +157,13 @@ const PokedexApp = {
       this.updateStatsSection(data.stats);
       this.updateDescriptionSection(data.flavorTextKr);
       this.updateEvolutionSection(data.evolutionChainUrl);
+      this.updateTypeEffectiveness(data.types);
+      this.updateFavButton();
+      
+      // 울음소리 자동재생
+      if (this.state.autoCry && data.cryUrl) {
+        this.playCry(data.cryUrl);
+      }
       
       this.setLedState('success');
       PokeAPI.preloadAdjacent(id, this.state.currentGen);
@@ -168,21 +200,41 @@ const PokedexApp = {
   },
 
   updateImageLabel() {
-    let label = this.els.pokemonImageContainer.querySelector('.image-mode-label');
-    if (!label) {
-      label = document.createElement('div');
+    let bar = this.els.mainScreen.querySelector('.image-mode-bar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.className = 'image-mode-bar';
+
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'image-nav-btn';
+      prevBtn.textContent = '◀';
+      prevBtn.addEventListener('click', (e) => { e.stopPropagation(); this.cycleImage(-1); });
+
+      const label = document.createElement('span');
       label.className = 'image-mode-label';
-      this.els.pokemonImageContainer.appendChild(label);
+
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'image-nav-btn';
+      nextBtn.textContent = '▶';
+      nextBtn.addEventListener('click', (e) => { e.stopPropagation(); this.cycleImage(1); });
+
+      bar.appendChild(prevBtn);
+      bar.appendChild(label);
+      bar.appendChild(nextBtn);
+      this.els.mainScreen.appendChild(bar);
     }
+    const label = bar.querySelector('.image-mode-label');
     const variant = this.state.imageVariants[this.state.imageIndex];
-    label.textContent = variant ? variant.label : '공식 일러스트';
     const total = this.state.imageVariants.length;
-    label.textContent += ` (${this.state.imageIndex + 1}/${total})`;
+    label.textContent = `${variant ? variant.label : '공식 일러스트'} (${this.state.imageIndex + 1}/${total})`;
   },
 
-  cycleImage() {
+  cycleImage(direction = 1) {
     if (this.state.imageVariants.length <= 1) return;
-    this.state.imageIndex = (this.state.imageIndex + 1) % this.state.imageVariants.length;
+    let next = this.state.imageIndex + direction;
+    if (next >= this.state.imageVariants.length) next = 0;
+    if (next < 0) next = this.state.imageVariants.length - 1;
+    this.state.imageIndex = next;
     const variant = this.state.imageVariants[this.state.imageIndex];
     
     const img = this.els.pokemonImage;
@@ -190,6 +242,10 @@ const PokedexApp = {
     void img.offsetWidth;
     img.src = variant.url;
     img.classList.add('entering');
+    
+    // 픽셀아트 스프라이트 감지 → 선명 확대
+    const isPixel = variant.label.includes('스프라이트') || variant.label.includes('도트');
+    img.classList.toggle('pixel-art', isPixel);
     
     this.updateImageLabel();
   },
@@ -366,6 +422,11 @@ const PokedexApp = {
     });
     this.preloadGenerationList(gen);
     
+    // BGM 전환
+    if (this.state.bgmPlaying) {
+      this.playBGM(gen);
+    }
+    
     const [min] = PokeAPI.GENERATION_RANGES[gen];
     this.loadPokemon(targetId || min);
   },
@@ -376,7 +437,72 @@ const PokedexApp = {
     this.els.dpadRight.addEventListener('click', () => this.navigatePokemon(1));
     this.els.dpadUp.addEventListener('click', () => this.cycleGeneration(-1));
     this.els.dpadDown.addEventListener('click', () => this.cycleGeneration(1));
-    this.els.dpadCenter.addEventListener('click', () => this.playCry(this.state.currentCryUrl));
+    this.els.dpadCenter.addEventListener('click', () => this.showFavorites());
+  },
+
+  showFavorites() {
+    // 기존 모달 제거
+    const existing = document.getElementById('fav-modal');
+    if (existing) { existing.remove(); return; }
+
+    const favIds = [...this.state.favorites].sort((a, b) => a - b);
+
+    const modal = document.createElement('div');
+    modal.id = 'fav-modal';
+    modal.className = 'fav-modal';
+
+    const inner = document.createElement('div');
+    inner.className = 'fav-modal-inner';
+
+    // 헤더
+    const header = document.createElement('div');
+    header.className = 'fav-modal-header';
+    header.innerHTML = `<span>⭐ 즐겨찾기 (${favIds.length})</span>`;
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'fav-close-btn';
+    closeBtn.textContent = '✕';
+    closeBtn.addEventListener('click', () => modal.remove());
+    header.appendChild(closeBtn);
+    inner.appendChild(header);
+
+    if (favIds.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'fav-empty';
+      empty.textContent = '즐겨찾기한 포켓몬이 없어요!\n☆ 버튼을 눌러 추가해보세요';
+      inner.appendChild(empty);
+    } else {
+      const grid = document.createElement('div');
+      grid.className = 'fav-grid';
+      favIds.forEach(id => {
+        const card = document.createElement('div');
+        card.className = 'fav-card';
+        const img = document.createElement('img');
+        img.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+        img.alt = `#${id}`;
+        img.loading = 'lazy';
+        const label = document.createElement('span');
+        label.className = 'fav-card-label';
+        label.textContent = `#${String(id).padStart(3, '0')}`;
+        card.appendChild(img);
+        card.appendChild(label);
+        card.addEventListener('click', () => {
+          // 세대 자동 전환
+          for (const [gen, [min, max]] of Object.entries(PokeAPI.GENERATION_RANGES)) {
+            if (id >= min && id <= max) {
+              this.switchGeneration(parseInt(gen), id);
+              break;
+            }
+          }
+          modal.remove();
+        });
+        grid.appendChild(card);
+      });
+      inner.appendChild(grid);
+    }
+
+    modal.appendChild(inner);
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+    document.body.appendChild(modal);
   },
 
   cycleGeneration(direction) {
@@ -493,7 +619,90 @@ const PokedexApp = {
 
   formatNumber(num) {
     return `#${String(num).padStart(3, '0')}`;
-  }
+  },
+
+  // ===== 타입 상성 =====
+  updateTypeEffectiveness(types) {
+    const el = this.els.typeEffectiveness;
+    if (!el) return;
+    const eff = PokeAPI.getTypeEffectiveness(types);
+    el.innerHTML = '';
+
+    const renderRow = (label, typeList, cssClass) => {
+      if (typeList.length === 0) return;
+      const row = document.createElement('div');
+      row.className = 'eff-row';
+      const lbl = document.createElement('span');
+      lbl.className = `eff-label ${cssClass}`;
+      lbl.textContent = label;
+      row.appendChild(lbl);
+      typeList.forEach(t => {
+        const badge = document.createElement('span');
+        badge.className = `type-badge type-${t}`;
+        badge.textContent = PokeAPI.TYPE_NAMES_KR[t] || t;
+        row.appendChild(badge);
+      });
+      el.appendChild(row);
+    };
+
+    renderRow('×4', eff.x4, 'eff-x4');
+    renderRow('×2', eff.x2, 'eff-x2');
+    renderRow('×½', eff.x05, 'eff-half');
+    renderRow('×¼', eff.x025, 'eff-quarter');
+    renderRow('×0', eff.x0, 'eff-immune');
+  },
+
+  // ===== 즐겨찾기 =====
+  toggleFavorite() {
+    const id = this.state.currentPokemonId;
+    if (this.state.favorites.has(id)) {
+      this.state.favorites.delete(id);
+    } else {
+      this.state.favorites.add(id);
+    }
+    localStorage.setItem('pokeFavorites', JSON.stringify([...this.state.favorites]));
+    this.updateFavButton();
+  },
+
+  updateFavButton() {
+    const isFav = this.state.favorites.has(this.state.currentPokemonId);
+    this.els.favBtn.textContent = isFav ? '★' : '☆';
+    this.els.favBtn.classList.toggle('active', isFav);
+  },
+
+  // ===== BGM =====
+  toggleBGM() {
+    if (this.state.bgmPlaying) {
+      this.stopBGM();
+    } else {
+      this.playBGM(this.state.currentGen);
+    }
+  },
+
+  playBGM(gen) {
+    this.stopBGM();
+    const url = this.BGM_URLS[gen];
+    if (!url) return;
+    const audio = new Audio(url);
+    audio.loop = true;
+    audio.volume = 0.15;
+    audio.play().catch(() => {});
+    this.state.bgmAudio = audio;
+    this.state.bgmPlaying = true;
+    this.els.bgmBtn.classList.add('active');
+    this.els.bgmBtn.textContent = '🎵';
+  },
+
+  stopBGM() {
+    if (this.state.bgmAudio) {
+      this.state.bgmAudio.pause();
+      this.state.bgmAudio.currentTime = 0;
+      this.state.bgmAudio = null;
+    }
+    this.state.bgmPlaying = false;
+    this.els.bgmBtn.classList.remove('active');
+    this.els.bgmBtn.textContent = '🎵';
+  },
 };
 
 document.addEventListener('DOMContentLoaded', () => {

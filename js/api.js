@@ -22,6 +22,53 @@ const PokeAPI = {
     steel: '강철', fairy: '페어리'
   },
 
+  // 방어 시 상성 (key 타입으로 공격받을 때)
+  TYPE_DEFENSE: {
+    normal:   { weak: ['fighting'], resist: [], immune: ['ghost'] },
+    fire:     { weak: ['water','ground','rock'], resist: ['fire','grass','ice','bug','steel','fairy'], immune: [] },
+    water:    { weak: ['electric','grass'], resist: ['fire','water','ice','steel'], immune: [] },
+    grass:    { weak: ['fire','ice','poison','flying','bug'], resist: ['water','electric','grass','ground'], immune: [] },
+    electric: { weak: ['ground'], resist: ['electric','flying','steel'], immune: [] },
+    ice:      { weak: ['fire','fighting','rock','steel'], resist: ['ice'], immune: [] },
+    fighting: { weak: ['flying','psychic','fairy'], resist: ['bug','rock','dark'], immune: [] },
+    poison:   { weak: ['ground','psychic'], resist: ['fighting','poison','bug','grass','fairy'], immune: [] },
+    ground:   { weak: ['water','grass','ice'], resist: ['poison','rock'], immune: ['electric'] },
+    flying:   { weak: ['electric','ice','rock'], resist: ['fighting','bug','grass'], immune: ['ground'] },
+    psychic:  { weak: ['bug','ghost','dark'], resist: ['fighting','psychic'], immune: [] },
+    bug:      { weak: ['fire','flying','rock'], resist: ['fighting','grass','ground'], immune: [] },
+    rock:     { weak: ['water','grass','fighting','ground','steel'], resist: ['normal','fire','poison','flying'], immune: [] },
+    ghost:    { weak: ['ghost','dark'], resist: ['poison','bug'], immune: ['normal','fighting'] },
+    dragon:   { weak: ['ice','dragon','fairy'], resist: ['fire','water','electric','grass'], immune: [] },
+    dark:     { weak: ['fighting','bug','fairy'], resist: ['ghost','dark'], immune: ['psychic'] },
+    steel:    { weak: ['fire','fighting','ground'], resist: ['normal','grass','ice','flying','psychic','bug','rock','dragon','steel','fairy'], immune: ['poison'] },
+    fairy:    { weak: ['poison','steel'], resist: ['fighting','bug','dark'], immune: ['dragon'] },
+  },
+
+  getTypeEffectiveness(types) {
+    const multipliers = {};
+    const allTypes = Object.keys(this.TYPE_DEFENSE);
+    allTypes.forEach(t => multipliers[t] = 1);
+
+    types.forEach(typeObj => {
+      const typeName = typeObj.type.name;
+      const def = this.TYPE_DEFENSE[typeName];
+      if (!def) return;
+      def.weak.forEach(t => multipliers[t] *= 2);
+      def.resist.forEach(t => multipliers[t] *= 0.5);
+      def.immune.forEach(t => multipliers[t] *= 0);
+    });
+
+    const result = { x4: [], x2: [], x05: [], x025: [], x0: [] };
+    allTypes.forEach(t => {
+      if (multipliers[t] === 4) result.x4.push(t);
+      else if (multipliers[t] === 2) result.x2.push(t);
+      else if (multipliers[t] === 0.5) result.x05.push(t);
+      else if (multipliers[t] === 0.25) result.x025.push(t);
+      else if (multipliers[t] === 0) result.x0.push(t);
+    });
+    return result;
+  },
+
   async fetchWithCache(url) {
     if (this.cache.has(url)) {
       return this.cache.get(url);

@@ -84,6 +84,7 @@
             <div class="pokemon-basic-info">
               <span id="pokemon-number" class="pokemon-number">#001</span>
               <span id="pokemon-name-kr" class="pokemon-name-kr">이상해씨</span>
+              <button id="fav-btn" class="fav-btn" aria-label="즐겨찾기">☆</button>
             </div>
           </div>
           <div id="screen-glow" class="screen-glow"></div>
@@ -93,9 +94,12 @@
       <!-- 타입 + 스피커 -->
       <section class="type-speaker-bar">
         <div id="type-badges" class="type-badges"></div>
-        <button id="speaker-btn" class="speaker-btn" aria-label="울음소리 재생">
-          <div class="speaker-icon">🔊</div>
-        </button>
+        <div class="sound-controls">
+          <button id="bgm-btn" class="sound-btn" aria-label="BGM 토글" title="BGM">🎵</button>
+          <button id="speaker-btn" class="speaker-btn" aria-label="울음소리 재생">
+            <div class="speaker-icon">🔊</div>
+          </button>
+        </div>
       </section>
 
       <!-- 스피커 그릴 -->
@@ -156,6 +160,12 @@
                 <span class="stats-total-label">합계</span>
                 <span id="stats-total-value" class="stats-total-value">-</span>
               </div>
+            </div>
+
+            <!-- 타입 상성 섹션 -->
+            <div class="section-block">
+              <div class="section-title">⚔️ 타입 상성</div>
+              <div id="type-effectiveness" class="type-effectiveness"></div>
             </div>
 
             <!-- 설명 섹션 -->
