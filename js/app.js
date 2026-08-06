@@ -196,9 +196,11 @@ const PokedexApp = {
 
   async loadTCGCards(nameEn) {
     if (!nameEn) return;
+    const pokemonId = this.state.currentPokemonId;
     try {
-      const cards = await PokeAPI.getTCGCard(nameEn);
-      if (cards.length > 0 && this.state.currentPokemonId === this.state.currentPokemonId) {
+      const cards = await PokeAPI.getTCGCard(nameEn, pokemonId);
+      // 아직 같은 포켓몬을 보고 있는지 확인
+      if (cards.length > 0 && this.state.currentPokemonId === pokemonId) {
         this.state.imageVariants.push(...cards);
         this.state.tcgLoaded = true;
         this.updateImageLabel();

@@ -206,10 +206,24 @@ const PokeAPI = {
     };
   },
 
-  async getTCGCard(name) {
+  async getTCGCard(name, pokemonId) {
     try {
-      const url = `https://api.pokemontcg.io/v2/cards?q=name:${name}&pageSize=5&orderBy=-set.releaseDate`;
+      const url = `https://api.pokemontcg.io/v2/cards?q=nationalPokedexNumbers:${pokemonId || ''} name:"${name}"&pageSize=5&orderBy=-set.releaseDate`;
       const res = await fetch(url);
+      if (!res.ok) {
+        // nationalPokedexNumbers 실패 시 이름만으로 재시도
+        const url2 = `https://api.pokemontcg.io/v2/cards?q=name:"${name}"&pageSize=5&orderBy=-set.releaseDate`;
+        const res2 = await fetch(url2);
+        if (!res2.ok) return [];
+        const data2 = await res2.json();
+        if (data2.data && data2.data.length > 0) {
+          return data2.data.map(card => ({
+            label: `🃏 ${card.set.name}`,
+            url: card.images.large
+          }));
+        }
+        return [];
+      }
       const data = await res.json();
       if (data.data && data.data.length > 0) {
         return data.data.map(card => ({
@@ -218,7 +232,8 @@ const PokeAPI = {
         }));
       }
       return [];
-    } catch {
+    } catch (e) {
+      console.log('TCG API error:', e);
       return [];
     }
   },
