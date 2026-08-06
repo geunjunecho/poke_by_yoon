@@ -93,14 +93,15 @@ const PokeAPI = {
     const nameEn = data.names.find(n => n.language.name === 'en')?.name;
     
     const flavorTextsKo = data.flavor_text_entries.filter(e => e.language.name === 'ko');
+    const flavorTextsJa = data.flavor_text_entries.filter(e => e.language.name === 'ja');
+    const flavorTextsEn = data.flavor_text_entries.filter(e => e.language.name === 'en');
     let flavorTextKr = '';
     if (flavorTextsKo.length > 0) {
       flavorTextKr = flavorTextsKo[flavorTextsKo.length - 1].flavor_text;
-    } else {
-      const flavorTextsEn = data.flavor_text_entries.filter(e => e.language.name === 'en');
-      if (flavorTextsEn.length > 0) {
-        flavorTextKr = flavorTextsEn[flavorTextsEn.length - 1].flavor_text;
-      }
+    } else if (flavorTextsJa.length > 0) {
+      flavorTextKr = '🇯🇵 ' + flavorTextsJa[flavorTextsJa.length - 1].flavor_text;
+    } else if (flavorTextsEn.length > 0) {
+      flavorTextKr = '🇺🇸 ' + flavorTextsEn[flavorTextsEn.length - 1].flavor_text;
     }
     flavorTextKr = flavorTextKr.replace(/[\n\f]/g, ' ');
     

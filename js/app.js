@@ -97,11 +97,8 @@ const PokedexApp = {
     // BGM 토글 (없으면 무시)
     if (this.els.bgmBtn) this.els.bgmBtn.addEventListener('click', () => this.toggleBGM());
     
-    // 전 세대 리스트 백그라운드 프리로드
-    const totalGens = Object.keys(PokeAPI.GENERATION_RANGES).length;
-    for (let g = 1; g <= totalGens; g++) {
-      this.preloadGenerationList(g);
-    }
+    // 전 세대 리스트 + 한글 이름 백그라운드 로드
+    this.preloadAllGenerations();
   },
 
   handleIntroTap() {
@@ -117,6 +114,32 @@ const PokedexApp = {
   async preloadGenerationList(gen) {
     if (this.state.generationCache.has(gen)) return;
     try {
+      await this.preloadGenerationListOnly(gen);
+      const list = this.state.generationCache.get(gen);
+      if (list) this.loadKoreanNames(gen, list);
+    } catch (e) {
+      console.error('Failed to preload generation list', e);
+    }
+  },
+
+  async preloadAllGenerations() {
+    const totalGens = Object.keys(PokeAPI.GENERATION_RANGES).length;
+    // Phase 1: 모든 세대 영문 리스트 병렬 로드 (빠름)
+    await Promise.allSettled(
+      Array.from({length: totalGens}, (_, i) => this.preloadGenerationListOnly(i + 1))
+    );
+    // Phase 2: 한글 이름 세대별 순차 로드 (API 부하 방지)
+    for (let g = 1; g <= totalGens; g++) {
+      const list = this.state.generationCache.get(g);
+      if (list && list.some(p => !p.nameKr)) {
+        await this.loadKoreanNames(g, list);
+      }
+    }
+  },
+
+  async preloadGenerationListOnly(gen) {
+    if (this.state.generationCache.has(gen)) return;
+    try {
       const [min, max] = PokeAPI.GENERATION_RANGES[gen];
       const limit = max - min + 1;
       const url = `${PokeAPI.BASE_URL}/pokemon?limit=${limit}&offset=${min - 1}`;
@@ -127,21 +150,21 @@ const PokedexApp = {
         nameKr: null
       }));
       this.state.generationCache.set(gen, list);
-      // 백그라운드로 한글 이름 로드
-      this.loadKoreanNames(gen, list);
     } catch (e) {
-      console.error('Failed to preload generation list', e);
+      console.error(`Failed to preload gen ${gen} list`, e);
     }
   },
 
   async loadKoreanNames(gen, list) {
-    const batchSize = 15;
+    const batchSize = 40;
     for (let i = 0; i < list.length; i += batchSize) {
       const batch = list.slice(i, i + batchSize);
-      const names = await Promise.all(
+      const names = await Promise.allSettled(
         batch.map(p => PokeAPI.getSpeciesName(p.id))
       );
-      batch.forEach((p, idx) => { p.nameKr = names[idx]; });
+      batch.forEach((p, idx) => {
+        if (names[idx].status === 'fulfilled') p.nameKr = names[idx].value;
+      });
     }
   },
 
