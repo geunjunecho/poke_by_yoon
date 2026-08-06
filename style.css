@@ -108,43 +108,18 @@ body {
 }
 
 /* ========================================
-   Rotate Notice (portrait warning — mobile)
-   ======================================== */
-.rotate-notice {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: #111;
-  color: #fff;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  font-family: var(--font-primary);
-  font-size: 16px;
-  font-weight: 700;
-}
-.rotate-icon { font-size: 48px; }
-
-@media (orientation: portrait) and (max-width: 768px) {
-  .rotate-notice { display: flex; }
-  .pokedex-device { display: none !important; }
-}
-
-/* ========================================
-   Intro Overlay
+   Intro — Closed Pokédex Design
    ======================================== */
 .intro-overlay {
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse at center, var(--pokedex-red) 0%, #550000 100%);
+  background: radial-gradient(ellipse at center, #1a0a0a 0%, #000 100%);
   z-index: 1000;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 24px;
+  gap: 28px;
   cursor: pointer;
   transition: opacity 0.6s ease;
 }
@@ -152,44 +127,149 @@ body {
   opacity: 0;
   pointer-events: none;
 }
-.intro-pokeball {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  border: 5px solid #222;
-  background: linear-gradient(to bottom, #DC0A2D 50%, #fff 50%);
-  animation: spin 2.5s linear infinite;
-  box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.2);
+
+/* 닫힌 도감 본체 */
+.closed-pokedex {
+  width: 280px;
+  height: 380px;
+  background: linear-gradient(160deg, #ff4d4d 0%, #DC0A2D 30%, #8B0000 100%);
+  border-radius: 16px;
+  border: 3px solid #660000;
+  box-shadow:
+    0 15px 50px rgba(0,0,0,0.6),
+    0 0 60px rgba(220,10,45,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    inset 0 -2px 4px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   position: relative;
+  animation: pokedex-float 3s ease-in-out infinite;
 }
-.pokeball-line {
-  position: absolute;
-  top: 50%; left: 0; right: 0;
-  height: 5px;
-  background: #222;
-  transform: translateY(-50%);
+@keyframes pokedex-float {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
 }
-.pokeball-center {
+
+/* 상판 */
+.closed-top {
+  flex: 1;
+  padding: 24px 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.closed-lens {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0D47A1 0%, #2196F3 40%, #64B5F6 100%);
+  border: 4px solid #ddd;
+  box-shadow:
+    0 0 12px rgba(33,150,243,0.5),
+    0 0 30px rgba(33,150,243,0.2),
+    inset 0 -4px 8px rgba(0,0,0,0.3);
+  position: relative;
+  animation: lens-pulse 2.5s ease-in-out infinite;
+}
+.closed-lens-inner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #90CAF9 0%, #2196F3 50%, #0D47A1 100%);
   position: absolute;
   top: 50%; left: 50%;
-  width: 26px; height: 26px;
-  background: #fff;
-  border: 5px solid #222;
-  border-radius: 50%;
   transform: translate(-50%, -50%);
 }
-.pokeball-button {
-  width: 8px; height: 8px;
+.closed-lens-reflection {
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  border: 2px solid #555;
-  margin: 2px auto;
+  background: rgba(255,255,255,0.6);
+  position: absolute;
+  top: 10px; left: 14px;
+  filter: blur(1px);
 }
+.closed-led-group {
+  display: flex;
+  gap: 8px;
+  padding-left: 4px;
+}
+.closed-led {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,0.3);
+}
+.closed-led.red { background: #FF1744; box-shadow: 0 0 6px #FF1744; }
+.closed-led.yellow { background: #FFD600; box-shadow: 0 0 6px #FFD600; }
+.closed-led.green { background: #00E676; box-shadow: 0 0 6px #00E676; animation: led-blink 1.5s infinite; }
+
+/* 힌지 라인 */
+.closed-hinge-line {
+  height: 8px;
+  background: linear-gradient(180deg, #440000 0%, #660000 30%, #880000 50%, #660000 70%, #440000 100%);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.5), inset 0 -1px 0 rgba(255,255,255,0.1);
+  position: relative;
+}
+
+/* 하판 */
+.closed-bottom {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+/* 포켓볼 걸쇠 */
+.closed-clasp {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.closed-pokeball {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(to bottom, #fff 48%, #333 48%, #333 52%, #DC0A2D 52%);
+  border: 3px solid #333;
+  position: relative;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+  animation: pulse 1.5s infinite alternate;
+}
+.closed-pokeball-line {
+  position: absolute;
+  top: 50%; left: 0; right: 0;
+  height: 3px;
+  background: #333;
+  transform: translateY(-50%);
+}
+.closed-pokeball-btn {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #333;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .intro-text {
   color: rgba(255,255,255,0.9);
   font-family: var(--font-retro);
   font-size: 11px;
   animation: breathe 2s ease-in-out infinite;
   letter-spacing: 1px;
+}
+.intro-credit {
+  color: rgba(255,215,0,0.6);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
 }
 
 /* ========================================
@@ -887,9 +967,9 @@ body {
 .footer-screw::before { transform: translate(-50%, -50%) rotate(-45deg); }
 
 /* ========================================
-   Desktop Enhancement
+   Desktop Enhancement (Landscape wide)
    ======================================== */
-@media (min-width: 900px) {
+@media (min-width: 900px) and (orientation: landscape) {
   .pokemon-image {
     max-width: 320px;
     max-height: 320px;
@@ -897,7 +977,7 @@ body {
 }
 
 /* Very small landscape screens */
-@media (max-height: 360px) {
+@media (max-height: 360px) and (orientation: landscape) {
   .panel-left, .panel-right { padding: 6px 8px 4px; gap: 3px; }
   .device-header { gap: 6px; }
   .blue-lens { width: 24px; height: 24px; }
@@ -909,10 +989,108 @@ body {
   .type-badge { font-size: 7px; padding: 1px 6px; }
   .speaker-btn { width: 22px; height: 22px; }
   .speaker-grill { height: 4px; }
-  .tab-btn { font-size: 9px; padding: 3px 2px; }
   .info-screen { border-width: 2px; }
   .search-input { padding: 4px 8px; font-size: 10px; }
   .dpad-container { grid-template-columns: repeat(3, 22px); grid-template-rows: repeat(3, 22px); }
   .gen-buttons { gap: 2px; }
   .gen-btn { font-size: 7px; padding: 2px 0; }
+}
+
+/* ========================================
+   Portrait Mode — 세로형 레이아웃
+   ======================================== */
+@media (orientation: portrait) {
+  .pokedex-device {
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+  }
+  
+  .panel-left {
+    flex: 0 0 auto;
+    height: 45vh;
+    min-height: 0;
+  }
+  
+  .hinge {
+    width: 100%;
+    height: 10px;
+    flex-direction: row;
+    padding: 0;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+  }
+  .hinge-line {
+    width: 30%;
+    height: 2px;
+    background: #440000;
+  }
+  .hinge-dot {
+    width: 4px;
+    height: 4px;
+  }
+  
+  .panel-right {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* 헤더를 간결하게 */
+  .device-header {
+    padding: 6px 10px;
+    gap: 8px;
+  }
+  .blue-lens {
+    width: 28px;
+    height: 28px;
+  }
+  .header-title {
+    font-size: 11px;
+  }
+
+  /* 타입+스피커 바 */
+  .type-speaker-bar {
+    padding: 2px 4px;
+  }
+  .speaker-grill {
+    height: 3px;
+  }
+
+  /* 컨트롤 영역 세로형 */
+  .controls-area {
+    padding: 4px 8px;
+    gap: 4px;
+  }
+  .controls-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+  .dpad-container {
+    grid-template-columns: repeat(3, 26px);
+    grid-template-rows: repeat(3, 26px);
+  }
+  .gen-buttons-container {
+    flex: 1;
+  }
+  .gen-buttons {
+    gap: 2px;
+  }
+  .gen-btn {
+    font-size: 8px;
+    padding: 4px 0;
+  }
+
+  /* 포켓몬 이미지 세로 화면에 맞게 */
+  .pokemon-image {
+    max-width: 200px;
+    max-height: 200px;
+  }
+
+  /* 하단 장식 숨김 */
+  .device-footer {
+    display: none;
+  }
 }

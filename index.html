@@ -16,21 +16,35 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- 세로 모드 안내 -->
-  <div id="rotate-notice" class="rotate-notice">
-    <div class="rotate-icon">📱↩️</div>
-    <p>가로 모드로 전환해주세요!</p>
-  </div>
-
-  <!-- 도감 열기 인트로 -->
+  <!-- 닫힌 도감 인트로 -->
   <div id="intro-overlay" class="intro-overlay">
-    <div class="intro-pokeball">
-      <div class="pokeball-top"></div>
-      <div class="pokeball-line"></div>
-      <div class="pokeball-center"><div class="pokeball-button"></div></div>
-      <div class="pokeball-bottom"></div>
+    <div class="closed-pokedex">
+      <!-- 닫힌 도감 상판 -->
+      <div class="closed-top">
+        <div class="closed-lens">
+          <div class="closed-lens-inner"></div>
+          <div class="closed-lens-reflection"></div>
+        </div>
+        <div class="closed-led-group">
+          <div class="closed-led red"></div>
+          <div class="closed-led yellow"></div>
+          <div class="closed-led green"></div>
+        </div>
+      </div>
+      <!-- 힌지 라인 -->
+      <div class="closed-hinge-line"></div>
+      <!-- 닫힌 도감 하판 -->
+      <div class="closed-bottom">
+        <div class="closed-clasp">
+          <div class="closed-pokeball">
+            <div class="closed-pokeball-line"></div>
+            <div class="closed-pokeball-btn"></div>
+          </div>
+        </div>
+      </div>
     </div>
     <p class="intro-text">터치하여 도감 열기</p>
+    <p class="intro-credit">조윤의 우당탕탕 포켓몬 도감</p>
   </div>
 
   <!-- 로딩 오버레이 -->
