@@ -320,7 +320,22 @@ body {
 .led-red.active, .led-red.blink { color: #FF0000; }
 .led-yellow.active, .led-yellow.blink { color: #FFD600; }
 .led-green.active, .led-green.blink { color: #00E676; }
-.header-spacer { flex: 1; }
+.header-title {
+  flex: 1;
+  text-align: right;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 1px;
+  background: linear-gradient(135deg, #FFD600 0%, #FFF176 40%, #FFD600 60%, #FF8F00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* Main Screen */
 .main-screen-wrapper {
