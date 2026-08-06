@@ -84,12 +84,27 @@ const PokedexApp = {
       const limit = max - min + 1;
       const url = `${PokeAPI.BASE_URL}/pokemon?limit=${limit}&offset=${min - 1}`;
       const data = await PokeAPI.fetchWithCache(url);
-      this.state.generationCache.set(gen, data.results.map((p, i) => ({
+      const list = data.results.map((p, i) => ({
         name: p.name,
-        id: min + i
-      })));
+        id: min + i,
+        nameKr: null
+      }));
+      this.state.generationCache.set(gen, list);
+      // 백그라운드로 한글 이름 로드
+      this.loadKoreanNames(gen, list);
     } catch (e) {
       console.error('Failed to preload generation list', e);
+    }
+  },
+
+  async loadKoreanNames(gen, list) {
+    const batchSize = 15;
+    for (let i = 0; i < list.length; i += batchSize) {
+      const batch = list.slice(i, i + batchSize);
+      const names = await Promise.all(
+        batch.map(p => PokeAPI.getSpeciesName(p.id))
+      );
+      batch.forEach((p, idx) => { p.nameKr = names[idx]; });
     }
   },
 
@@ -358,14 +373,19 @@ const PokedexApp = {
       }
       
       const list = this.state.generationCache.get(this.state.currentGen) || [];
-      const matches = list.filter(p => p.name.includes(query) || p.id.toString() === query || this.formatNumber(p.id).includes(query)).slice(0, 8);
+      const matches = list.filter(p => 
+        p.name.includes(query) || 
+        p.id.toString() === query || 
+        this.formatNumber(p.id).includes(query) ||
+        (p.nameKr && p.nameKr.includes(query))
+      ).slice(0, 8);
       
       if (matches.length > 0) {
         this.els.searchResults.innerHTML = '';
         matches.forEach(m => {
           const div = document.createElement('div');
           div.className = 'search-result-item';
-          div.textContent = `${this.formatNumber(m.id)} ${m.name}`;
+          div.textContent = `${this.formatNumber(m.id)} ${m.nameKr || m.name}`;
           div.addEventListener('mousedown', () => {
             this.loadPokemon(m.id);
             this.els.searchInput.value = '';
