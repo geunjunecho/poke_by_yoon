@@ -91,11 +91,11 @@ const PokedexApp = {
     this.els.pokemonImage.addEventListener('click', () => this.cycleImage());
     this.els.pokemonImage.style.cursor = 'pointer';
 
-    // 즐겨찾기 버튼
-    this.els.favBtn.addEventListener('click', () => this.toggleFavorite());
+    // 즐겨찾기 버튼 (없으면 무시)
+    if (this.els.favBtn) this.els.favBtn.addEventListener('click', () => this.toggleFavorite());
 
-    // BGM 토글
-    this.els.bgmBtn.addEventListener('click', () => this.toggleBGM());
+    // BGM 토글 (없으면 무시)
+    if (this.els.bgmBtn) this.els.bgmBtn.addEventListener('click', () => this.toggleBGM());
     
     this.preloadGenerationList(1);
   },
@@ -665,6 +665,7 @@ const PokedexApp = {
   },
 
   updateFavButton() {
+    if (!this.els.favBtn) return;
     const isFav = this.state.favorites.has(this.state.currentPokemonId);
     this.els.favBtn.textContent = isFav ? '★' : '☆';
     this.els.favBtn.classList.toggle('active', isFav);
@@ -689,8 +690,10 @@ const PokedexApp = {
     audio.play().catch(() => {});
     this.state.bgmAudio = audio;
     this.state.bgmPlaying = true;
-    this.els.bgmBtn.classList.add('active');
-    this.els.bgmBtn.textContent = '🎵';
+    if (this.els.bgmBtn) {
+      this.els.bgmBtn.classList.add('active');
+      this.els.bgmBtn.textContent = '🎵';
+    }
   },
 
   stopBGM() {
@@ -700,8 +703,10 @@ const PokedexApp = {
       this.state.bgmAudio = null;
     }
     this.state.bgmPlaying = false;
-    this.els.bgmBtn.classList.remove('active');
-    this.els.bgmBtn.textContent = '🎵';
+    if (this.els.bgmBtn) {
+      this.els.bgmBtn.classList.remove('active');
+      this.els.bgmBtn.textContent = '🎵';
+    }
   },
 };
 
