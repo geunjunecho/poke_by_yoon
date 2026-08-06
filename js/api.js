@@ -1,0 +1,227 @@
+const PokeAPI = {
+  BASE_URL: 'https://pokeapi.co/api/v2',
+  cache: new Map(),
+  
+  GENERATION_RANGES: {
+    1: [1, 151],
+    2: [152, 251],
+    3: [252, 386],
+    4: [387, 493],
+    5: [494, 649],
+    6: [650, 721],
+    7: [722, 809],
+    8: [810, 905],
+    9: [906, 1025]
+  },
+
+  TYPE_NAMES_KR: {
+    normal: '노말', fire: '불꽃', water: '물', grass: '풀',
+    electric: '전기', ice: '얼음', fighting: '격투', poison: '독',
+    ground: '땅', flying: '비행', psychic: '에스퍼', bug: '벌레',
+    rock: '바위', ghost: '고스트', dragon: '드래곤', dark: '악',
+    steel: '강철', fairy: '페어리'
+  },
+
+  async fetchWithCache(url) {
+    if (this.cache.has(url)) {
+      return this.cache.get(url);
+    }
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json();
+    this.cache.set(url, data);
+    return data;
+  },
+  
+  async getPokemon(id) {
+    const url = `${this.BASE_URL}/pokemon/${id}`;
+    return await this.fetchWithCache(url);
+  },
+  
+  async getSpecies(id) {
+    const url = `${this.BASE_URL}/pokemon-species/${id}`;
+    const data = await this.fetchWithCache(url);
+    
+    const nameKr = data.names.find(n => n.language.name === 'ko')?.name;
+    const nameEn = data.names.find(n => n.language.name === 'en')?.name;
+    
+    const flavorTextsKo = data.flavor_text_entries.filter(e => e.language.name === 'ko');
+    let flavorTextKr = '';
+    if (flavorTextsKo.length > 0) {
+      flavorTextKr = flavorTextsKo[flavorTextsKo.length - 1].flavor_text;
+    } else {
+      const flavorTextsEn = data.flavor_text_entries.filter(e => e.language.name === 'en');
+      if (flavorTextsEn.length > 0) {
+        flavorTextKr = flavorTextsEn[flavorTextsEn.length - 1].flavor_text;
+      }
+    }
+    flavorTextKr = flavorTextKr.replace(/[\n\f]/g, ' ');
+    
+    return {
+      nameKr: nameKr || nameEn,
+      nameEn,
+      flavorTextKr,
+      evolutionChainUrl: data.evolution_chain?.url,
+      generation: data.generation?.name
+    };
+  },
+
+  async getSpeciesName(id) {
+    try {
+      const url = `${this.BASE_URL}/pokemon-species/${id}`;
+      const data = await this.fetchWithCache(url);
+      const nameKr = data.names.find(n => n.language.name === 'ko')?.name;
+      const nameEn = data.names.find(n => n.language.name === 'en')?.name;
+      return nameKr || nameEn || data.name;
+    } catch {
+      return null;
+    }
+  },
+
+  async getAbilityNameKr(abilityName) {
+    try {
+      const url = `${this.BASE_URL}/ability/${abilityName}`;
+      const data = await this.fetchWithCache(url);
+      const nameKr = data.names.find(n => n.language.name === 'ko')?.name;
+      return nameKr || abilityName;
+    } catch {
+      return abilityName;
+    }
+  },
+
+  async getItemNameKr(itemName) {
+    try {
+      const url = `${this.BASE_URL}/item/${itemName}`;
+      const data = await this.fetchWithCache(url);
+      const nameKr = data.names.find(n => n.language.name === 'ko')?.name;
+      return nameKr || itemName;
+    } catch {
+      return itemName;
+    }
+  },
+  
+  async getEvolutionChain(url) {
+    if (!url) return [];
+    const data = await this.fetchWithCache(url);
+    const chain = [];
+    
+    const traverse = (node) => {
+      const id = node.species.url.split('/').filter(Boolean).pop();
+      const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+      const evoDetails = node.evolution_details[0];
+      
+      let conditionText = '';
+      if (evoDetails?.min_level) {
+        conditionText = `Lv ${evoDetails.min_level}`;
+      } else if (evoDetails?.item?.name) {
+        conditionText = evoDetails.item.name; // will be resolved to Korean later
+      } else if (evoDetails?.trigger?.name === 'trade') {
+        conditionText = '통신교환';
+      } else if (evoDetails?.min_happiness) {
+        conditionText = '친밀도';
+      } else if (evoDetails?.trigger?.name) {
+        conditionText = evoDetails.trigger.name;
+      }
+      
+      chain.push({
+        id: parseInt(id, 10),
+        name: node.species.name,
+        sprite_url: spriteUrl,
+        min_level: evoDetails?.min_level || null,
+        trigger: evoDetails?.trigger?.name || null,
+        item: evoDetails?.item?.name || null,
+        condition_text: conditionText
+      });
+      
+      if (node.evolves_to && node.evolves_to.length > 0) {
+        node.evolves_to.forEach(child => traverse(child));
+      }
+    };
+    
+    traverse(data.chain);
+
+    // Resolve Korean names for each stage
+    const resolved = await Promise.all(chain.map(async (stage) => {
+      const nameKr = await this.getSpeciesName(stage.id);
+      let condKr = stage.condition_text;
+      if (stage.item) {
+        condKr = await this.getItemNameKr(stage.item);
+      }
+      return { ...stage, nameKr: nameKr || stage.name, condition_text: condKr };
+    }));
+
+    return resolved;
+  },
+  
+  async getPokemonFullData(id) {
+    const [pokemon, species] = await Promise.all([
+      this.getPokemon(id),
+      this.getSpecies(id)
+    ]);
+    
+    const artworkUrl = pokemon.sprites.other['official-artwork'].front_default;
+    const spriteUrl = pokemon.sprites.front_default;
+    const cryUrl = pokemon.cries?.latest;
+
+    // Fetch Korean ability names
+    const abilityNamesKr = await Promise.all(
+      pokemon.abilities.map(a => this.getAbilityNameKr(a.ability.name))
+    );
+    
+    return {
+      id: pokemon.id,
+      nameKr: species.nameKr,
+      nameEn: species.nameEn,
+      types: pokemon.types,
+      stats: pokemon.stats,
+      height: pokemon.height,
+      weight: pokemon.weight,
+      abilities: pokemon.abilities,
+      abilityNamesKr: abilityNamesKr,
+      spriteUrl: spriteUrl,
+      artworkUrl: artworkUrl,
+      cryUrl: cryUrl,
+      flavorTextKr: species.flavorTextKr,
+      evolutionChainUrl: species.evolutionChainUrl,
+      baseExp: pokemon.base_experience
+    };
+  },
+  
+  async preloadAdjacent(currentId, gen) {
+    const [min, max] = this.GENERATION_RANGES[gen];
+    const prevId = currentId > min ? currentId - 1 : max;
+    const nextId = currentId < max ? currentId + 1 : min;
+    
+    // Fire and forget
+    this.getPokemonFullData(prevId).catch(() => {});
+    this.getPokemonFullData(nextId).catch(() => {});
+  },
+  
+  getTypeColor(typeName) {
+    const colors = {
+      normal: '#A8A77A',
+      fire: '#EE8130',
+      water: '#6390F0',
+      electric: '#F7D02C',
+      grass: '#7AC74C',
+      ice: '#96D9D6',
+      fighting: '#C22E28',
+      poison: '#A33EA1',
+      ground: '#E2BF65',
+      flying: '#A98FF3',
+      psychic: '#F95587',
+      bug: '#A6B91A',
+      rock: '#B6A136',
+      ghost: '#735797',
+      dragon: '#6F35FC',
+      dark: '#705898',
+      steel: '#B7B7CE',
+      fairy: '#D685AD'
+    };
+    return colors[typeName] || '#A8A77A';
+  },
+
+  getTypeNameKr(typeName) {
+    return this.TYPE_NAMES_KR[typeName] || typeName;
+  }
+};

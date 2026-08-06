@@ -1,0 +1,19 @@
+{
+  "name": "포켓몬 도감",
+  "short_name": "Pokédex",
+  "description": "클래식 1세대 디자인의 인터랙티브 포켓몬 도감",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#1a1a2e",
+  "theme_color": "#DC0A2D",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%23DC0A2D' stroke='%23333' stroke-width='3'/><rect x='2' y='47' width='96' height='6' fill='%23333'/><circle cx='50' cy='50' r='14' fill='%23333'/><circle cx='50' cy='50' r='10' fill='white' stroke='%23333' stroke-width='2'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

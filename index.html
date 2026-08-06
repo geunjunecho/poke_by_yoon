@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="description" content="클래식 1세대 디자인의 인터랙티브 포켓몬 도감. 전 세대 포켓몬을 탐색하세요!">
+  <meta name="theme-color" content="#DC0A2D">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="screen-orientation" content="landscape">
+  <title>포켓몬 도감 | Pokédex</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@400;700;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 세로 모드 안내 -->
+  <div id="rotate-notice" class="rotate-notice">
+    <div class="rotate-icon">📱↩️</div>
+    <p>가로 모드로 전환해주세요!</p>
+  </div>
+
+  <!-- 도감 열기 인트로 -->
+  <div id="intro-overlay" class="intro-overlay">
+    <div class="intro-pokeball">
+      <div class="pokeball-top"></div>
+      <div class="pokeball-line"></div>
+      <div class="pokeball-center"><div class="pokeball-button"></div></div>
+      <div class="pokeball-bottom"></div>
+    </div>
+    <p class="intro-text">터치하여 도감 열기</p>
+  </div>
+
+  <!-- 로딩 오버레이 -->
+  <div id="loading-overlay" class="loading-overlay hidden">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">데이터 로딩중...</p>
+  </div>
+
+  <!-- 메인 도감 디바이스 -->
+  <div id="pokedex-device" class="pokedex-device hidden">
+
+    <!-- ========== 왼쪽 패널 ========== -->
+    <div class="panel-left">
+      <!-- 상단: 렌즈 + LED -->
+      <header class="device-header">
+        <div class="lens-area">
+          <div id="blue-lens" class="blue-lens">
+            <div class="lens-reflection"></div>
+          </div>
+        </div>
+        <div class="led-group">
+          <div id="led-red" class="led led-red"></div>
+          <div id="led-yellow" class="led led-yellow"></div>
+          <div id="led-green" class="led led-green active"></div>
+        </div>
+        <div class="header-spacer"></div>
+      </header>
+
+      <!-- 메인 스크린 -->
+      <section class="main-screen-wrapper">
+        <div id="main-screen" class="main-screen">
+          <div class="screen-scanlines"></div>
+          <div class="screen-content">
+            <div id="pokemon-image-container" class="pokemon-image-container">
+              <img id="pokemon-image" class="pokemon-image" src="" alt="포켓몬">
+            </div>
+            <div class="pokemon-basic-info">
+              <span id="pokemon-number" class="pokemon-number">#001</span>
+              <span id="pokemon-name-kr" class="pokemon-name-kr">이상해씨</span>
+            </div>
+          </div>
+          <div id="screen-glow" class="screen-glow"></div>
+        </div>
+      </section>
+
+      <!-- 타입 + 스피커 -->
+      <section class="type-speaker-bar">
+        <div id="type-badges" class="type-badges"></div>
+        <button id="speaker-btn" class="speaker-btn" aria-label="울음소리 재생">
+          <div class="speaker-icon">🔊</div>
+        </button>
+      </section>
+
+      <!-- 스피커 그릴 -->
+      <div class="speaker-grill">
+        <div class="grill-lines"></div>
+      </div>
+    </div>
+
+    <!-- ========== 힌지 ========== -->
+    <div class="hinge">
+      <div class="hinge-line"></div>
+      <div class="hinge-dot"></div>
+      <div class="hinge-dot"></div>
+      <div class="hinge-dot"></div>
+      <div class="hinge-line"></div>
+    </div>
+
+    <!-- ========== 오른쪽 패널 ========== -->
+    <div class="panel-right">
+      <!-- 정보 스크린 -->
+      <section class="info-screen-wrapper">
+        <div id="info-screen" class="info-screen">
+          <div class="screen-scanlines"></div>
+          <div id="info-scroll-content" class="info-scroll-content">
+
+            <!-- 기본 정보 섹션 -->
+            <div class="section-block">
+              <div class="section-title">📋 기본 정보</div>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">이름</span>
+                  <span id="pokemon-name-en" class="info-value">이상해씨</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">키</span>
+                  <span id="pokemon-height" class="info-value">0.7m</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">몸무게</span>
+                  <span id="pokemon-weight" class="info-value">6.9kg</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">특성</span>
+                  <span id="pokemon-abilities" class="info-value">-</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">기초 경험치</span>
+                  <span id="pokemon-exp" class="info-value">-</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 스탯 섹션 -->
+            <div class="section-block">
+              <div class="section-title">📊 능력치</div>
+              <div id="stats-container" class="stats-container"></div>
+              <div id="stats-total" class="stats-total">
+                <span class="stats-total-label">합계</span>
+                <span id="stats-total-value" class="stats-total-value">-</span>
+              </div>
+            </div>
+
+            <!-- 설명 섹션 -->
+            <div class="section-block">
+              <div class="section-title">📖 도감 설명</div>
+              <p id="description-text" class="description-text">도감 설명을 불러오는 중...</p>
+            </div>
+
+            <!-- 진화 섹션 (맨 아래) -->
+            <div class="section-block">
+              <div class="section-title">🔄 진화</div>
+              <div id="evolution-chain" class="evolution-chain"></div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- 컨트롤 영역 -->
+      <section class="controls-area">
+        <div class="search-bar">
+          <input type="text" id="search-input" class="search-input" placeholder="이름 또는 번호 검색..." autocomplete="off">
+          <div id="search-results" class="search-results hidden"></div>
+        </div>
+
+        <div class="controls-row">
+          <div class="dpad-container">
+            <button id="dpad-up" class="dpad-btn dpad-up" aria-label="이전 포켓몬">▲</button>
+            <button id="dpad-left" class="dpad-btn dpad-left" aria-label="이전 탭">◀</button>
+            <button id="dpad-center" class="dpad-btn dpad-center" aria-label="선택">●</button>
+            <button id="dpad-right" class="dpad-btn dpad-right" aria-label="다음 탭">▶</button>
+            <button id="dpad-down" class="dpad-btn dpad-down" aria-label="다음 포켓몬">▼</button>
+          </div>
+
+          <div class="gen-buttons-container">
+            <div id="gen-buttons" class="gen-buttons">
+              <button class="gen-btn active" data-gen="1">I</button>
+              <button class="gen-btn" data-gen="2">II</button>
+              <button class="gen-btn" data-gen="3">III</button>
+              <button class="gen-btn" data-gen="4">IV</button>
+              <button class="gen-btn" data-gen="5">V</button>
+              <button class="gen-btn" data-gen="6">VI</button>
+              <button class="gen-btn" data-gen="7">VII</button>
+              <button class="gen-btn" data-gen="8">VIII</button>
+              <button class="gen-btn" data-gen="9">IX</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 하단 장식 -->
+    <footer class="device-footer">
+      <div class="footer-screw"></div>
+      <div class="footer-screw"></div>
+    </footer>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
