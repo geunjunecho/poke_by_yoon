@@ -5,6 +5,9 @@ const PokedexApp = {
     isLoading: false,
     isIntroVisible: true,
     generationCache: new Map(),
+    imageVariants: [],
+    imageIndex: 0,
+    tcgLoaded: false,
   },
 
   els: {},
@@ -16,6 +19,7 @@ const PokedexApp = {
       pokedexDevice: document.getElementById('pokedex-device'),
       mainScreen: document.getElementById('main-screen'),
       pokemonImage: document.getElementById('pokemon-image'),
+      pokemonImageContainer: document.getElementById('pokemon-image-container'),
       pokemonNumber: document.getElementById('pokemon-number'),
       pokemonNameKr: document.getElementById('pokemon-name-kr'),
       screenGlow: document.getElementById('screen-glow'),
@@ -63,6 +67,10 @@ const PokedexApp = {
     this.setupSearch();
     
     this.els.speakerBtn.addEventListener('click', () => this.playCry(this.state.currentCryUrl));
+
+    // 이미지 클릭으로 스타일 전환
+    this.els.pokemonImage.addEventListener('click', () => this.cycleImage());
+    this.els.pokemonImage.style.cursor = 'pointer';
     
     this.preloadGenerationList(1);
   },
@@ -140,12 +148,64 @@ const PokedexApp = {
     img.classList.remove('entering');
     void img.offsetWidth;
     
+    // 이미지 변형 저장
+    this.state.imageVariants = data.imageVariants || [];
+    this.state.imageIndex = 0;
+    this.state.tcgLoaded = false;
+    
     img.src = data.artworkUrl || data.spriteUrl;
     img.alt = data.nameKr || data.nameEn;
     img.classList.add('entering');
     
     this.els.pokemonNumber.textContent = this.formatNumber(data.id);
     this.els.pokemonNameKr.textContent = data.nameKr;
+
+    // 인디케이터 업데이트
+    this.updateImageLabel();
+    
+    // 백그라운드로 TCG 카드 로드
+    this.loadTCGCards(data.nameEn);
+  },
+
+  updateImageLabel() {
+    let label = this.els.pokemonImageContainer.querySelector('.image-mode-label');
+    if (!label) {
+      label = document.createElement('div');
+      label.className = 'image-mode-label';
+      this.els.pokemonImageContainer.appendChild(label);
+    }
+    const variant = this.state.imageVariants[this.state.imageIndex];
+    label.textContent = variant ? variant.label : '공식 일러스트';
+    const total = this.state.imageVariants.length;
+    label.textContent += ` (${this.state.imageIndex + 1}/${total})`;
+  },
+
+  cycleImage() {
+    if (this.state.imageVariants.length <= 1) return;
+    this.state.imageIndex = (this.state.imageIndex + 1) % this.state.imageVariants.length;
+    const variant = this.state.imageVariants[this.state.imageIndex];
+    
+    const img = this.els.pokemonImage;
+    img.classList.remove('entering');
+    void img.offsetWidth;
+    img.src = variant.url;
+    img.classList.add('entering');
+    
+    this.updateImageLabel();
+  },
+
+  async loadTCGCards(nameEn) {
+    if (!nameEn) return;
+    try {
+      const cards = await PokeAPI.getTCGCard(nameEn);
+      if (cards.length > 0 && this.state.currentPokemonId === this.state.currentPokemonId) {
+        this.state.imageVariants.push(...cards);
+        this.state.tcgLoaded = true;
+        this.updateImageLabel();
+      }
+    } catch (e) {
+      console.log('TCG load failed', e);
+    }
   },
 
   updateTypeDisplay(types) {

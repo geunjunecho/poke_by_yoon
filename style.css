@@ -379,6 +379,24 @@ body {
   justify-content: center;
   align-items: center;
   padding: 8px;
+  position: relative;
+}
+.image-mode-label {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.65);
+  color: #FFD600;
+  font-family: var(--font-primary);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 10px;
+  white-space: nowrap;
+  z-index: 15;
+  pointer-events: none;
+  letter-spacing: 0.3px;
 }
 .pokemon-image {
   max-width: 160px;

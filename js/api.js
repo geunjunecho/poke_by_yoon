@@ -159,9 +159,27 @@ const PokeAPI = {
       this.getSpecies(id)
     ]);
     
-    const artworkUrl = pokemon.sprites.other['official-artwork'].front_default;
-    const spriteUrl = pokemon.sprites.front_default;
+    const s = pokemon.sprites;
     const cryUrl = pokemon.cries?.latest;
+
+    // 모든 이미지 스타일 수집
+    const imageVariants = [];
+    if (s.other['official-artwork']?.front_default)
+      imageVariants.push({ label: '공식 일러스트', url: s.other['official-artwork'].front_default });
+    if (s.other.home?.front_default)
+      imageVariants.push({ label: 'HOME 3D', url: s.other.home.front_default });
+    if (s.other.dream_world?.front_default)
+      imageVariants.push({ label: '드림월드', url: s.other.dream_world.front_default });
+    if (s.other['official-artwork']?.front_shiny)
+      imageVariants.push({ label: '✨ 이로치', url: s.other['official-artwork'].front_shiny });
+    if (s.other.home?.front_shiny)
+      imageVariants.push({ label: '✨ HOME 이로치', url: s.other.home.front_shiny });
+    if (s.other.showdown?.front_default)
+      imageVariants.push({ label: '배틀 스프라이트', url: s.other.showdown.front_default });
+    if (s.front_default)
+      imageVariants.push({ label: '도트 스프라이트', url: s.front_default });
+    if (s.front_shiny)
+      imageVariants.push({ label: '✨ 도트 이로치', url: s.front_shiny });
 
     // Fetch Korean ability names
     const abilityNamesKr = await Promise.all(
@@ -178,13 +196,31 @@ const PokeAPI = {
       weight: pokemon.weight,
       abilities: pokemon.abilities,
       abilityNamesKr: abilityNamesKr,
-      spriteUrl: spriteUrl,
-      artworkUrl: artworkUrl,
+      spriteUrl: s.front_default,
+      artworkUrl: s.other['official-artwork']?.front_default,
+      imageVariants: imageVariants,
       cryUrl: cryUrl,
       flavorTextKr: species.flavorTextKr,
       evolutionChainUrl: species.evolutionChainUrl,
       baseExp: pokemon.base_experience
     };
+  },
+
+  async getTCGCard(name) {
+    try {
+      const url = `https://api.pokemontcg.io/v2/cards?q=name:${name}&pageSize=5&orderBy=-set.releaseDate`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.data && data.data.length > 0) {
+        return data.data.map(card => ({
+          label: `🃏 ${card.set.name}`,
+          url: card.images.large
+        }));
+      }
+      return [];
+    } catch {
+      return [];
+    }
   },
   
   async preloadAdjacent(currentId, gen) {
