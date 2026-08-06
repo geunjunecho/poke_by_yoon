@@ -303,15 +303,13 @@ body {
    Pokédex Device — FORCED Landscape Layout
    ======================================== */
 .pokedex-device {
-  /* 전체화면: 뷰포트 꽉 채우기 */
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  height: var(--real-vh, 100vh);
+  /* position:fixed + inset:0 = 모바일에서 가장 정확한 전체화면 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow: hidden;
-  box-sizing: border-box;
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
   
   /* 핵심: flexbox row로 강제 가로 배치 */
   display: flex;
@@ -1201,10 +1199,6 @@ body {
 @media (orientation: portrait) {
   .pokedex-device {
     flex-direction: column;
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh;
-    height: var(--real-vh, 100vh);
   }
   
   .panel-left {
