@@ -12,6 +12,8 @@ const PokedexApp = {
     bgmPlaying: false,
     bgmAudio: null,
     favorites: new Set(JSON.parse(localStorage.getItem('pokeFavorites') || '[]')),
+    currentPokemonData: null,
+    currentEvolutionChain: [],
   },
 
   BGM_URLS: {
@@ -97,8 +99,19 @@ const PokedexApp = {
     // BGM 토글 (없으면 무시)
     if (this.els.bgmBtn) this.els.bgmBtn.addEventListener('click', () => this.toggleBGM());
     
-    // 전 세대 리스트 + 한글 이름 백그라운드 로드
-    this.preloadAllGenerations();
+    // 전 세대 리스트 백그라운드 프리로드
+    const totalGens = Object.keys(PokeAPI.GENERATION_RANGES).length;
+    for (let g = 1; g <= totalGens; g++) {
+      this.preloadGenerationList(g);
+    }
+
+    // 미니게임 오락실 버튼 바인딩
+    const openMinigameBtn = document.getElementById('open-minigame-btn');
+    if (openMinigameBtn) {
+      openMinigameBtn.addEventListener('click', () => {
+        if (window.PokeMiniGames) window.PokeMiniGames.openHub();
+      });
+    }
   },
 
   handleIntroTap() {
@@ -114,32 +127,6 @@ const PokedexApp = {
   async preloadGenerationList(gen) {
     if (this.state.generationCache.has(gen)) return;
     try {
-      await this.preloadGenerationListOnly(gen);
-      const list = this.state.generationCache.get(gen);
-      if (list) this.loadKoreanNames(gen, list);
-    } catch (e) {
-      console.error('Failed to preload generation list', e);
-    }
-  },
-
-  async preloadAllGenerations() {
-    const totalGens = Object.keys(PokeAPI.GENERATION_RANGES).length;
-    // Phase 1: 모든 세대 영문 리스트 병렬 로드 (빠름)
-    await Promise.allSettled(
-      Array.from({length: totalGens}, (_, i) => this.preloadGenerationListOnly(i + 1))
-    );
-    // Phase 2: 한글 이름 세대별 순차 로드 (API 부하 방지)
-    for (let g = 1; g <= totalGens; g++) {
-      const list = this.state.generationCache.get(g);
-      if (list && list.some(p => !p.nameKr)) {
-        await this.loadKoreanNames(g, list);
-      }
-    }
-  },
-
-  async preloadGenerationListOnly(gen) {
-    if (this.state.generationCache.has(gen)) return;
-    try {
       const [min, max] = PokeAPI.GENERATION_RANGES[gen];
       const limit = max - min + 1;
       const url = `${PokeAPI.BASE_URL}/pokemon?limit=${limit}&offset=${min - 1}`;
@@ -150,21 +137,21 @@ const PokedexApp = {
         nameKr: null
       }));
       this.state.generationCache.set(gen, list);
+      // 백그라운드로 한글 이름 로드
+      this.loadKoreanNames(gen, list);
     } catch (e) {
-      console.error(`Failed to preload gen ${gen} list`, e);
+      console.error('Failed to preload generation list', e);
     }
   },
 
   async loadKoreanNames(gen, list) {
-    const batchSize = 40;
+    const batchSize = 15;
     for (let i = 0; i < list.length; i += batchSize) {
       const batch = list.slice(i, i + batchSize);
-      const names = await Promise.allSettled(
+      const names = await Promise.all(
         batch.map(p => PokeAPI.getSpeciesName(p.id))
       );
-      batch.forEach((p, idx) => {
-        if (names[idx].status === 'fulfilled') p.nameKr = names[idx].value;
-      });
+      batch.forEach((p, idx) => { p.nameKr = names[idx]; });
     }
   },
 
@@ -175,6 +162,7 @@ const PokedexApp = {
     
     try {
       const data = await PokeAPI.getPokemonFullData(id);
+      this.state.currentPokemonData = data;
       this.state.currentPokemonId = data.id;
       this.state.currentCryUrl = data.cryUrl;
       
@@ -376,6 +364,7 @@ const PokedexApp = {
     this.els.evolutionChain.innerHTML = '<div style="color:#88B; text-align:center; padding-top: 10px; font-size:11px;">로딩중...</div>';
     try {
       const chain = await PokeAPI.getEvolutionChain(evolutionChainUrl);
+      this.state.currentEvolutionChain = chain || [];
       this.els.evolutionChain.innerHTML = '';
       
       chain.forEach((stage, idx) => {
@@ -421,6 +410,7 @@ const PokedexApp = {
       });
       
     } catch (e) {
+      this.state.currentEvolutionChain = [];
       this.els.evolutionChain.innerHTML = '<div style="color:#F95587; text-align:center; padding-top: 10px; font-size:11px;">진화 정보를 불러오지 못했습니다.</div>';
     }
   },
@@ -542,6 +532,7 @@ const PokedexApp = {
 
   setupKeyboard() {
     window.addEventListener('keydown', (e) => {
+      if (window.PokeMiniGames && window.PokeMiniGames.isOpen) return;
       if (this.state.isIntroVisible) return;
       if (document.activeElement === this.els.searchInput) return;
       

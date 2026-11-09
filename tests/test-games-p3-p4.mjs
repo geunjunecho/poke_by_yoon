@@ -1,0 +1,299 @@
+/**
+ * 포켓몬 미니게임 P3(몬스터볼 캐치) & P4(시소 대결) 단위 테스트
+ */
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ROOT_DIR = path.resolve(__dirname, '..');
+
+/**
+ * 가벼운 DOM 엘리먼트 및 스테이지 모킹 헬퍼
+ */
+function createMockElement(tagName = 'div', attrs = {}) {
+  const listeners = new Map();
+  return {
+    tagName: tagName.toUpperCase(),
+    className: attrs.className || '',
+    textContent: '',
+    src: '',
+    alt: '',
+    style: { transform: '', borderColor: '', boxShadow: '' },
+    attributes: { ...attrs },
+    getAttribute(name) {
+      return this.attributes[name] ?? null;
+    },
+    setAttribute(name, val) {
+      this.attributes[name] = String(val);
+    },
+    addEventListener(type, fn) {
+      if (!listeners.has(type)) listeners.set(type, new Set());
+      listeners.get(type).add(fn);
+    },
+    removeEventListener(type, fn) {
+      if (listeners.has(type)) listeners.get(type).delete(fn);
+    },
+    click() {
+      const set = listeners.get('click');
+      if (set) {
+        for (const fn of set) fn({ preventDefault() {} });
+      }
+    }
+  };
+}
+
+function createMockStage() {
+  const roleMap = new Map();
+  const ballSlots = [1, 2, 3, 4, 5].map((r) =>
+    createMockElement('div', { 'data-ball-slot': String(r), className: 'catch-ball-slot' })
+  );
+
+  let htmlContent = '';
+  return {
+    get innerHTML() {
+      return htmlContent;
+    },
+    set innerHTML(val) {
+      htmlContent = String(val || '');
+      roleMap.clear();
+    },
+    querySelector(selector) {
+      const m = selector && selector.match(/\[data-role="([^"]+)"\]/);
+      if (m) {
+        const role = m[1];
+        if (!roleMap.has(role)) {
+          roleMap.set(role, createMockElement('div', { 'data-role': role }));
+        }
+        return roleMap.get(role);
+      }
+      return createMockElement('div');
+    },
+    querySelectorAll(selector) {
+      if (selector === '[data-ball-slot]') {
+        return ballSlots;
+      }
+      return [];
+    }
+  };
+}
+
+function createMockCharCtx(overrides = {}) {
+  return {
+    id: 25,
+    nameKr: '피카츄',
+    nameEn: 'pikachu',
+    artworkUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png',
+    spriteUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png',
+    runnerSpriteUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png',
+    isAnimatedGif: false,
+    primaryType: 'electric',
+    typeNameKr: '전기',
+    typeColor: '#FFCA28',
+    typeEmoji: '⚡',
+    height: 4,
+    weight: 60,
+    cryUrl: '',
+    evolutionChain: [],
+    ...overrides
+  };
+}
+
+function createMockHelpers() {
+  const highScores = {};
+  const calls = {
+    sfx: [],
+    cries: 0,
+    rewards: 0,
+    overlays: []
+  };
+
+  return {
+    calls,
+    highScores,
+    playSfx(type, noteIdx) {
+      calls.sfx.push({ type, noteIdx });
+    },
+    playCry() {
+      calls.cries += 1;
+    },
+    computeRunTransform(state, tick) {
+      return `translateY(${-(tick % 5)}px)`;
+    },
+    getHighScore(gameId) {
+      return highScores[gameId] || 0;
+    },
+    saveHighScore(gameId, score) {
+      highScores[gameId] = Math.max(highScores[gameId] || 0, score);
+    },
+    rewardCharacter() {
+      calls.rewards += 1;
+    },
+    showResultOverlay(stageEl, opts) {
+      calls.overlays.push(opts);
+    }
+  };
+}
+
+// 글로벌 브라우저/코어 허브 환경 모킹 및 스크립트 로드
+const registeredGames = new Map();
+globalThis.window = globalThis;
+globalThis.addEventListener = globalThis.addEventListener || function () {};
+globalThis.removeEventListener = globalThis.removeEventListener || function () {};
+globalThis.PokeMiniGames = {
+  register(id, gameDef) {
+    registeredGames.set(id, gameDef);
+  }
+};
+
+const catchCode = fs.readFileSync(path.join(ROOT_DIR, 'js', 'games', 'poke-catch.js'), 'utf8');
+const seesawCode = fs.readFileSync(path.join(ROOT_DIR, 'js', 'games', 'poke-seesaw.js'), 'utf8');
+
+vm.runInThisContext(catchCode, { filename: 'poke-catch.js' });
+vm.runInThisContext(seesawCode, { filename: 'poke-seesaw.js' });
+
+test('1. poke-catch.js와 poke-seesaw.js가 PokeMiniGames.register에 정상 등록된다', () => {
+  assert.equal(registeredGames.has('catch'), true, 'catch 게임이 등록되어야 함');
+  assert.equal(registeredGames.has('seesaw'), true, 'seesaw 게임이 등록되어야 함');
+
+  const catchDef = registeredGames.get('catch');
+  assert.equal(catchDef.id, 'catch');
+  assert.equal(catchDef.title, '흔들흔들! 몬스터볼 캐치');
+  assert.equal(catchDef.icon, '🔴');
+  assert.equal(catchDef.badgeColor, '#FFCA28');
+  assert.equal(typeof catchDef.mount, 'function');
+  assert.equal(globalThis.PokeGameCatch, catchDef);
+
+  const seesawDef = registeredGames.get('seesaw');
+  assert.equal(seesawDef.id, 'seesaw');
+  assert.equal(seesawDef.title, '누가누가 더 클까? 시소 대결');
+  assert.equal(seesawDef.icon, '⚖️');
+  assert.equal(seesawDef.badgeColor, '#29B6F6');
+  assert.equal(typeof seesawDef.mount, 'function');
+  assert.equal(Array.isArray(seesawDef.OPPONENT_POOL), true);
+  assert.equal(seesawDef.OPPONENT_POOL.length, 20, '비교 포켓몬 풀은 20종이어야 함');
+  assert.equal(globalThis.PokeGameSeesaw, seesawDef);
+});
+
+test('2. catch 게임에서 throwBallAtScale(0.9)(황금 구간) 호출 시 점수가 100점 증가하고 라운드가 진행되며 cleanup()이 동작한다', () => {
+  const stageEl = createMockStage();
+  const charCtx = createMockCharCtx();
+  const helpers = createMockHelpers();
+
+  const cleanup = globalThis.PokeGameCatch.mount(stageEl, charCtx, helpers);
+  assert.equal(typeof cleanup, 'function', 'mount는 cleanup 함수를 반환해야 함');
+  assert.ok(stageEl._catchGame, 'stageEl._catchGame 테스트 훅이 노출되어야 함');
+
+  const initialState = stageEl._catchGame.getState();
+  assert.equal(initialState.round, 1);
+  assert.equal(initialState.score, 0);
+  assert.equal(initialState.currentBall.name, '몬스터볼');
+
+  // 1R: 황금 구간(0.9) 투척 -> +100점, 라운드 2(슈퍼볼)로 진행
+  const res1 = stageEl._catchGame.throwBallAtScale(0.9);
+  assert.equal(res1.tier, 'excellent');
+  assert.equal(res1.points, 100);
+  assert.ok(res1.message.includes('엑설런트 캐치'));
+
+  const stateAfter1 = stageEl._catchGame.getState();
+  assert.equal(stateAfter1.score, 100, '황금 구간 투척 후 점수가 100점이어야 함');
+  assert.equal(stateAfter1.round, 2, '1라운드 후 라운드가 2로 진행되어야 함');
+  assert.equal(stateAfter1.completedRounds, 1);
+  assert.equal(stateAfter1.currentBall.name, '슈퍼볼', '2라운드는 슈퍼볼이어야 함');
+
+  // 2R: 초록 구간(0.6) 투척 -> +70점, 라운드 3(하이퍼볼)
+  stageEl._catchGame.throwBallAtScale(0.6);
+  assert.equal(stageEl._catchGame.getState().score, 170);
+  assert.equal(stageEl._catchGame.getState().round, 3);
+  assert.equal(stageEl._catchGame.getState().currentBall.name, '하이퍼볼');
+
+  // 3R: 노란 구간(1.6) 투척 -> +30점, 라운드 4(러브볼)
+  stageEl._catchGame.throwBallAtScale(1.6);
+  assert.equal(stageEl._catchGame.getState().score, 200);
+  assert.equal(stageEl._catchGame.getState().round, 4);
+  assert.equal(stageEl._catchGame.getState().currentBall.name, '러브볼');
+
+  // 4R & 5R(마스터볼) 완료 검증
+  stageEl._catchGame.throwBallAtScale(0.9);
+  assert.equal(stageEl._catchGame.getState().currentBall.name, '마스터볼');
+  stageEl._catchGame.throwBallAtScale(0.9);
+
+  const finalState = stageEl._catchGame.getState();
+  assert.equal(finalState.finished, true);
+  assert.equal(finalState.score, 400);
+  assert.equal(helpers.highScores.catch, 400);
+  assert.equal(helpers.calls.rewards, 1);
+  assert.equal(helpers.calls.cries, 1);
+  assert.equal(helpers.calls.overlays.length, 1);
+
+  cleanup();
+  assert.equal(stageEl._catchGame, null, 'cleanup 호출 후 _catchGame 훅이 해제되어야 함');
+});
+
+test('3. seesaw 게임에서 현재 문제(mode: weight | height)의 정답 쪽을 선택했을 때 정답 판정 및 점수 증가가 정상 동작하고 cleanup()이 동작한다', () => {
+  const stageEl = createMockStage();
+  const charCtx = createMockCharCtx({ id: 25, nameKr: '피카츄', weight: 60, height: 4 });
+  const helpers = createMockHelpers();
+
+  const cleanup = globalThis.PokeGameSeesaw.mount(stageEl, charCtx, helpers);
+  assert.equal(typeof cleanup, 'function', 'mount는 cleanup 함수를 반환해야 함');
+  assert.ok(stageEl._seesawGame, 'stageEl._seesawGame 테스트 훅이 노출되어야 함');
+
+  const st1 = stageEl._seesawGame.getState();
+  assert.equal(st1.round, 1);
+  assert.equal(st1.score, 0);
+  assert.ok(st1.mode === 'weight' || st1.mode === 'height');
+  assert.notEqual(st1.leftValue, st1.rightValue, '내 포켓몬과 상대 포켓몬의 비교 수치는 달라야 함');
+
+  // 현재 문제의 정답 쪽 계산 후 선택
+  const expectedSide1 = st1.leftValue > st1.rightValue ? 'left' : 'right';
+  assert.equal(st1.correctSide, expectedSide1);
+
+  const res1 = stageEl._seesawGame.answerSide(expectedSide1);
+  assert.equal(res1.isCorrect, true, '정답 쪽 선택 시 isCorrect가 true여야 함');
+  assert.equal(res1.points, 100, '첫 정답 시 100점이 부여되어야 함');
+  assert.equal(
+    res1.plankTransform,
+    expectedSide1 === 'left' ? 'rotate(-18deg)' : 'rotate(+18deg)',
+    '시소가 더 무겁거나 큰 쪽으로 18도 기울어져야 함'
+  );
+
+  const stAfter1 = stageEl._seesawGame.getState();
+  assert.equal(stAfter1.score, 100, '점수가 100점 증가해야 함');
+  assert.equal(stAfter1.round, 2, '다음 라운드로 진행되어야 함');
+
+  // 2R: 연속 정답 선택 시 +100점 + 연속 보너스 20점 = +120점 확인
+  const expectedSide2 = stAfter1.leftValue > stAfter1.rightValue ? 'left' : 'right';
+  const res2 = stageEl._seesawGame.answerSide(expectedSide2);
+  assert.equal(res2.isCorrect, true);
+  assert.equal(res2.points, 120, '연속 정답 시 보너스 포함 120점이 증가해야 함');
+  assert.equal(stageEl._seesawGame.getState().score, 220);
+
+  // 3R: 오답 선택 시 격려 점수 +30점 확인
+  const st3 = stageEl._seesawGame.getState();
+  const wrongSide3 = st3.leftValue > st3.rightValue ? 'right' : 'left';
+  const res3 = stageEl._seesawGame.answerSide(wrongSide3);
+  assert.equal(res3.isCorrect, false);
+  assert.equal(res3.points, 30, '틀려도 격려 점수 30점이 부여되어야 함');
+  assert.equal(stageEl._seesawGame.getState().score, 250);
+
+  // 4R & 5R 완료 확인
+  const st4 = stageEl._seesawGame.getState();
+  stageEl._seesawGame.answerSide(st4.correctSide);
+  const st5 = stageEl._seesawGame.getState();
+  stageEl._seesawGame.answerSide(st5.correctSide);
+
+  const finalState = stageEl._seesawGame.getState();
+  assert.equal(finalState.finished, true);
+  assert.equal(finalState.score, 470);
+  assert.equal(helpers.highScores.seesaw, 470);
+  assert.equal(helpers.calls.rewards, 1);
+  assert.equal(helpers.calls.overlays.length, 1);
+
+  cleanup();
+  assert.equal(stageEl._seesawGame, null, 'cleanup 호출 후 _seesawGame 훅이 해제되어야 함');
+});

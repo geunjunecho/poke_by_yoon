@@ -14,6 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@400;700;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/minigames.css">
 </head>
 <body>
   <script>
@@ -111,6 +112,15 @@
             <div class="speaker-icon">🔊</div>
           </button>
         </div>
+      </section>
+
+      <!-- 미니게임 오락실 버튼 -->
+      <section class="minigame-entry-bar">
+        <button id="open-minigame-btn" class="open-minigame-btn" aria-label="이 포켓몬과 미니게임 놀기">
+          <span class="mg-btn-icon">🎮</span>
+          <span class="mg-btn-text">이 포켓몬과 미니게임 놀기!</span>
+          <span class="mg-btn-sparkle">✨</span>
+        </button>
       </section>
 
       <!-- 스피커 그릴 -->
@@ -237,5 +247,12 @@
 
   <script src="js/api.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/minigames-core.js"></script>
+  <script src="js/games/poke-runner.js"></script>
+  <script src="js/games/poke-berry.js"></script>
+  <script src="js/games/poke-catch.js"></script>
+  <script src="js/games/poke-seesaw.js"></script>
+  <script src="js/games/poke-memory.js"></script>
+  <script src="js/games/poke-flipbattle.js"></script>
 </body>
 </html>

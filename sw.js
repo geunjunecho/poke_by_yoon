@@ -1,10 +1,18 @@
-const CACHE_NAME = 'pokedex-v2';
+const CACHE_NAME = 'pokedex-v3';
 const STATIC_ASSETS = [
   './',
   './index.html',
   './style.css',
+  './css/minigames.css',
   './js/api.js',
   './js/app.js',
+  './js/minigames-core.js',
+  './js/games/poke-runner.js',
+  './js/games/poke-berry.js',
+  './js/games/poke-catch.js',
+  './js/games/poke-seesaw.js',
+  './js/games/poke-memory.js',
+  './js/games/poke-flipbattle.js',
   './manifest.json'
 ];
 
@@ -67,10 +75,18 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets: cache first
+  // Static assets: network first, cache fallback (prevents stale HTML/JS on deploy)
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return cached || fetch(event.request);
-    })
+    fetch(event.request)
+      .then((response) => {
+        if (response && response.ok && event.request.method === 'GET') {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, clone);
+          });
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
