@@ -342,10 +342,13 @@
     ctx.fillRect(bx + 6, groundY - 2, bw - 12, 4);
     ctx.restore();
 
-    // 상단 천장 고정 체인/서포트 필러 (공중 구조물임을 명확히 표현)
-    ctx.fillStyle = 'rgba(24, 24, 24, 0.35)';
-    ctx.fillRect(bx + 10, 0, 4, by);
-    ctx.fillRect(bx + bw - 14, 0, 4, by);
+    // 상단 플로팅 로터/날개 장식 (천장까지 이어지는 긴 선 대신 깔끔한 공중 부유 드론 형태)
+    ctx.fillStyle = '#181818';
+    ctx.fillRect(bx + Math.floor(bw * 0.5) - 5, by - 7, 10, 7);
+    ctx.fillStyle = '#80D8FF';
+    ctx.fillRect(bx + 6, by - 10, bw - 12, 4);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(bx + 10, by - 9, bw - 20, 2);
 
     // 외곽선 본체
     ctx.fillStyle = '#181818';
@@ -453,15 +456,18 @@
       ctxData.runnerSpriteUrl || ctxData.spriteUrl || ctxData.artworkUrl || '';
 
     var W = 720;
+    var GROUND_DEPTH = 68;
     var H = 320;
-    var GROUND_Y = 252;
+    var GROUND_Y = H - GROUND_DEPTH;
     var PLAYER_X = 105;
     var HERO_LEFT_PCT = (PLAYER_X / W) * 100;
     var HERO_BOTTOM_PCT = ((H - GROUND_Y) / H) * 100;
-    var GRAVITY = 0.68;
+    var GRAVITY = 0.66;
     var JUMP_VELOCITY_1 = -12.2;
-    var JUMP_VELOCITY_2 = -10.8;
+    var JUMP_VELOCITY_2 = -11.2;
     var KNOCKBACK_DURATION = 34; // '팅! 팅!' 2단 백스텝 바운스 프레임
+    var renderScaleX = 1;
+    var renderScaleY = 1;
 
     var dpr = Math.min(2, (typeof window !== 'undefined' && window.devicePixelRatio) || 1);
 
@@ -647,13 +653,51 @@
       player.knockbackTilt = Number(kt.toFixed(2));
     }
 
+    function syncViewportMetrics() {
+      var cw = Number(stageArea && stageArea.clientWidth) || 0;
+      var ch = Number(stageArea && stageArea.clientHeight) || 0;
+      if (cw > 0 && ch > 0) {
+        var targetH = Math.max(280, Math.min(480, Math.round(W * (ch / cw))));
+        if (targetH !== H) {
+          var prevGroundY = GROUND_Y;
+          H = targetH;
+          GROUND_Y = H - GROUND_DEPTH;
+          var deltaGroundY = GROUND_Y - prevGroundY;
+          canvas.width = Math.round(W * dpr);
+          canvas.height = Math.round(H * dpr);
+          for (var oi = 0; oi < obstacles.length; oi++) {
+            obstacles[oi].y += deltaGroundY;
+          }
+          for (var ii = 0; ii < items.length; ii++) {
+            items[ii].y += deltaGroundY;
+          }
+          for (var pi = 0; pi < particles.length; pi++) {
+            particles[pi].y += deltaGroundY;
+          }
+          for (var ppi = 0; ppi < popups.length; ppi++) {
+            popups[ppi].y += deltaGroundY;
+          }
+        }
+        renderScaleX = Number((cw / W).toFixed(4));
+        renderScaleY = Number((ch / H).toFixed(4));
+      } else {
+        renderScaleX = 1;
+        renderScaleY = 1;
+      }
+      HERO_BOTTOM_PCT = ((H - GROUND_Y) / H) * 100;
+      heroEl.style.bottom = HERO_BOTTOM_PCT.toFixed(4) + '%';
+    }
+
     function syncHeroTransform() {
+      syncViewportMetrics();
       computeKnockbackKinematics();
       var effectiveY = player.y + player.knockbackBounceY;
+      var scaledYOffset = Number((effectiveY * renderScaleY).toFixed(2));
+      var scaledKnockbackX = Math.round(player.knockbackX * renderScaleX);
 
       var tf = helpers.computeRunTransform(
         {
-          yOffset: effectiveY,
+          yOffset: scaledYOffset,
           isJumping: player.isJumping || player.knockbackBounceY < -2,
           isDucking: player.isDucking,
           isHit: player.invincibleTimer > 0,
@@ -663,22 +707,18 @@
       );
       var shadowScale =
         player.isJumping || player.knockbackBounceY < -2
-          ? Math.max(0.35, 1 - Math.abs(effectiveY) / 140)
+          ? Math.max(0.35, 1 - Math.abs(effectiveY) / 175)
           : player.isDucking
           ? 1.25
           : 0.95;
 
-      // 주인공 컨테이너(.poke-runner-hero)에 넉백 X 오프셋 반영
+      // 주인공 컨테이너(.poke-runner-hero)에 화면 스케일이 반영된 넉백 X 오프셋 적용
       heroEl.style.transform =
-        'translateX(calc(-50% + ' + Math.round(player.knockbackX) + 'px))';
+        'translateX(calc(-50% + ' + scaledKnockbackX + 'px))';
 
       var extraKnockbackTransform =
         player.knockbackTimer > 0
-          ? ' translateY(' +
-            Math.round(player.knockbackBounceY) +
-            'px) rotate(' +
-            player.knockbackTilt.toFixed(1) +
-            'deg)'
+          ? ' rotate(' + player.knockbackTilt.toFixed(1) + 'deg)'
           : '';
 
       if (typeof tf === 'string') {
@@ -693,7 +733,6 @@
         }
         if (tf.filter !== undefined) heroImg.style.filter = tf.filter;
         if (tf.opacity !== undefined) heroImg.style.opacity = tf.opacity;
-        if (typeof tf.shadowScale === 'number') shadowScale = tf.shadowScale;
       }
 
       shadowEl.style.transform =
@@ -748,11 +787,18 @@
       player.duckKeyHeld = false;
       duckBtn.classList.remove('active');
 
-      player.vy = player.jumpCount === 1 ? JUMP_VELOCITY_1 : JUMP_VELOCITY_2;
-      if (player.y >= 0) {
-        player.y = -12;
+      if (player.jumpCount === 1) {
+        player.vy = JUMP_VELOCITY_1;
+        if (player.y >= 0) {
+          player.y = -12;
+        }
       } else {
+        // 2단 점프: 버튼을 빠르게 연타하든 정점에서 누르든 항상 시원한 고공 궤적(-172 ~ -195)까지 올라가도록 보정
         player.y -= 6;
+        var maxCeiling = -Math.max(175, Math.min(215, GROUND_Y - 64));
+        var targetPeakY = Math.max(maxCeiling, Math.min(player.y - 72, -174));
+        var riseNeeded = Math.max(52, player.y - targetPeakY);
+        player.vy = -Math.sqrt(2 * GRAVITY * riseNeeded);
       }
 
       spawnFootstepDust(4);
@@ -797,7 +843,7 @@
         emoji: tpl.emoji,
         label: tpl.label,
         x: W + 44,
-        y: category === 'ground' ? GROUND_Y - tpl.height : GROUND_Y - 90,
+        y: category === 'ground' ? GROUND_Y - tpl.height : GROUND_Y - 76,
         width: tpl.width,
         height: tpl.height,
         passed: false,
@@ -815,14 +861,20 @@
           ? ctxData.typeEmoji || '🔑'
           : BERRY_EMOJIS[Math.floor(Math.random() * BERRY_EMOJIS.length)];
       var pts = kind === 'star' ? 50 : kind === 'orb' ? 30 : 15;
-      var high = Math.random() < 0.45;
+      var laneRoll = Math.random();
+      var itemY =
+        kind === 'star' || laneRoll < 0.22
+          ? GROUND_Y - 162 // 2단 점프 보너스 레인
+          : laneRoll < 0.65
+          ? GROUND_Y - 104 // 1단 점프 메인 레인
+          : GROUND_Y - 38; // 지상 달리기 레인
       items.push({
         kind: kind,
         emoji: emoji,
         points: pts,
         x: W + 34,
-        y: high ? GROUND_Y - 106 : GROUND_Y - 46,
-        radius: 20,
+        y: itemY,
+        radius: 22,
         collected: false
       });
     }
@@ -939,11 +991,13 @@
         if (pRight < oLeft || pLeft > oRight) continue;
 
         if (obs.category === 'ground') {
-          if (player.y < -26) continue;
+          if (player.y < -(obs.height - 12)) continue;
           triggerObstacleHit(obs);
           break;
         } else if (obs.category === 'air') {
-          if (player.isDucking && player.y > -15) continue;
+          // 숙여서 아래로 통과하거나, 2단 점프 등으로 공중 배리어 위쪽(y <= -66)을 완전히 뛰어넘으면 통과
+          if (player.isDucking && player.y > -20) continue;
+          if (player.y <= -66) continue;
           triggerObstacleHit(obs);
           break;
         }
@@ -1136,6 +1190,11 @@
       if (player.isJumping || player.y < 0 || player.vy !== 0) {
         player.y += player.vy;
         player.vy += GRAVITY;
+        var ceilingLimit = -Math.max(185, GROUND_Y - 56);
+        if (player.y < ceilingLimit) {
+          player.y = ceilingLimit;
+          if (player.vy < 0) player.vy = 0;
+        }
         if (player.y >= 0) {
           player.y = 0;
           player.vy = 0;
@@ -1254,6 +1313,8 @@
         knockbackBounceY: player.knockbackBounceY,
         y: player.y,
         vy: player.vy,
+        renderScaleX: renderScaleX,
+        renderScaleY: renderScaleY,
         jumpCount: player.jumpCount,
         lives: lives,
         maxLives: maxLives,

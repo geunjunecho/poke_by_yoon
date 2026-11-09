@@ -62,17 +62,17 @@
       '  image-rendering: pixelated; image-rendering: crisp-edges;',
       '}',
       '.tp-runner-shadow {',
-      '  position: absolute; left: calc(17.1875% - 28px); bottom: 16.5%; width: 56px; height: 12px;',
+      '  position: absolute; left: calc(17.1875% - 28px); bottom: 18.6%; width: 56px; height: 12px;',
       '  border-radius: 50%; background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.14) 65%, transparent 100%);',
       '  pointer-events: none; z-index: 4; transform-origin: center center; will-change: transform, opacity;',
       '}',
       '.tp-runner-hero {',
-      '  position: absolute; left: calc(17.1875% - 42px); bottom: 18.62%; width: 84px; height: 84px;',
-      '  display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 5;',
+      '  position: absolute; left: calc(17.1875% - 42px); bottom: 20.0%; width: 84px; height: 84px;',
+      '  display: flex; align-items: flex-end; justify-content: center; pointer-events: none; z-index: 5;',
       '  transform-origin: center bottom; will-change: transform, filter;',
       '}',
       '.tp-runner-puppet {',
-      '  position: relative; width: 76px; height: 76px; display: flex; align-items: center; justify-content: center;',
+      '  position: relative; width: 76px; height: 76px; display: flex; align-items: flex-end; justify-content: center;',
       '}',
       '.tp-wing {',
       '  position: absolute; top: 18px; font-size: 1.7rem; line-height: 1; pointer-events: none;',
@@ -261,10 +261,13 @@
     ctx.fillRect(bx + 6, groundY - 2, bw - 12, 4);
     ctx.restore();
 
-    // 천장 서포트 체인
-    ctx.fillStyle = 'rgba(24, 24, 24, 0.35)';
-    ctx.fillRect(bx + 9, 0, 4, by);
-    ctx.fillRect(bx + bw - 13, 0, 4, by);
+    // 상단 플로팅 마법 날개/로터 장식 (천장까지 이어지는 긴 선 대신 깔끔한 공중 부유 배리어 형태)
+    ctx.fillStyle = '#181818';
+    ctx.fillRect(bx + Math.floor(bw * 0.5) - 5, by - 7, 10, 7);
+    ctx.fillStyle = '#EA80FC';
+    ctx.fillRect(bx + 6, by - 10, bw - 12, 4);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(bx + 10, by - 9, bw - 20, 2);
 
     ctx.fillStyle = '#181818';
     ctx.fillRect(bx, by, bw, bh - 10);
@@ -456,6 +459,7 @@
       var heartsEl = stageEl.querySelector('.tp-runner-hearts');
       var scoreValEl = stageEl.querySelector('.tp-runner-score-val');
       var highValEl = stageEl.querySelector('.tp-runner-high-val');
+      var viewportEl = stageEl.querySelector('.tp-runner-viewport');
       var canvasEl = stageEl.querySelector('.tp-runner-canvas');
       var shadowEl = stageEl.querySelector('.tp-runner-shadow');
       var heroEl = stageEl.querySelector('.tp-runner-hero');
@@ -470,10 +474,13 @@
         : null;
 
       var CANVAS_W = 640;
+      var GROUND_DEPTH = 54;
       var CANVAS_H = 290;
-      var GROUND_Y = 236;
+      var GROUND_Y = CANVAS_H - GROUND_DEPTH;
       var HERO_X = 110;
       var KNOCKBACK_DURATION = 34;
+      var renderScaleX = 1;
+      var renderScaleY = 1;
 
       var tick = 0;
       var score = 0;
@@ -602,12 +609,58 @@
         player.knockbackTilt = Number(kt.toFixed(2));
       }
 
+      function syncViewportMetrics() {
+        var cw = Number(viewportEl && viewportEl.clientWidth) || 0;
+        var ch = Number(viewportEl && viewportEl.clientHeight) || 0;
+        if (cw > 0 && ch > 0) {
+          var targetH = Math.max(260, Math.min(450, Math.round(CANVAS_W * (ch / cw))));
+          if (targetH !== CANVAS_H) {
+            var prevGroundY = GROUND_Y;
+            CANVAS_H = targetH;
+            GROUND_Y = CANVAS_H - GROUND_DEPTH;
+            var deltaGroundY = GROUND_Y - prevGroundY;
+            if (canvasEl) {
+              canvasEl.width = CANVAS_W;
+              canvasEl.height = CANVAS_H;
+            }
+            for (var oi = 0; oi < obstacles.length; oi++) {
+              obstacles[oi].y += deltaGroundY;
+            }
+            for (var ii = 0; ii < items.length; ii++) {
+              items[ii].y += deltaGroundY;
+            }
+            for (var pi = 0; pi < particles.length; pi++) {
+              particles[pi].y += deltaGroundY;
+            }
+            for (var fi = 0; fi < floatingTexts.length; fi++) {
+              floatingTexts[fi].y += deltaGroundY;
+            }
+          }
+          renderScaleX = Number((cw / CANVAS_W).toFixed(4));
+          renderScaleY = Number((ch / CANVAS_H).toFixed(4));
+        } else {
+          renderScaleX = 1;
+          renderScaleY = 1;
+        }
+        var heroBottomPct = ((CANVAS_H - (GROUND_Y - 4)) / CANVAS_H) * 100;
+        var shadowBottomPct = ((CANVAS_H - GROUND_Y) / CANVAS_H) * 100;
+        if (heroEl && heroEl.style) {
+          heroEl.style.bottom = heroBottomPct.toFixed(4) + '%';
+        }
+        if (shadowEl && shadowEl.style) {
+          shadowEl.style.bottom = shadowBottomPct.toFixed(4) + '%';
+        }
+      }
+
       function applyPuppetTransform() {
+        syncViewportMetrics();
         computeKnockbackKinematics();
         var effectiveY = player.y + player.knockbackBounceY;
+        var scaledYOffset = Number((effectiveY * renderScaleY).toFixed(2));
+        var scaledKnockbackX = Math.round(player.knockbackX * renderScaleX);
 
         var statePayload = {
-          yOffset: effectiveY,
+          yOffset: scaledYOffset,
           isJumping: player.isJumping || player.knockbackBounceY < -2,
           isDucking: player.isDucking,
           isHit: player.invincibleTimer > 0,
@@ -639,9 +692,7 @@
         var knockbackSuffix =
           player.knockbackTimer > 0
             ? ' translateX(' +
-              Math.round(player.knockbackX) +
-              'px) translateY(' +
-              Math.round(player.knockbackBounceY) +
+              scaledKnockbackX +
               'px) rotate(' +
               player.knockbackTilt.toFixed(1) +
               'deg)'
@@ -653,10 +704,10 @@
           heroEl.style.opacity = (player.invincibleTimer > 0 && Math.floor(tick / 4) % 2 === 1) ? '0.6' : '1';
         }
         if (shadowEl && shadowEl.style) {
-          var shadowScale = Math.max(0.45, 1 - Math.abs(effectiveY) / 135);
+          var shadowScale = Math.max(0.45, 1 - Math.abs(effectiveY) / 170);
           shadowEl.style.transform =
             'translateX(' +
-            Math.round(player.knockbackX) +
+            scaledKnockbackX +
             'px) scale(' +
             shadowScale.toFixed(2) +
             ', ' +
@@ -680,7 +731,20 @@
         player.duckHold = false;
         player.isJumping = true;
         player.jumpCount += 1;
-        player.vy = player.jumpCount === 1 ? -11.6 : -10.2;
+
+        if (player.jumpCount === 1) {
+          player.vy = -11.8;
+          if (player.y >= 0) {
+            player.y = -10;
+          }
+        } else {
+          // 2단 점프: 버튼을 빠르게 연타하든 정점에서 누르든 항상 시원한 고공 궤적(-170 ~ -190)까지 올라가도록 보정
+          player.y -= 6;
+          var maxCeiling = -Math.max(170, Math.min(205, GROUND_Y - 56));
+          var targetPeakY = Math.max(maxCeiling, Math.min(player.y - 68, -168));
+          var riseNeeded = Math.max(50, player.y - targetPeakY);
+          player.vy = -Math.sqrt(2 * player.gravity * riseNeeded);
+        }
         player.jumpProgress = 0.05;
 
         if (duckBtn && duckBtn.classList) {
@@ -733,7 +797,7 @@
         var chosen = pool[Math.floor(Math.random() * pool.length)];
         obstacles.push({
           x: CANVAS_W + 40,
-          y: isAir ? (GROUND_Y - 68) : (GROUND_Y - 22),
+          y: isAir ? (GROUND_Y - 53) : (GROUND_Y - 22),
           width: isAir ? 52 : 46,
           height: isAir ? 42 : 38,
           kind: chosen.kind,
@@ -761,11 +825,17 @@
           pts = 20;
         }
 
-        var highLane = Math.random() < 0.45;
+        var laneRoll = Math.random();
+        var itemY =
+          itemType === 'crown' || laneRoll < 0.22
+            ? (GROUND_Y - 154) // 2단 점프 보너스 레인
+            : laneRoll < 0.65
+            ? (GROUND_Y - 98) // 1단 점프 메인 레인
+            : (GROUND_Y - 34); // 지상 달리기 레인
         items.push({
           x: CANVAS_W + 30,
-          y: highLane ? (GROUND_Y - 94) : (GROUND_Y - 32),
-          radius: 18,
+          y: itemY,
+          radius: 20,
           type: itemType,
           icon: icon,
           points: pts,
@@ -839,6 +909,11 @@
         if (player.isJumping) {
           player.y += player.vy;
           player.vy += player.gravity;
+          var ceilingLimit = -Math.max(178, GROUND_Y - 52);
+          if (player.y < ceilingLimit) {
+            player.y = ceilingLimit;
+            if (player.vy < 0) player.vy = 0;
+          }
           var normalized = Math.min(1, Math.max(0.05, (player.vy + 12) / 24));
           player.jumpProgress = Number(normalized.toFixed(2));
 
@@ -937,13 +1012,14 @@
           var horizOverlap = !obs.hitPlayer && Math.abs(obs.x - heroCenterX) < 30;
           if (horizOverlap) {
             if (obs.kind === 'ground') {
-              var jumpedOver = Math.abs(player.y) >= 34;
+              var jumpedOver = Math.abs(player.y) >= 28;
               if (!jumpedOver) {
                 handleObstacleHit(obs);
               }
             } else if (obs.kind === 'air') {
               var duckedUnder = player.isDucking && Math.abs(player.y) < 25;
-              if (!duckedUnder) {
+              var jumpedAboveAir = player.y <= -64;
+              if (!duckedUnder && !jumpedAboveAir) {
                 handleObstacleHit(obs);
               }
             }
@@ -1213,6 +1289,8 @@
           jumpProgress: player.jumpProgress,
           y: player.y,
           yOffset: player.y,
+          renderScaleX: renderScaleX,
+          renderScaleY: renderScaleY,
           obstacles: obstacles.slice(),
           items: items.slice(),
           isGameOver: isGameOver,

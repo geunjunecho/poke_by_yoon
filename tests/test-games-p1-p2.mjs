@@ -471,6 +471,43 @@ test('4. P1/P2 퍼센트 좌표 동기화, 그림자, 우측 방향 플립 및 �
   duckBtn.dispatchEvent('click', { preventDefault() {} });
   assert.equal(stageEl._runnerGame.getState().isDucking, false, '숙이기 버튼에서 손을 떼면 즉시 isDucking === false 가 되어야 합니다');
 
+  // 빠른 연속 2단 점프 시 1단 점프보다 확실히 더 높이 올라가야 함
+  stageEl._runnerGame.reset();
+  stageEl._runnerGame.jump();
+  stageEl._runnerGame.stepFrame();
+  stageEl._runnerGame.jump();
+  let minDoubleJumpY = 0;
+  for (let i = 0; i < 35; i++) {
+    const st = stageEl._runnerGame.stepFrame();
+    if (st.y < minDoubleJumpY) minDoubleJumpY = st.y;
+  }
+  assert.ok(
+    minDoubleJumpY <= -155,
+    `빠른 2단 점프 정점 높이(minY=${minDoubleJumpY})는 1단 점프(-120)보다 훨씬 높아야 합니다 (<= -155)`
+  );
+
+  // 전체화면 스테이지 스케일(예: 960x640)에서 점프 변위(yOffset)가 화면 스케일에 맞춰 증폭되어야 함
+  const stageArea = stageEl.querySelector('.poke-runner-stage-area');
+  stageArea.clientWidth = 960;
+  stageArea.clientHeight = 640;
+  stageEl._runnerGame.reset();
+  stageEl._runnerGame.jump();
+  for (let i = 0; i < 12; i++) {
+    stageEl._runnerGame.stepFrame();
+  }
+  const scaledState = stageEl._runnerGame.getState();
+  assert.ok(
+    scaledState.renderScaleY > 1.1,
+    `전체화면(960x640)에서 renderScaleY(${scaledState.renderScaleY})가 1.1보다 커야 합니다`
+  );
+  const translateMatch = runnerImg.style.transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+  assert.ok(translateMatch, 'runnerImg transform에 translateY(px)가 포함되어야 합니다');
+  const renderedTranslateY = Number(translateMatch[1]);
+  assert.ok(
+    Math.abs(renderedTranslateY) > Math.abs(scaledState.y) * 1.1,
+    `DOM 점프 높이(${renderedTranslateY}px)가 논리 좌표(${scaledState.y})에 화면 스케일(${scaledState.renderScaleY})을 곱한 값과 일치해야 합니다`
+  );
+
   cleanupRunner();
 
   const berryStage = createMockElement('div');
