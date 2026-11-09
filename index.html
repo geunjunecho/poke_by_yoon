@@ -3,256 +3,471 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="description" content="클래식 1세대 디자인의 인터랙티브 포켓몬 도감. 전 세대 포켓몬을 탐색하세요!">
-  <meta name="theme-color" content="#DC0A2D">
+  <meta name="description" content="조윤이의 우당탕탕 포켓몬 도감 & 조은이의 샤랄라 티니핑 도감 통합 놀이터">
+  <meta name="theme-color" content="#1e1b4b">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="screen-orientation" content="landscape">
-  <title>포켓몬 도감 | Pokédex</title>
+  <title>✨ 조윤 & 조은이의 신나는 도감 놀이터 ✨</title>
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@400;700;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="css/minigames.css">
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@500;700;900&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: 'Jua', 'Noto Sans KR', sans-serif;
+      background:
+        radial-gradient(circle at 18% 22%, rgba(255, 214, 0, 0.22) 0%, transparent 42%),
+        radial-gradient(circle at 82% 25%, rgba(255, 105, 180, 0.25) 0%, transparent 45%),
+        radial-gradient(circle at 50% 85%, rgba(56, 189, 248, 0.2) 0%, transparent 50%),
+        linear-gradient(145deg, #0f172a 0%, #1e1b4b 48%, #2e1065 100%);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 16px;
+      overflow-x: hidden;
+    }
+
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(3deg); }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    @keyframes badgeSparkle {
+      0%, 100% { transform: scale(1) rotate(-4deg); }
+      50% { transform: scale(1.15) rotate(6deg); }
+    }
+
+    .portal-shell {
+      width: 100%;
+      max-width: 1080px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      z-index: 2;
+    }
+
+    .portal-header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .portal-top-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 18px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      font-size: 0.95rem;
+      color: #fde047;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(8px);
+    }
+
+    .portal-title {
+      font-size: clamp(1.8rem, 4vw, 2.85rem);
+      color: #ffffff;
+      text-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 28px rgba(255, 214, 0, 0.35);
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+    }
+
+    .portal-subtitle {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: clamp(0.95rem, 2vw, 1.15rem);
+      font-weight: 700;
+      color: #e2e8f0;
+      opacity: 0.95;
+    }
+
+    .portal-cards-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .dex-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-radius: 32px;
+      padding: 26px 24px 24px;
+      text-decoration: none;
+      color: #ffffff;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+    }
+
+    .dex-card:hover {
+      transform: translateY(-8px) scale(1.015);
+    }
+
+    .dex-card:active {
+      transform: translateY(2px) scale(0.985);
+    }
+
+    /* 포켓몬 도감 카드 */
+    .dex-card.pokemon {
+      background:
+        radial-gradient(circle at 85% 20%, rgba(255, 214, 0, 0.32) 0%, transparent 48%),
+        linear-gradient(155deg, #ef4444 0%, #dc0a2d 52%, #7f1d1d 100%);
+      border: 4px solid #fde047;
+      box-shadow:
+        0 10px 0 #7f1d1d,
+        0 20px 45px rgba(220, 10, 45, 0.45),
+        inset 0 2px 6px rgba(255, 255, 255, 0.45);
+    }
+
+    /* 티니핑 도감 카드 */
+    .dex-card.tiniping {
+      background:
+        radial-gradient(circle at 85% 20%, rgba(255, 255, 255, 0.35) 0%, transparent 48%),
+        linear-gradient(155deg, #ff7eb9 0%, #ec4899 50%, #9333ea 100%);
+      border: 4px solid #ffd700;
+      box-shadow:
+        0 10px 0 #6b21a8,
+        0 20px 45px rgba(236, 72, 153, 0.45),
+        inset 0 2px 6px rgba(255, 255, 255, 0.55);
+    }
+
+    .dex-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .dex-owner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 1rem;
+      background: rgba(0, 0, 0, 0.32);
+      border: 2px solid rgba(255, 255, 255, 0.55);
+      color: #fff;
+    }
+
+    .dex-game-count-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      background: #fde047;
+      color: #1e293b;
+      font-weight: 900;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+      animation: badgeSparkle 2.4s ease-in-out infinite;
+    }
+
+    .dex-hero-visual {
+      position: relative;
+      height: 175px;
+      margin: 6px 0 14px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.16);
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      overflow: hidden;
+      box-shadow: inset 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .poke-sprite-trio {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .poke-sprite-trio img {
+      width: 108px;
+      height: 108px;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.38));
+      animation: floatSlow 3s ease-in-out infinite;
+    }
+
+    .poke-sprite-trio img.center-main {
+      width: 132px;
+      height: 132px;
+      z-index: 2;
+      animation-delay: -0.8s;
+    }
+
+    .poke-sprite-trio img:last-child {
+      animation-delay: -1.6s;
+    }
+
+    .tiniping-pact-showcase {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    .tp-showcase-orb {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #fff0f7, #fbcfe8);
+      border: 3.5px solid #ffd700;
+      box-shadow: 0 8px 18px rgba(131, 24, 67, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #be185d;
+      font-size: 1rem;
+      animation: floatSlow 3s ease-in-out infinite;
+    }
+
+    .tp-showcase-orb.main {
+      width: 118px;
+      height: 118px;
+      background: linear-gradient(135deg, #ffffff, #fce7f3);
+      border-width: 4px;
+      box-shadow: 0 0 24px rgba(255, 215, 0, 0.75), 0 10px 22px rgba(131, 24, 67, 0.4);
+      animation-delay: -0.9s;
+    }
+
+    .tp-showcase-orb .orb-emoji {
+      font-size: 2.3rem;
+      line-height: 1.1;
+    }
+
+    .tp-showcase-orb.main .orb-emoji {
+      font-size: 3.1rem;
+    }
+
+    .tp-showcase-orb .orb-name {
+      font-size: 0.92rem;
+      color: #9d174d;
+      margin-top: 2px;
+    }
+
+    .dex-card-title {
+      font-size: clamp(1.55rem, 3vw, 2.05rem);
+      text-shadow: 0 3px 8px rgba(0, 0, 0, 0.38);
+      margin-bottom: 6px;
+    }
+
+    .dex-card-desc {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.94);
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+
+    .dex-feature-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+
+    .dex-feature-tag {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 900;
+      padding: 5px 11px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .dex-enter-btn {
+      width: 100%;
+      padding: 15px 20px;
+      border-radius: 20px;
+      font-size: 1.3rem;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: 900;
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.28);
+      transition: transform 0.12s ease;
+    }
+
+    .dex-card.pokemon .dex-enter-btn {
+      background: linear-gradient(180deg, #ffee58 0%, #fbc02d 100%);
+      color: #1e293b;
+      border: 3px solid #ffffff;
+    }
+
+    .dex-card.tiniping .dex-enter-btn {
+      background: linear-gradient(180deg, #ffffff 0%, #fce7f3 100%);
+      color: #be185d;
+      border: 3px solid #ffd700;
+    }
+
+    .portal-footer {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.72);
+      text-align: center;
+    }
+
+    @media (max-width: 780px) {
+      .portal-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+      .dex-card {
+        padding: 20px 18px;
+      }
+      .dex-hero-visual {
+        height: 145px;
+      }
+      .poke-sprite-trio img {
+        width: 86px;
+        height: 86px;
+      }
+      .poke-sprite-trio img.center-main {
+        width: 108px;
+        height: 108px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <script>
-    // 모바일 브라우저 실제 보이는 높이 (시스템UI 완전 제외)
-    function setRealVH() {
-      var h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-      document.documentElement.style.setProperty('--real-vh', h + 'px');
-    }
-    setRealVH();
-    window.addEventListener('resize', setRealVH);
-    if (window.visualViewport) window.visualViewport.addEventListener('resize', setRealVH);
-    window.addEventListener('orientationchange', function(){ setTimeout(setRealVH, 200); });
-  </script>
-  <!-- 닫힌 도감 인트로 -->
-  <div id="intro-overlay" class="intro-overlay">
-    <div class="closed-pokedex">
-      <!-- 닫힌 도감 상판 -->
-      <div class="closed-top">
-        <div class="closed-lens">
-          <div class="closed-lens-inner"></div>
-          <div class="closed-lens-reflection"></div>
-        </div>
-        <div class="closed-led-group">
-          <div class="closed-led red"></div>
-          <div class="closed-led yellow"></div>
-          <div class="closed-led green"></div>
-        </div>
-      </div>
-      <!-- 힌지 라인 -->
-      <div class="closed-hinge-line"></div>
-      <!-- 닫힌 도감 하판 -->
-      <div class="closed-bottom">
-        <div class="closed-clasp">
-          <div class="closed-pokeball">
-            <div class="closed-pokeball-line"></div>
-            <div class="closed-pokeball-btn"></div>
+  <main class="portal-shell">
+    <header class="portal-header">
+      <div class="portal-top-pill">🌟 조윤 &amp; 조은 남매의 도감 &amp; 미니게임 오락실 🌟</div>
+      <h1 class="portal-title">✨ 오늘 어떤 도감으로 놀아볼까? ✨</h1>
+      <p class="portal-subtitle">들어가고 싶은 도감 카드를 콕! 터치해 보세요</p>
+    </header>
+
+    <section class="portal-cards-grid" aria-label="도감 선택">
+      <!-- 1. 조윤이의 포켓몬 도감 -->
+      <a href="pokemon.html" class="dex-card pokemon" id="enterPokemonCard">
+        <div>
+          <div class="dex-card-top">
+            <span class="dex-owner-badge">⚡ 조윤이의 도감</span>
+            <span class="dex-game-count-badge">🎮 미니게임 6종!</span>
           </div>
-        </div>
-      </div>
-    </div>
-    <p class="intro-text">터치하여 도감 열기</p>
-    <p class="intro-credit">조윤의 우당탕탕 포켓몬 도감</p>
-  </div>
 
-  <!-- 로딩 오버레이 -->
-  <div id="loading-overlay" class="loading-overlay hidden">
-    <div class="loading-spinner"></div>
-    <p class="loading-text">데이터 로딩중...</p>
-  </div>
-
-  <!-- 메인 도감 디바이스 -->
-  <div id="pokedex-device" class="pokedex-device hidden">
-
-    <!-- ========== 왼쪽 패널 ========== -->
-    <div class="panel-left">
-      <!-- 상단: 렌즈 + LED -->
-      <header class="device-header">
-        <div class="lens-area">
-          <div id="blue-lens" class="blue-lens">
-            <div class="lens-reflection"></div>
-          </div>
-        </div>
-        <div class="led-group">
-          <div id="led-red" class="led led-red"></div>
-          <div id="led-yellow" class="led led-yellow"></div>
-          <div id="led-green" class="led led-green active"></div>
-        </div>
-        <div class="header-title">조윤의 우당탕탕 포켓몬 도감</div>
-      </header>
-
-      <!-- 메인 스크린 -->
-      <section class="main-screen-wrapper">
-        <div id="main-screen" class="main-screen">
-          <div class="screen-scanlines"></div>
-          <div class="screen-content">
-            <div id="pokemon-image-container" class="pokemon-image-container">
-              <img id="pokemon-image" class="pokemon-image" src="" alt="포켓몬">
-            </div>
-            <div class="pokemon-basic-info">
-              <span id="pokemon-number" class="pokemon-number">#001</span>
-              <span id="pokemon-name-kr" class="pokemon-name-kr">이상해씨</span>
-              <button id="fav-btn" class="fav-btn" aria-label="즐겨찾기">☆</button>
+          <div class="dex-hero-visual">
+            <div class="poke-sprite-trio">
+              <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png" alt="이상해씨">
+              <img class="center-main" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" alt="피카츄">
+              <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png" alt="리자몽">
             </div>
           </div>
-          <div id="screen-glow" class="screen-glow"></div>
+
+          <h2 class="dex-card-title">조윤의 우당탕탕 포켓몬 도감</h2>
+          <p class="dex-card-desc">피카츄·리자몽·뮤츠까지! 전 세대 포켓몬을 찾아보고 내 파트너와 신나는 미니게임 6종을 즐겨요!</p>
+
+          <div class="dex-feature-tags">
+            <span class="dex-feature-tag">🏃 점프런</span>
+            <span class="dex-feature-tag">🍓 진화 열매캐치</span>
+            <span class="dex-feature-tag">🔴 몬스터볼 캐치</span>
+            <span class="dex-feature-tag">⚖️ 시소 퀴즈</span>
+            <span class="dex-feature-tag">🃏 카드 짝맞추기</span>
+            <span class="dex-feature-tag">⚡ 로켓단 판뒤집기</span>
+          </div>
         </div>
-      </section>
 
-      <!-- 타입 + 스피커 -->
-      <section class="type-speaker-bar">
-        <div id="type-badges" class="type-badges"></div>
-        <div class="sound-controls">
-          <button id="bgm-btn" class="sound-btn" aria-label="BGM 토글" title="BGM">🎵</button>
-          <button id="speaker-btn" class="speaker-btn" aria-label="울음소리 재생">
-            <div class="speaker-icon">🔊</div>
-          </button>
+        <div class="dex-enter-btn">
+          <span>⚡ 포켓몬 도감 열기!</span>
+          <span>▶</span>
         </div>
-      </section>
+      </a>
 
-      <!-- 미니게임 오락실 버튼 -->
-      <section class="minigame-entry-bar">
-        <button id="open-minigame-btn" class="open-minigame-btn" aria-label="이 포켓몬과 미니게임 놀기">
-          <span class="mg-btn-icon">🎮</span>
-          <span class="mg-btn-text">이 포켓몬과 미니게임 놀기!</span>
-          <span class="mg-btn-sparkle">✨</span>
-        </button>
-      </section>
+      <!-- 2. 조은이의 티니핑 도감 -->
+      <a href="tiniping/index.html" class="dex-card tiniping" id="enterTinipingCard">
+        <div>
+          <div class="dex-card-top">
+            <span class="dex-owner-badge">💖 조은이의 도감</span>
+            <span class="dex-game-count-badge">🎀 미니게임 5종!</span>
+          </div>
 
-      <!-- 스피커 그릴 -->
-      <div class="speaker-grill">
-        <div class="grill-lines"></div>
-      </div>
-    </div>
-
-    <!-- ========== 힌지 ========== -->
-    <div class="hinge">
-      <div class="hinge-line"></div>
-      <div class="hinge-dot"></div>
-      <div class="hinge-dot"></div>
-      <div class="hinge-dot"></div>
-      <div class="hinge-line"></div>
-    </div>
-
-    <!-- ========== 오른쪽 패널 ========== -->
-    <div class="panel-right">
-      <!-- 정보 스크린 -->
-      <section class="info-screen-wrapper">
-        <div id="info-screen" class="info-screen">
-          <div class="screen-scanlines"></div>
-          <div id="info-scroll-content" class="info-scroll-content">
-
-            <!-- 기본 정보 섹션 -->
-            <div class="section-block">
-              <div class="section-title">📋 기본 정보</div>
-              <div class="info-grid">
-                <div class="info-item">
-                  <span class="info-label">이름</span>
-                  <span id="pokemon-name-en" class="info-value">이상해씨</span>
-                </div>
-                <div class="info-item">
-                  <span class="info-label">키</span>
-                  <span id="pokemon-height" class="info-value">0.7m</span>
-                </div>
-                <div class="info-item">
-                  <span class="info-label">몸무게</span>
-                  <span id="pokemon-weight" class="info-value">6.9kg</span>
-                </div>
-                <div class="info-item">
-                  <span class="info-label">특성</span>
-                  <span id="pokemon-abilities" class="info-value">-</span>
-                </div>
-                <div class="info-item">
-                  <span class="info-label">기초 경험치</span>
-                  <span id="pokemon-exp" class="info-value">-</span>
-                </div>
+          <div class="dex-hero-visual">
+            <div class="tiniping-pact-showcase">
+              <div class="tp-showcase-orb">
+                <span class="orb-emoji">👑</span>
+                <span class="orb-name">로열핑</span>
+              </div>
+              <div class="tp-showcase-orb main">
+                <span class="orb-emoji">💖</span>
+                <span class="orb-name">하츄핑</span>
+              </div>
+              <div class="tp-showcase-orb">
+                <span class="orb-emoji">🌈</span>
+                <span class="orb-name">레전드핑</span>
               </div>
             </div>
-
-            <!-- 스탯 섹션 -->
-            <div class="section-block">
-              <div class="section-title">📊 능력치</div>
-              <div id="stats-container" class="stats-container"></div>
-              <div id="stats-total" class="stats-total">
-                <span class="stats-total-label">합계</span>
-                <span id="stats-total-value" class="stats-total-value">-</span>
-              </div>
-            </div>
-
-            <!-- 타입 상성 섹션 -->
-            <div class="section-block">
-              <div class="section-title">⚔️ 타입 상성</div>
-              <div id="type-effectiveness" class="type-effectiveness"></div>
-            </div>
-
-            <!-- 설명 섹션 -->
-            <div class="section-block">
-              <div class="section-title">📖 도감 설명</div>
-              <p id="description-text" class="description-text">도감 설명을 불러오는 중...</p>
-            </div>
-
-            <!-- 진화 섹션 (맨 아래) -->
-            <div class="section-block">
-              <div class="section-title">🔄 진화</div>
-              <div id="evolution-chain" class="evolution-chain"></div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      <!-- 컨트롤 영역 -->
-      <section class="controls-area">
-        <div class="search-bar">
-          <input type="text" id="search-input" class="search-input" placeholder="이름 또는 번호 검색..." autocomplete="off">
-          <div id="search-results" class="search-results hidden"></div>
-        </div>
-
-        <div class="controls-row">
-          <div class="dpad-container">
-            <button id="dpad-up" class="dpad-btn dpad-up" aria-label="이전 포켓몬">▲</button>
-            <button id="dpad-left" class="dpad-btn dpad-left" aria-label="이전 탭">◀</button>
-            <button id="dpad-center" class="dpad-btn dpad-center" aria-label="선택">●</button>
-            <button id="dpad-right" class="dpad-btn dpad-right" aria-label="다음 탭">▶</button>
-            <button id="dpad-down" class="dpad-btn dpad-down" aria-label="다음 포켓몬">▼</button>
           </div>
 
-          <div class="gen-buttons-container">
-            <div id="gen-buttons" class="gen-buttons">
-              <button class="gen-btn active" data-gen="1">I</button>
-              <button class="gen-btn" data-gen="2">II</button>
-              <button class="gen-btn" data-gen="3">III</button>
-              <button class="gen-btn" data-gen="4">IV</button>
-              <button class="gen-btn" data-gen="5">V</button>
-              <button class="gen-btn" data-gen="6">VI</button>
-              <button class="gen-btn" data-gen="7">VII</button>
-              <button class="gen-btn" data-gen="8">VIII</button>
-              <button class="gen-btn" data-gen="9">IX</button>
-            </div>
+          <h2 class="dex-card-title">조은의 샤랄라 티니핑 도감</h2>
+          <p class="dex-card-desc">마법 팩트를 열면 1기~7기 149마리 티니핑 친구들이 가득! 하츄핑과 마법 놀이터로 출발해요!</p>
+
+          <div class="dex-feature-tags">
+            <span class="dex-feature-tag">🌈 구름길 점프런</span>
+            <span class="dex-feature-tag">🍰 마법 파르페</span>
+            <span class="dex-feature-tag">🫧 비눗방울 구출</span>
+            <span class="dex-feature-tag">🃏 티니핑 짝맞추기</span>
+            <span class="dex-feature-tag">⚡ 악동핑 판뒤집기</span>
           </div>
         </div>
-      </section>
-    </div>
 
-    <!-- 하단 장식 -->
-    <footer class="device-footer">
-      <div class="footer-screw"></div>
-      <div class="footer-screw"></div>
+        <div class="dex-enter-btn">
+          <span>💖 티니핑 도감 열기!</span>
+          <span>▶</span>
+        </div>
+      </a>
+    </section>
+
+    <footer class="portal-footer">
+      💡 각 도감 오른쪽 위 <strong>[🏠 홈으로]</strong> 버튼을 누르면 언제든 다른 도감으로 바꿀 수 있어요!
     </footer>
-  </div>
+  </main>
 
-  <script src="js/api.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/minigames-core.js"></script>
-  <script src="js/games/poke-runner.js"></script>
-  <script src="js/games/poke-berry.js"></script>
-  <script src="js/games/poke-catch.js"></script>
-  <script src="js/games/poke-seesaw.js"></script>
-  <script src="js/games/poke-memory.js"></script>
-  <script src="js/games/poke-flipbattle.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function () {});
+      });
+    }
+  </script>
 </body>
 </html>

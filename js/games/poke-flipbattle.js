@@ -123,6 +123,18 @@
     return { playerCount: playerCount, rivalCount: rivalCount };
   }
 
+  var ALARM_CLOCK_SVG =
+    '<svg class="poke-arcade-clock-svg" viewBox="0 0 64 64" width="46" height="46" aria-hidden="true">' +
+      '<path d="M10 18 C6 12, 14 4, 22 10 L18 20 Z" fill="#FACC15" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<path d="M54 18 C58 12, 50 4, 42 10 L46 20 Z" fill="#FACC15" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<rect x="29" y="5" width="6" height="8" rx="3" fill="#EAB308" stroke="#FFFFFF" stroke-width="2"/>' +
+      '<path d="M18 52 L13 59 M46 52 L51 59" stroke="#FACC15" stroke-width="5" stroke-linecap="round"/>' +
+      '<circle cx="32" cy="35" r="22" fill="#FACC15" stroke="#FFFFFF" stroke-width="3"/>' +
+      '<circle cx="32" cy="35" r="17" fill="#FFFFFF" stroke="#EAB308" stroke-width="2"/>' +
+      '<path d="M32 35 L32 24 M32 35 L25 40" stroke="#334155" stroke-width="2.8" stroke-linecap="round"/>' +
+      '<circle cx="32" cy="35" r="2.6" fill="#334155"/>' +
+    '</svg>';
+
   function buildFlipBattleMarkup(hero, state) {
     var counts = countOwners(state.tiles);
     var playerPct = Math.round((counts.playerCount / TOTAL_TILES) * 100);
@@ -132,21 +144,32 @@
       var isPlayer = tile.owner === 'player';
       var cls = 'poke-flipbattle-tile ' + (isPlayer ? 'is-player' : 'is-rival');
       if (tile.hasRainbow) cls += ' has-rainbow';
-      if (tile.burstFlash) cls += ' is-bursting';
+      if (tile.burstFlash) cls += ' is-burst-flash is-bursting';
+      if (tile.tiltedFlip) cls += ' is-tilted-flip';
 
       return (
         '<button type="button" class="' + cls + '" data-role="flip-tile" data-tile-index="' + tile.index + '" ' +
+          'data-owner="' + tile.owner + '" data-rainbow="' + (tile.hasRainbow ? 'true' : 'false') + '" ' +
           'style="--player-tile-color: ' + hero.typeColor + '; --rival-tile-color: ' + RIVAL_META.color + ';" ' +
           'aria-label="' + (isPlayer ? hero.nameKr + ' 카드' : '로켓단 나옹 카드') + '">' +
+          '<span class="poke-flipbattle-rainbow-badge" data-role="rainbow-badge"' + (tile.hasRainbow ? '' : ' style="display: none;"') + '>🌟 무지개 몬스터볼</span>' +
           '<div class="poke-flipbattle-tile-inner">' +
-            (tile.hasRainbow
-              ? '<span class="poke-flipbattle-rainbow-badge" data-role="rainbow-badge">🌟 무지개 몬스터볼</span>'
-              : '') +
-            (isPlayer
-              ? '<img class="poke-flipbattle-tile-img" src="' + hero.artworkUrl + '" alt="' + hero.nameKr + '" />' +
-                '<span class="poke-flipbattle-tile-label">' + hero.typeEmoji + ' ' + hero.nameKr + '</span>'
-              : '<div class="poke-flipbattle-rival-icon">😼</div>' +
-                '<span class="poke-flipbattle-tile-label">😼 로켓단</span>') +
+            '<div class="poke-flipbattle-face poke-flipbattle-face-player">' +
+              '<div class="poke-flipbattle-well poke-flipbattle-well-player">' +
+                '<img class="poke-flipbattle-tile-img" src="' + hero.artworkUrl + '" alt="' + hero.nameKr + '" width="76" height="76" decoding="async" draggable="false" />' +
+                '<span class="poke-flipbattle-tile-label">' + hero.typeEmoji + ' ' + hero.nameKr + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="poke-flipbattle-face poke-flipbattle-face-rival">' +
+              '<div class="poke-flipbattle-well poke-flipbattle-well-rival">' +
+                '<img class="poke-flipbattle-tile-img poke-flipbattle-rival-img" src="' + RIVAL_META.artworkUrl + '" alt="' + RIVAL_META.nameKr + '" width="76" height="76" decoding="async" draggable="false" />' +
+                '<div class="poke-flipbattle-rival-emblem">' +
+                  '<span class="poke-flipbattle-rival-r">R</span>' +
+                  '<span class="poke-flipbattle-rival-icon">😼</span>' +
+                '</div>' +
+                '<span class="poke-flipbattle-tile-label">😼 로켓단</span>' +
+              '</div>' +
+            '</div>' +
           '</div>' +
         '</button>'
       );
@@ -155,19 +178,34 @@
     return (
       '<div class="poke-flipbattle-root" style="--hero-color: ' + hero.typeColor + ';">' +
         '<div class="poke-flipbattle-hud">' +
-          '<div class="poke-flipbattle-timer-pill" data-role="timer-pill">⏱️ 남은 시간 ' + state.timeLeft + '초</div>' +
-          '<div class="poke-flipbattle-banner" data-role="banner-text">' + state.bannerText + '</div>' +
-          '<div class="poke-flipbattle-score-pill" data-role="score-pill">점수 ' + state.score + '점</div>' +
-        '</div>' +
-        '<div class="poke-flipbattle-tug-wrap">' +
-          '<div class="poke-flipbattle-tug-labels">' +
-            '<span class="poke-flipbattle-tug-my" data-role="my-count-label">' + hero.typeEmoji + ' 내 포켓몬 ' + counts.playerCount + '장</span>' +
-            '<span class="poke-flipbattle-tug-vs">⚡ 세력 줄다리기 ⚡</span>' +
-            '<span class="poke-flipbattle-tug-rival" data-role="rival-count-label">😼 로켓단 ' + counts.rivalCount + '장</span>' +
+          '<div class="poke-flipbattle-hud-stat">' +
+            '<div class="poke-flipbattle-hud-avatar">' +
+              '<img src="' + hero.artworkUrl + '" alt="' + hero.nameKr + '" width="48" height="48" decoding="async" draggable="false" />' +
+            '</div>' +
+            '<span class="poke-flipbattle-big-num" data-role="hud-my-count-num">' + counts.playerCount + '</span>' +
           '</div>' +
-          '<div class="poke-flipbattle-tug-bar">' +
-            '<div class="poke-flipbattle-tug-fill-player" data-role="tug-fill-player" style="width: ' + playerPct + '%; background: ' + hero.typeColor + ';"></div>' +
-            '<div class="poke-flipbattle-tug-fill-rival" data-role="tug-fill-rival" style="width: ' + rivalPct + '%;"></div>' +
+          '<div class="poke-flipbattle-hud-clock">' +
+            ALARM_CLOCK_SVG +
+            '<span class="poke-flipbattle-big-num" data-role="hud-timer-num">' + state.timeLeft + '</span>' +
+            '<span class="poke-flipbattle-timer-pill sr-only" data-role="timer-pill">⏱️ 남은 시간 ' + state.timeLeft + '초</span>' +
+          '</div>' +
+          '<div class="poke-flipbattle-hud-ribbon-group">' +
+            '<span class="poke-flipbattle-score-pill" data-role="score-pill">점수 ' + state.score + '점</span>' +
+            '<div class="poke-flipbattle-corner-ribbon">카드 뒤집기</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="poke-flipbattle-subhud">' +
+          '<div class="poke-flipbattle-banner" data-role="banner-text">' + state.bannerText + '</div>' +
+          '<div class="poke-flipbattle-tug-wrap">' +
+            '<div class="poke-flipbattle-tug-labels">' +
+              '<span class="poke-flipbattle-tug-my" data-role="my-count-label">' + hero.typeEmoji + ' 내 포켓몬 ' + counts.playerCount + '장</span>' +
+              '<span class="poke-flipbattle-tug-vs">⚡ 세력 줄다리기 ⚡</span>' +
+              '<span class="poke-flipbattle-tug-rival" data-role="rival-count-label">😼 로켓단 ' + counts.rivalCount + '장</span>' +
+            '</div>' +
+            '<div class="poke-flipbattle-tug-bar">' +
+              '<div class="poke-flipbattle-tug-fill-player" data-role="tug-fill-player" style="width: ' + playerPct + '%; background: ' + hero.typeColor + ';"></div>' +
+              '<div class="poke-flipbattle-tug-fill-rival" data-role="tug-fill-rival" style="width: ' + rivalPct + '%;"></div>' +
+            '</div>' +
           '</div>' +
         '</div>' +
         '<div class="poke-flipbattle-board" data-role="flip-board">' +
@@ -196,6 +234,7 @@
       tiles: createInitialTiles(),
       isPointerDown: false,
       lastSwipedIndex: -1,
+      lastSwipeFlipAt: 0,
       finished: false,
       cleanedUp: false,
       outcome: null,
@@ -205,6 +244,8 @@
 
     var intervals = [];
     var timeouts = [];
+    var cachedTileEls = [];
+    var cachedBadgeEls = [];
 
     function addInterval(fn, ms) {
       var id = setInterval(function () {
@@ -240,6 +281,28 @@
       return null;
     }
 
+    function collectTileElements() {
+      cachedTileEls = [];
+      cachedBadgeEls = [];
+      if (typeof stageEl.querySelectorAll === 'function') {
+        var found = stageEl.querySelectorAll('[data-role="flip-tile"]');
+        if (!found || found.length === 0) {
+          found = stageEl.querySelectorAll('.poke-flipbattle-tile');
+        }
+        if (found && found.length) {
+          for (var i = 0; i < found.length; i++) {
+            var tileEl = found[i];
+            cachedTileEls.push(tileEl);
+            var badgeEl = null;
+            if (tileEl && typeof tileEl.querySelector === 'function') {
+              badgeEl = tileEl.querySelector('[data-role="rainbow-badge"]');
+            }
+            cachedBadgeEls.push(badgeEl);
+          }
+        }
+      }
+    }
+
     function bindBoardEvents() {
       var boardEl = queryRole('flip-board');
       if (boardEl && typeof boardEl.addEventListener === 'function') {
@@ -247,6 +310,10 @@
           state.isPointerDown = true;
         });
         boardEl.addEventListener('pointerup', function () {
+          state.isPointerDown = false;
+          state.lastSwipedIndex = -1;
+        });
+        boardEl.addEventListener('pointercancel', function () {
           state.isPointerDown = false;
           state.lastSwipedIndex = -1;
         });
@@ -265,6 +332,7 @@
                 var idx = Number(idxStr);
                 if (idx !== state.lastSwipedIndex) {
                   state.lastSwipedIndex = idx;
+                  state.lastSwipeFlipAt = Date.now();
                   flipTile(idx, { fromSwipe: true });
                 }
               }
@@ -273,36 +341,135 @@
         });
       }
 
-      if (typeof stageEl.querySelectorAll === 'function') {
-        var tileEls = stageEl.querySelectorAll('.poke-flipbattle-tile');
-        if (!tileEls || tileEls.length === 0) {
-          tileEls = stageEl.querySelectorAll('[data-role="flip-tile"]');
-        }
-        for (var i = 0; i < (tileEls ? tileEls.length : 0); i++) {
-          (function (tileEl, fallbackIdx) {
-            if (!tileEl || typeof tileEl.addEventListener !== 'function') return;
-            function getIdx() {
-              var attr = tileEl.getAttribute ? tileEl.getAttribute('data-tile-index') : null;
-              return attr !== null ? Number(attr) : fallbackIdx;
+      collectTileElements();
+      for (var i = 0; i < cachedTileEls.length; i++) {
+        (function (tileEl, fallbackIdx) {
+          if (!tileEl || typeof tileEl.addEventListener !== 'function') return;
+          function getIdx() {
+            var attr = tileEl.getAttribute ? tileEl.getAttribute('data-tile-index') : null;
+            return attr !== null ? Number(attr) : fallbackIdx;
+          }
+          tileEl.addEventListener('pointerdown', function () {
+            state.isPointerDown = true;
+            state.lastSwipedIndex = getIdx();
+          });
+          tileEl.addEventListener('click', function (e) {
+            if (e && typeof e.preventDefault === 'function') e.preventDefault();
+            var idx = getIdx();
+            if (state.lastSwipeFlipAt && Date.now() - state.lastSwipeFlipAt < 180 && state.lastSwipedIndex === idx) {
+              return;
             }
-            tileEl.addEventListener('click', function (e) {
-              if (e && typeof e.preventDefault === 'function') e.preventDefault();
-              flipTile(getIdx());
-            });
-            tileEl.addEventListener('pointerenter', function () {
-              if (state.isPointerDown) {
-                flipTile(getIdx(), { fromSwipe: true });
-              }
-            });
-          })(tileEls[i], i);
-        }
+            flipTile(idx);
+          });
+          tileEl.addEventListener('pointerenter', function () {
+            if (state.isPointerDown) {
+              var idx = getIdx();
+              state.lastSwipedIndex = idx;
+              state.lastSwipeFlipAt = Date.now();
+              flipTile(idx, { fromSwipe: true });
+            }
+          });
+        })(cachedTileEls[i], i);
       }
     }
 
-    function render() {
+    /**
+     * 16장 타일 보드는 마운트 시 딱 1회만 생성하여
+     * 스와이프 중 DOM 파괴 현상과 이미지 깜빡임을 원천 차단합니다.
+     */
+    function mountBoardDOM() {
       if (state.cleanedUp) return;
       stageEl.innerHTML = buildFlipBattleMarkup(hero, state);
       bindBoardEvents();
+      syncUI();
+    }
+
+    /**
+     * 타일 뒤집기·타이머·세력 게이지·무지개 볼 상태는 인플레이스(In-Place)로만 갱신합니다.
+     */
+    function syncUI() {
+      if (state.cleanedUp) return;
+      var counts = countOwners(state.tiles);
+      var playerPct = Math.round((counts.playerCount / TOTAL_TILES) * 100);
+      var rivalPct = 100 - playerPct;
+
+      var hudMyNumEl = queryRole('hud-my-count-num');
+      if (hudMyNumEl) {
+        hudMyNumEl.textContent = String(counts.playerCount);
+      }
+
+      var hudTimerNumEl = queryRole('hud-timer-num');
+      if (hudTimerNumEl) {
+        hudTimerNumEl.textContent = String(state.timeLeft);
+      }
+
+      var timerEl = queryRole('timer-pill');
+      if (timerEl) {
+        timerEl.textContent = '⏱️ 남은 시간 ' + state.timeLeft + '초';
+      }
+
+      var bannerEl = queryRole('banner-text');
+      if (bannerEl) {
+        bannerEl.textContent = state.bannerText;
+      }
+
+      var scoreEl = queryRole('score-pill');
+      if (scoreEl) {
+        scoreEl.textContent = '점수 ' + state.score + '점';
+      }
+
+      var myCountEl = queryRole('my-count-label');
+      if (myCountEl) {
+        myCountEl.textContent = hero.typeEmoji + ' 내 포켓몬 ' + counts.playerCount + '장';
+      }
+
+      var rivalCountEl = queryRole('rival-count-label');
+      if (rivalCountEl) {
+        rivalCountEl.textContent = '😼 로켓단 ' + counts.rivalCount + '장';
+      }
+
+      var fillPlayerEl = queryRole('tug-fill-player');
+      if (fillPlayerEl && fillPlayerEl.style) {
+        fillPlayerEl.style.width = playerPct + '%';
+        fillPlayerEl.style.background = hero.typeColor;
+      }
+
+      var fillRivalEl = queryRole('tug-fill-rival');
+      if (fillRivalEl && fillRivalEl.style) {
+        fillRivalEl.style.width = rivalPct + '%';
+      }
+
+      if (cachedTileEls.length !== state.tiles.length) {
+        collectTileElements();
+      }
+
+      for (var i = 0; i < state.tiles.length; i++) {
+        var tile = state.tiles[i];
+        var tileEl = cachedTileEls[i];
+        if (!tileEl) continue;
+
+        var isPlayer = tile.owner === 'player';
+        var cls = 'poke-flipbattle-tile ' + (isPlayer ? 'is-player' : 'is-rival');
+        if (tile.hasRainbow) cls += ' has-rainbow';
+        if (tile.burstFlash) cls += ' is-burst-flash is-bursting';
+        if (tile.tiltedFlip) cls += ' is-tilted-flip';
+
+        tileEl.className = cls;
+        if (typeof tileEl.setAttribute === 'function') {
+          tileEl.setAttribute('data-owner', tile.owner);
+          tileEl.setAttribute('data-rainbow', tile.hasRainbow ? 'true' : 'false');
+          tileEl.setAttribute('aria-label', isPlayer ? hero.nameKr + ' 카드' : '로켓단 나옹 카드');
+        }
+
+        var badgeEl = cachedBadgeEls[i];
+        if (!badgeEl && typeof tileEl.querySelector === 'function') {
+          badgeEl = tileEl.querySelector('[data-role="rainbow-badge"]');
+          cachedBadgeEls[i] = badgeEl;
+        }
+        if (badgeEl && badgeEl.style) {
+          badgeEl.style.display = tile.hasRainbow ? '' : 'none';
+        }
+      }
     }
 
     /**
@@ -347,12 +514,13 @@
 
       safeHelpers.playCry();
       safeHelpers.playSfx('win');
-      render();
+      syncUI();
 
       addTimeout(function () {
         for (var k = 0; k < state.tiles.length; k++) {
           state.tiles[k].burstFlash = false;
         }
+        syncUI();
       }, 450);
 
       var counts = countOwners(state.tiles);
@@ -406,6 +574,9 @@
         };
       }
 
+      for (var t = 0; t < state.tiles.length; t++) {
+        state.tiles[t].tiltedFlip = (t === idx);
+      }
       tile.owner = 'player';
       state.combo += 1;
 
@@ -421,7 +592,7 @@
         state.bannerText = '✨ 얍! ' + hero.nameKr + ' 카드로 뒤집었어요! (+' + earned + '점!)';
       }
 
-      render();
+      syncUI();
       var counts = countOwners(state.tiles);
       return {
         flipped: true,
@@ -463,7 +634,7 @@
       tile.owner = 'rival';
       state.combo = 0;
       state.bannerText = '😼 로켓단 나옹이 카드를 뒤집으려 해요! 얼른 다시 뒤집자!';
-      render();
+      syncUI();
 
       var counts = countOwners(state.tiles);
       return {
@@ -491,7 +662,7 @@
       state.rainbowIndex = idx;
       state.bannerText = '🌟 무지개 몬스터볼 등장! 터치하면 십자(+)로 한꺼번에 변신해요!';
       safeHelpers.playSfx('collect', 4);
-      render();
+      syncUI();
       return idx;
     }
 
@@ -504,7 +675,7 @@
       if (state.timeLeft <= 5 && state.timeLeft > 0) {
         safeHelpers.playSfx('tick');
       }
-      render();
+      syncUI();
       if (state.timeLeft <= 0) {
         finishGame();
       }
@@ -539,7 +710,7 @@
         : '😊 아깝다! 그래도 정말 빨랐어요! (+50점 격려 보너스)';
 
       state.bannerText = resultMessage;
-      render();
+      syncUI();
 
       var prevBest = safeHelpers.getHighScore('flipbattle');
       safeHelpers.saveHighScore('flipbattle', state.score);
@@ -568,8 +739,8 @@
       };
     }
 
-    // 초기 렌더링 및 주기 타이머 가동
-    render();
+    // 초기 1회 보드 DOM 마운트 및 주기 타이머 가동
+    mountBoardDOM();
     addInterval(stepSecond, 1000);
     addInterval(function () { rivalFlip(); }, RIVAL_INTERVAL_MS);
     addInterval(function () { spawnRainbowBall(); }, RAINBOW_SPAWN_MS);

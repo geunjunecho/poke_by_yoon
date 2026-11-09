@@ -1,0 +1,1559 @@
+{
+  "seasons": [
+    {
+      "id": 1,
+      "name": "캐치! 티니핑",
+      "nameEn": "Catch! Teenieping",
+      "theme": "큐브",
+      "themeEn": "Emotion",
+      "year": 2020,
+      "color": "#FF69B4"
+    },
+    {
+      "id": 2,
+      "name": "반짝반짝 캐치! 티니핑",
+      "nameEn": "Twinkle Catch! Teenieping",
+      "theme": "보석",
+      "themeEn": "Jewel",
+      "year": 2021,
+      "color": "#9B59B6"
+    },
+    {
+      "id": 3,
+      "name": "알쏭달쏭 캐치! 티니핑",
+      "nameEn": "Secret Catch! Teenieping",
+      "theme": "열쇠",
+      "themeEn": "Key",
+      "year": 2022,
+      "color": "#3498DB"
+    },
+    {
+      "id": 4,
+      "name": "새콤달콤 캐치! 티니핑",
+      "nameEn": "Dessert Catch! Teenieping",
+      "theme": "디저트",
+      "themeEn": "Dessert",
+      "year": 2023,
+      "color": "#E74C3C"
+    },
+    {
+      "id": 5,
+      "name": "슈팅스타 캐치! 티니핑",
+      "nameEn": "Star Catch! Teenieping",
+      "theme": "스타",
+      "themeEn": "Star",
+      "year": 2024,
+      "color": "#F1C40F"
+    },
+    {
+      "id": 6,
+      "name": "프린세스 캐치! 티니핑",
+      "nameEn": "Princess Catch! Teenieping",
+      "theme": "프린세스",
+      "themeEn": "Princess",
+      "year": 2025,
+      "color": "#E91E63"
+    },
+    {
+      "id": 7,
+      "name": "쥬얼스타 캐치! 티니핑",
+      "nameEn": "Jewelstar Catch! Teenieping",
+      "theme": "쥬얼스타",
+      "themeEn": "Jewelstar",
+      "year": 2026,
+      "color": "#00BCD4"
+    }
+  ],
+  "tinipings": [
+    {
+      "name": "하츄핑",
+      "nameEn": "Heartsping",
+      "grade": "로열",
+      "emotion": "사랑",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/JNFG7ZDLqAgHRQO-fgGX8tWuB0sVNHpFFmltnb690_I0R4B6MdzkWcuUO4PdAoJ3trizG7u7dWjxNaTu0CI6og.webp",
+      "description": "사랑의 감정을 가진 로열 티니핑."
+    },
+    {
+      "name": "바로핑",
+      "nameEn": "Dadaping",
+      "grade": "로열",
+      "emotion": "정의",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/etpV9E_TB58IgNeHhZPzBBJeDL4eUhVK-E0p0NW9ZmOAUidPVu_t960-hmdLNc-8dmT58ccwpYilf7UjRSUdcQ.webp",
+      "description": "올바름의 감정을 가진 로열 티니핑."
+    },
+    {
+      "name": "아자핑",
+      "nameEn": "Gogoping",
+      "grade": "로열",
+      "emotion": "용기",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/xa9AQqJkpupMyglCkuEc7cFRknSvTlRY2q_PMxHXF-LEphXjh-JuVtFJZn824uyjLKRc3A_lj1qro0jul4Ol5A.webp",
+      "description": "용기의 감정을 가진 로열 티니핑."
+    },
+    {
+      "name": "차차핑",
+      "nameEn": "Chachaping",
+      "grade": "로열",
+      "emotion": "선행",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/A2p7Knse0sx3Ao9g3kH25wYsra1bEeofsSSvnbaSghzqjd_OakBoNIEB7RAfpfc3s0Q_kwGewbjvF1hKjJGnlQ.webp",
+      "description": "희망의 감정을 가진 로열 티니핑."
+    },
+    {
+      "name": "라라핑",
+      "nameEn": "Lalaping",
+      "grade": "로열",
+      "emotion": "기쁨",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/L0mi1RtJt7PmseKUiC_RCTE4enecZ6tsFG8LXdaSSOvofu8ONghQ1EtSUq8eAsPRLBsRLdLD3pJVJhU6h0s5VQ.webp",
+      "description": "즐거움의 감정을 가진 로열 티니핑."
+    },
+    {
+      "name": "해핑",
+      "nameEn": "Happying",
+      "grade": "로열",
+      "emotion": "행복",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/9FrV8-zxMiTdRyHoYGwIYmI9SjdsW8XGVuU5W-8kWOXN2zY-xQ6opEKL0to-xmlYgm5egJbY2wvXMVErvGWhQg.webp",
+      "description": "행복의 감정을 가진 로열 티니핑."
+    },
+    {
+      "name": "키키핑",
+      "nameEn": "Kikiping",
+      "grade": "일반",
+      "emotion": "웃음",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/lboKKbGdozuTuJfAj4YpUVGlGLXa7VdHazSEv2zBZbiTRIWuz4z5KaL8d5KbT1BgOo4bngkNRKNIn7vfMONzvA.webp",
+      "description": "장난치기를 좋아하는 티니핑."
+    },
+    {
+      "name": "투투핑",
+      "nameEn": "Tutuping",
+      "grade": "일반",
+      "emotion": "울음",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/bowkELFMgih_NKHrsWdPqbHPye2V5WNYmGaZjZ0P_MQarwLgZwM4c9vhr6m0rT-DOx6JgXBaKryxuERwb1X3SA.webp",
+      "description": "질투가 많은 티니핑."
+    },
+    {
+      "name": "앙대핑",
+      "nameEn": "Egoping",
+      "grade": "빌런",
+      "emotion": "이기심",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/8cZrRw61X8Lc6Ksw0YhvQJlHaiKP4heSGowKca05njFKT7DIGuwC2ZaZHKgb8i09wW6DsrE4g7iZ_ybu3PPPMA.webp",
+      "description": "무엇이든 반대하는 티니핑."
+    },
+    {
+      "name": "그림핑",
+      "nameEn": "Artping",
+      "grade": "일반",
+      "emotion": "상상",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/dr3HtKOmrDRdYZobwZZvWFNTlS97iTIyFzIRdHyO0uVaFiec74-lA1XqF8CBxSqOq1T0meYeV5GjmI3rs_mxNg.webp",
+      "description": "그림 그리기를 좋아하는 티니핑."
+    },
+    {
+      "name": "베베핑",
+      "nameEn": "Bebeping",
+      "grade": "일반",
+      "emotion": "아기",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/iPShOLmZUn8yt8_r--67Gz1L54p8c2T3P2124YHedXp4OU4bpuQnnqdkt9NNxLigBd2H8TX25qgNWhe-CBMsRA.webp",
+      "description": "아기처럼 행동하는 티니핑."
+    },
+    {
+      "name": "멋져핑",
+      "nameEn": "Charmping",
+      "grade": "일반",
+      "emotion": "멋짐",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/FBMbHWvp8z47P9a3WZmYCKxoOH6yMJhWpyfZtolA276eYo_VU6TUCSwfHwM3uYjiKemVL8kaaSq_Wu2Qm88sTHoeFA7LK3fkNgOhIRthbUCmb-Q8ry56UnqULZ9_1p-ynQ7YN6kyJGJ-ZLXCh8knFA.webp",
+      "description": "스스로 멋지다고 생각하는 티니핑."
+    },
+    {
+      "name": "부투핑",
+      "nameEn": "Dareping",
+      "grade": "일반",
+      "emotion": "용감",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/IAi4sTsygbJ-4bFePdhcHetIqKkt-S0eRwqKhZzQ7K8HXG0qjDdMmNzEV00XTa4hVj0Q_NEDFTRB16aor_fPaGh6HkOFjGFjSIMDqyCMqjVp7P1B7Qnp4rVfm-syGlhUGGr52zmIYPbIRprZJuwMaw.webp",
+      "description": "도전적이고 용감한 티니핑."
+    },
+    {
+      "name": "꽁꽁핑",
+      "nameEn": "Freezeping",
+      "grade": "일반",
+      "emotion": "냉정",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/WPVQpz_fbbXkQDWUE5DIMxpXRxeohSif9MxoMzJTFEDElDRP9Trzr0Plm45RHx-EAyc1_dW4T5qItXGbX1urNY_d0J7QqVXqbx6otF6rx8qht7K34XPvqorXTl6CxDnkDTd73qMsAMS6phWU0qUPbA.webp",
+      "description": "힘이 넘치는 활기찬 티니핑."
+    },
+    {
+      "name": "깜찍핑",
+      "nameEn": "Giggleping",
+      "grade": "일반",
+      "emotion": "깜찍",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/Pi6iFyVlOk-sbHj4QrfF8c8gyfoa_y5x8qA2a66E5dIi76XR6LnEaGRHUx5H5tFYugxeb6D-agRmiEEEMXRcppAXphqBasln9KuUmH3bSLyF87TpnVmPoHdzfrEZHlaptuEnJ2GrVLQnlTfvYjs7tA.webp",
+      "description": "깜찍하게 웃는 티니핑."
+    },
+    {
+      "name": "노라핑",
+      "nameEn": "Noraping",
+      "grade": "일반",
+      "emotion": "노래",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/s47PfrPSp3N4Y6t_NmFG3LFPL6tDFX-FaVw17j380s5j0nWa6COB4oe2UVOz_ABcutwdE4qBH_oDftEZdGmiog.webp",
+      "description": "노는 것을 좋아하는 티니핑."
+    },
+    {
+      "name": "노리핑",
+      "nameEn": "Noriping",
+      "grade": "일반",
+      "emotion": "놀이",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/s47PfrPSp3N4Y6t_NmFG3LFPL6tDFX-FaVw17j380s5j0nWa6COB4oe2UVOz_ABcutwdE4qBH_oDftEZdGmiog.webp",
+      "description": "노라핑과 함께 노는 티니핑."
+    },
+    {
+      "name": "무셔핑",
+      "nameEn": "Spookping",
+      "grade": "일반",
+      "emotion": "공포",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/sj_HVzBX6LcuKmcNbFQBv0m2sKwexNV6kznkz7QHvuwN8Le6p2oAQ6QZADoZBfJo7lvcDpGrUtX4jR8W2cCm284_cecVFECevqhF-raXgkQU-cwrbRL-5keKugAhULnQgJAR3i1hML9pLqDqyNnTMw.webp",
+      "description": "시간에 민감한 티니핑."
+    },
+    {
+      "name": "부끄핑",
+      "nameEn": "Shyping",
+      "grade": "일반",
+      "emotion": "수줍음",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/HtECxaolQtzHBCUjnYrRPsD3A6ImC0YWaRoKTt0Vz4tV20B5HJIFgvWhvybrlpe9I65UKJj1OcVB6aZNVwjihA.webp",
+      "description": "부끄러움이 많은 티니핑."
+    },
+    {
+      "name": "아휴핑",
+      "nameEn": "Sighping",
+      "grade": "일반",
+      "emotion": "한숨",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/txZdh3GGK2KhBtXYofoWJ47LRm86jKV7m1LcW8UCItovT_gKnuKjAXHD0TVLkC5w9z6WIP7KdFGv5KWXmQ1jL54Rpnw7JtlrHmjDS_S4A7z2i9OZR7Mdnlkn7KMrCVE8lKojVF3k0Bta5wi4J5rqKg.webp",
+      "description": "위로해주기를 좋아하는 티니핑."
+    },
+    {
+      "name": "코자핑",
+      "nameEn": "Sleeping",
+      "grade": "일반",
+      "emotion": "졸림",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/ad6c9W0DNyeiMyA6n9v6kvHIWoBYwJqVOPtQpo5wLHXS00tEIHIqfSJCo9fOy6JEYj6nOwixtI_68musq-tBFA.webp",
+      "description": "잠을 많이 자는 티니핑."
+    },
+    {
+      "name": "패션핑",
+      "nameEn": "Wannabeping",
+      "grade": "일반",
+      "emotion": "패션",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/2B5IbS_8HOXoM-r5XbMeH-8jBcbQPJ4fumk_m2AfXGQSseKGPaA8PMOavQgTsN7vGHrkWjFVTA215urgjMEpgQ.webp",
+      "description": "패션에 관심이 많은 티니핑."
+    },
+    {
+      "name": "주르핑",
+      "nameEn": "Weeping",
+      "grade": "일반",
+      "emotion": "눈물",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/DtfNZjL59eEmlgv6oSZbTY99Zme3otjnbk79quGKXsbWpo1x-GBsyGxN90ME8c1VEYtTSyQFXh-SUqqmSWTnPw.webp",
+      "description": "자주 우는 슬픈 티니핑."
+    },
+    {
+      "name": "바네핑",
+      "nameEn": "Luvping",
+      "grade": "일반",
+      "emotion": "반함",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/V0kOnM29Le2jgHqJ1Nhuu9K6ffbG2EBTYUf7Oa5xun92C0kWXT2iETSa4LmaTG7fM7pLR9LCP92b_FFHRh6asGmN3AOex7mB-Bmfj3Ve2gWfc91SlXZ6psnhic_qmqux37lJwfzUXQwjXDNm_14ANA.webp",
+      "description": "심장을 쿵쾅거리게 하는 티니핑."
+    },
+    {
+      "name": "똑똑핑",
+      "nameEn": "Curieping",
+      "grade": "일반",
+      "emotion": "지식",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/--2QJZQM7oXYuQm7BEzLTmBJIJrg3HpYw_lIwFTtNP5OvAvcic4wQkkA71DOgCyrgrly_Q3o3I0xTrb_Fk26yA.webp",
+      "description": "똑똑한 티니핑."
+    },
+    {
+      "name": "차캐핑",
+      "nameEn": "Goodping",
+      "grade": "일반",
+      "emotion": "착함",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/EhyFTkFToqp-UZ3XEbgCOXaKfbh1bu5A5GFrryL4tMl133ZdvLal7Mc4QSZd_IIVn_zfFeORpy1zoKr3y2o9mw.webp",
+      "description": "착한 마음씨를 가진 티니핑."
+    },
+    {
+      "name": "악동핑",
+      "nameEn": "Badping",
+      "grade": "빌런",
+      "emotion": "장난",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/FLGw1FaHWF7u8siAxgDYdFD9j5pCYqLpKN0osGbMVjYm8xu4sR-pScNuMtd5q-HmW0P2uwulKHtncPTdyQW5pw.webp",
+      "description": "장난을 넘어선 악동 티니핑."
+    },
+    {
+      "name": "덜덜핑",
+      "nameEn": "Roarping",
+      "grade": "일반",
+      "emotion": "떨림",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/IRcNb1oMB4jYIj5NUY0liiMCsvTMaTZGJvMSKJ3RolMmnPXLtKsLBN6p5Vz9xME65g_UY1BIz4GKUy3bPfmFzw.webp",
+      "description": "겁이 많은 티니핑."
+    },
+    {
+      "name": "따라핑",
+      "nameEn": "Followping",
+      "grade": "일반",
+      "emotion": "따라함",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/cz3eFLLlIXFn5ao5BkfMQQ34P_n-DSnEnKWFUul1PqiAAIcOexngPvbGwZlqaUxiRTOtXZHDIfMfqTtEfTCJ-A.webp",
+      "description": "따라함의 감정을 가진 티니핑"
+    },
+    {
+      "name": "토이핑",
+      "nameEn": "Toyping",
+      "grade": "일반",
+      "emotion": "장난감",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/3avwab7kHfofnGdyBP8eGdH8nMzzs_RjorTj_-FkrQAZq7GnL3EkUzxka4Tc9p7sAOYPK44WLGCojlUaq74PaQ.webp",
+      "description": "장난감의 감정을 가진 티니핑"
+    },
+    {
+      "name": "나르핑",
+      "nameEn": "Flyping",
+      "grade": "일반",
+      "emotion": "날기",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/nYj6nS92VqL43yhbFyZmDaROePeVbBrnf2MPYT6X5ob5HahGRmW1PTkmWZVyST_Plx_tsu3GjDK9TLy4_rUOcg.webp",
+      "description": "날기의 감정을 가진 티니핑"
+    },
+    {
+      "name": "씽씽핑",
+      "nameEn": "Zoomping",
+      "grade": "일반",
+      "emotion": "빠름",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/zJpkmVYVfE5X1KzSm01KiXBZuNO9JP9siB_TPdOcyucTl8b1fon9GE0iSB2_CC4kqX920nF6A_fu94mYWsk4Yg.webp",
+      "description": "빠름의 감정을 가진 티니핑"
+    },
+    {
+      "name": "무거핑",
+      "nameEn": "Heavyping",
+      "grade": "일반",
+      "emotion": "무거움",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/USPMl_QHBpoQ-hGicpx4OlxTvgCPuhKbO58tOKVU7D9LfjtxlC7DJi6bj2Dc1T2kiZWhYDyddCm1j0vyXD9XMQ.webp",
+      "description": "무거움의 감정을 가진 티니핑"
+    },
+    {
+      "name": "떠벌핑",
+      "nameEn": "Blabping",
+      "grade": "일반",
+      "emotion": "수다",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/3yQL6md2CdGLEwAxQivCTSm-x7cRbEIjlmJGxQyhJ6PGYtj5eayjjLvCwONxFuy-dHErVl2_nBULSKz09kyfuA.webp",
+      "description": "수다의 감정을 가진 티니핑"
+    },
+    {
+      "name": "다조핑",
+      "nameEn": "Touchping",
+      "grade": "일반",
+      "emotion": "만짐",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/qMVJWFOmNDoLtj6yCKt7Yxjwu1WPiPrVuxkUb3-k0rt4mzQeeWYzMHQFuxf3dd7Qi0dhHthXiWLxbJ89KvgU2Q.webp",
+      "description": "만짐의 감정을 가진 티니핑"
+    },
+    {
+      "name": "화나핑",
+      "nameEn": "Angryping",
+      "grade": "빌런",
+      "emotion": "분노",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/QoGhO5_2O5PTnyzkIM_tp6rfeHT-yvwY-W_6cRYyDpZ49Zz4cJ25yq-r3NWWSIqwdPRq0uai7iYOYB-NfEktUw.webp",
+      "description": "분노의 감정을 가진 티니핑"
+    },
+    {
+      "name": "시러핑",
+      "nameEn": "Hateping",
+      "grade": "빌런",
+      "emotion": "싫음",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/VggZFfNSpeIdhqYYGy3a9WGO3hyuEqQRnHEh9JsjuBrJOU2GHM0np-8I0yr1LOH3fuFpX4OHBoUkaBSE73GdNQ.webp",
+      "description": "싫음의 감정을 가진 티니핑"
+    },
+    {
+      "name": "꺼꿀핑",
+      "nameEn": "Frogping",
+      "grade": "일반",
+      "emotion": "개구리",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/P4ScL2hodD7zQ0ecVqLkxFukCVlhx2W7gE-qVyvZ7BJG4MF7sywdLWsU1oOxHjPsq0A3FaFu7PFz5LjCxNGGIQ.webp",
+      "description": "개구리의 감정을 가진 티니핑"
+    },
+    {
+      "name": "찌릿핑",
+      "nameEn": "Zappping",
+      "grade": "일반",
+      "emotion": "전기",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/BzhnDRkOjekymEfPZiVpU2-tdptq0jdNN-Q_ZUXlHOHEvPdKhYZ803OY3LfEgDSmGjqPSO_gqxMiqEpjiAgA0g.webp",
+      "description": "반짝반짝 빛나는 티니핑."
+    },
+    {
+      "name": "홀로핑",
+      "nameEn": "Loneping",
+      "grade": "일반",
+      "emotion": "외로움",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/5l1kKntDXRnIEZNEWJ6Se0qH0l_Tk1bvRQVfkDQCqrFQ5wtsftWvYeerojCEKM6q0alZ5SDXN8fSbCoTXnIAig.webp",
+      "description": "외로움의 감정을 가진 티니핑"
+    },
+    {
+      "name": "플라핑",
+      "nameEn": "Flowerping",
+      "grade": "일반",
+      "emotion": "꽃",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/53GYP2U6xANTNvOLEKmIYtYK1c219_7dSqnzdCZsf8tJgiqz6pDylgPhAS0J8KtdCgOnL3qstXsWjzhkyxVNMw.webp",
+      "description": "꽃의 감정을 가진 티니핑"
+    },
+    {
+      "name": "아잉핑",
+      "nameEn": "Cuteping",
+      "grade": "일반",
+      "emotion": "귀여움",
+      "gender": "여",
+      "mainSeason": 1,
+      "image": "",
+      "description": "귀여움의 감정을 가진 티니핑"
+    },
+    {
+      "name": "또까핑",
+      "nameEn": "Againping",
+      "grade": "일반",
+      "emotion": "반복",
+      "gender": "남",
+      "mainSeason": 1,
+      "image": "https://i.namu.wiki/i/PXRPuNz00VEarn6A9BPBEsJiIl6nc1KFi88d04z2hKC9ykslhVQSOVpLQ5z_ztTk__zTE6uHGNZmptHzeCNNbg.webp",
+      "description": "무엇이든 다시 하려는 티니핑."
+    },
+    {
+      "name": "방글핑",
+      "nameEn": "Teeheeping",
+      "grade": "로열",
+      "emotion": "미소",
+      "gender": "여",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/D-PHUqy3xTq33TmtjsLKmRVsWEFmUpQLoXe2_Xb_w_eZIwRcOw5q6VFRAtarf3ZcxIesyYODqUCCe8IY1pgP4Q.webp",
+      "description": "웃음의 보석 티니핑."
+    },
+    {
+      "name": "믿어핑",
+      "nameEn": "Trustping",
+      "grade": "로열",
+      "emotion": "믿음",
+      "gender": "여",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/uuQs41RFWGW_fFOBWDL74VV1hGaflcmOtyLLpTfRahLTpwV1I7Z0oB3NYpp4nZm4YHVE_Zw3LbJD6jW11AUxjg.webp",
+      "description": "믿음의 보석 티니핑."
+    },
+    {
+      "name": "조아핑",
+      "nameEn": "Joahping",
+      "grade": "로열",
+      "emotion": "좋아함",
+      "gender": "여",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/PB7bTpGBzccaSqa6gzQQVY-iHVGhZQXtxDcZ_saeUNe4OCQxTs-OqjDGcEessoKY3EJ9cPlnfSl3EHLOfyJFVQ.webp",
+      "description": "친절함의 보석 티니핑."
+    },
+    {
+      "name": "다해핑",
+      "nameEn": "Justiceping",
+      "grade": "빌런",
+      "emotion": "정의",
+      "gender": "여",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/uBm4NZQkbIELgynaFIlqL_b4lqjXevx5Go8_yl82jWLdHqUuQoaERVLsg46jU69kTYOiOSxqr2M3z_T8U7nfjA.webp",
+      "description": "정의로운 열쇠 티니핑."
+    },
+    {
+      "name": "까르핑",
+      "nameEn": "Laughping",
+      "grade": "일반",
+      "emotion": "웃음",
+      "gender": "남",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/5Q_hJsDJ0bAbZ5-cqCIxr6cZXtXwGHWqcV942IBOfLZVmNf0ppNaak1mB4t3LV46jUAC84DBUgOMlpxgOuS_YQ.webp",
+      "description": "웃음의 감정을 가진 티니핑"
+    },
+    {
+      "name": "소원핑",
+      "nameEn": "Wishping",
+      "grade": "일반",
+      "emotion": "소원",
+      "gender": "여",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/hsi0CFKAGJtBuSYQxfYL3nLF1zP7EIVzA69qvg1_vBbTMm4PrnUXSqn1vN6-JHyQZvc2LBW5D2HeSGLrRs38RQ.webp",
+      "description": "소원의 감정을 가진 티니핑"
+    },
+    {
+      "name": "토닥핑",
+      "nameEn": "Comfortping",
+      "grade": "일반",
+      "emotion": "위로",
+      "gender": "여",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/bowkELFMgih_NKHrsWdPqbHPye2V5WNYmGaZjZ0P_MQarwLgZwM4c9vhr6m0rT-DOx6JgXBaKryxuERwb1X3SA.webp",
+      "description": "보석 티니핑 버전의 투투핑."
+    },
+    {
+      "name": "쪼꼼핑",
+      "nameEn": "Miniping",
+      "grade": "일반",
+      "emotion": "작음",
+      "gender": "남",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/QJs5IHpVb8gwSgZw9Tyzn1czqSW43Fo8Nn1et1GeoN25OD1A5Qpf4hl8CwEFLnrohJlo0mMdOSzEf_RlmQNrfA.webp",
+      "description": "크기를 작게 만드는 티니핑."
+    },
+    {
+      "name": "맛나핑",
+      "nameEn": "Yummyping",
+      "grade": "일반",
+      "emotion": "맛있음",
+      "gender": "여",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/sT0l1XHJ69fUbKkTMM2J-aYIabx5_OrLUIEBSGy-IEoUVNWz-jivoEQ7jk8E8Pr-4IA1IsGBsP0VXWSYPk3fLf3BuZ8LeKQRVrO2eVZn12WxRa2y7n7vLUaJSZXLWA8VdOjrdGG9W45IMVimHxiFRg.webp",
+      "description": "요리를 잘하는 티니핑."
+    },
+    {
+      "name": "포근핑",
+      "nameEn": "Cozyping",
+      "grade": "일반",
+      "emotion": "포근함",
+      "gender": "여",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/QLeP8jqRCJSTdnFuTJS87W-Jl96Knvl47vgRuLxZslKWdxmzFXB8M0GEnfp4K5KPLg7FaJjCcOFq1TRq06aF2w.webp",
+      "description": "포근함의 감정을 가진 티니핑"
+    },
+    {
+      "name": "메모핑",
+      "nameEn": "Memoping",
+      "grade": "일반",
+      "emotion": "기록",
+      "gender": "남",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/h19U8Z7t5OHp2lSnPl0-mnDsZuW9tKoiNBbsgi96lm8597VhC5DqZIjOUToeFbjm3OyoIrwoDqH2l0qYM-HmwA.webp",
+      "description": "기록의 감정을 가진 티니핑"
+    },
+    {
+      "name": "공쥬핑",
+      "nameEn": "Princessping",
+      "grade": "일반",
+      "emotion": "공주",
+      "gender": "여",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/IcmVcq4jz1eYiRdbajdUib5zT51xf-yrWCMGfGcVyL0hKqDREywmlbBYKimKmYbtK5mqxpBXa3u3MPvpKoM6xA.webp",
+      "description": "공주처럼 행동하는 티니핑."
+    },
+    {
+      "name": "짝짝핑",
+      "nameEn": "Clappping",
+      "grade": "일반",
+      "emotion": "박수",
+      "gender": "남",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/8KR6U246fnh9QbLqQcRp9Rl0yvpmx3uPDZq5zObm4-ZPYAU72H6hL6b2tOei5xZtByHsoBZiXYBf6DBnHmZs1Q.webp",
+      "description": "박수의 감정을 가진 티니핑"
+    },
+    {
+      "name": "주네핑",
+      "nameEn": "Juneping",
+      "grade": "일반",
+      "emotion": "주문",
+      "gender": "여",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/8Xsf_RKROahjjwD-oSsASuWtPbE9cCdSLE6c-nPWjRZwseIGX8rp4UpZWtvphwdsrxwnmXUsEnV-L0KellsKEg.webp",
+      "description": "주문의 감정을 가진 티니핑"
+    },
+    {
+      "name": "뚝딱핑",
+      "nameEn": "Buildping",
+      "grade": "일반",
+      "emotion": "만들기",
+      "gender": "남",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/wAIFixv-q2J5k3JRotpKyyMUzyjDFu3iz3AojvwtcPqOxSDX7RBZDEzMWlUdjuN5rWfRpJ_7-1CbSUdL-YUIEg.webp",
+      "description": "만들기의 감정을 가진 티니핑"
+    },
+    {
+      "name": "발레핑",
+      "nameEn": "Balletping",
+      "grade": "일반",
+      "emotion": "춤",
+      "gender": "여",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/MwB1MckoYuOGGa0CNtd1PIWAyvY6ITrMyd2SzlQpc05lhXJAHIHOgF12dslrARMfX_oRtqL_u9To_J_tzzmvaA.webp",
+      "description": "발레를 좋아하는 티니핑."
+    },
+    {
+      "name": "원더핑",
+      "nameEn": "Wonderping",
+      "grade": "일반",
+      "emotion": "궁금",
+      "gender": "남",
+      "mainSeason": 2,
+      "image": "https://i.namu.wiki/i/dlVW9XbGtwLsZXEcV6emt1R3c3-8ePhfqeqmHncFv6WlNwaLT6G3R3qSZ4nyNw1cvtVJaflVcWgBhBgNqNZ7jQ.webp",
+      "description": "궁금의 감정을 가진 티니핑"
+    },
+    {
+      "name": "꾸래핑",
+      "nameEn": "Cheerupping",
+      "grade": "로열",
+      "emotion": "응원",
+      "gender": "여",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/qpJhYg_mQ9nCnqPNaUq1Uu3Ka8UT-cw_v_5ec3TcrYQPueJXTnGXKCQOS708Y-GV4LrJTPYl-Pu-n-CvJrkmVA.webp",
+      "description": "배려의 열쇠 티니핑."
+    },
+    {
+      "name": "나나핑",
+      "nameEn": "Nanaping",
+      "grade": "로열",
+      "emotion": "나눔",
+      "gender": "여",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/0BF52KNKpKr6V9p2q2YBiQflT6mTGjAUFnV2Fq9GfrBgAESysyzF9YwH6g987GbE8jhb35JQxw9ERDX9pwO0hw.webp",
+      "description": "열정의 열쇠 티니핑."
+    },
+    {
+      "name": "솔찌핑",
+      "nameEn": "Okeydokeyping",
+      "grade": "로열",
+      "emotion": "솔직",
+      "gender": "여",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/7h_8BDgg6_20Wi10P6KqqywT69bO0ZvKd_1QbCjpEkN41l76mtDQRtLd_7xXTHVcrEcyWPzFQHsoHn-4nIRFdA.webp",
+      "description": "솔직함의 열쇠 티니핑."
+    },
+    {
+      "name": "깡총핑",
+      "nameEn": "Hop-ping",
+      "grade": "일반",
+      "emotion": "깡총",
+      "gender": "여",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/LRdYs3oEkNnSlmHK8XMBAfbmRp0svFVBGsCiHvgZtdLRPeJCvSXgIM6oZo1j-J9kiYLFurvXu1hQ-pdgmtB6Ow.webp",
+      "description": "깡총깡총 뛰어다니는 티니핑."
+    },
+    {
+      "name": "삐뽀핑",
+      "nameEn": "Nurseping",
+      "grade": "일반",
+      "emotion": "치료",
+      "gender": "여",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/YiCmJbh7OcpompJAi-AnpffF64c-DpSMD3FYlD3AaH8rYm1hmaY4gwcijBuSyHx4RMX0RPRGqXouu1O5Y2HTSg.webp",
+      "description": "치료를 돕는 간호사 티니핑."
+    },
+    {
+      "name": "간호핑",
+      "nameEn": "Nurseping2",
+      "grade": "일반",
+      "emotion": "간호",
+      "gender": "여",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/4m5fKp7g3EwN3-S3bXhMQYJ6taXH8P4vJIVo18pIuhXbKgQRko76r6hKHkxGSY1T29xsO7z4Tekgpi1EfKQ_BA.webp",
+      "description": "간호를 담당하는 티니핑."
+    },
+    {
+      "name": "띠용핑",
+      "nameEn": "Sillyping",
+      "grade": "빌런",
+      "emotion": "엉뚱",
+      "gender": "남",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/cvly8uwSgsTI7X77_sC8W4sSxxKEAZO71BLqiaLpuunEYUDR01g2gelJ6Fwo4zPaKUKm_k34ED-CwRnPqhP1kQ.webp",
+      "description": "항상 엉뚱한 짓을 하는 티니핑."
+    },
+    {
+      "name": "공쥬핑",
+      "nameEn": "Princessping",
+      "grade": "일반",
+      "emotion": "공주",
+      "gender": "여",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/IcmVcq4jz1eYiRdbajdUib5zT51xf-yrWCMGfGcVyL0hKqDREywmlbBYKimKmYbtK5mqxpBXa3u3MPvpKoM6xA.webp",
+      "description": "공주처럼 행동하는 티니핑."
+    },
+    {
+      "name": "다해핑",
+      "nameEn": "Justiceping",
+      "grade": "빌런",
+      "emotion": "정의",
+      "gender": "여",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/uBm4NZQkbIELgynaFIlqL_b4lqjXevx5Go8_yl82jWLdHqUuQoaERVLsg46jU69kTYOiOSxqr2M3z_T8U7nfjA.webp",
+      "description": "정의로운 열쇠 티니핑."
+    },
+    {
+      "name": "꾸며핑",
+      "nameEn": "Decoping",
+      "grade": "일반",
+      "emotion": "꾸밈",
+      "gender": "여",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/Sx_6M2qZx1fzXqWrcnDCWzxyWiTgyDck80Ch9-0LHChCG0RFrkENd4QeAX4wsy7t5v38Ws9OedKQgr5HUqc6nw.webp",
+      "description": "꾸미기를 좋아하는 티니핑."
+    },
+    {
+      "name": "모야핑",
+      "nameEn": "Curiousping",
+      "grade": "일반",
+      "emotion": "호기심",
+      "gender": "남",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/8QRJ-BZ0kqPGiArpwHQByEPAnT2fvtuM_qiePbnYoUP4sAWkpCrzURpeGT1XX8bFur3pxXkauqW4mTnH1p7jzA.webp",
+      "description": "호기심이 많은 티니핑."
+    },
+    {
+      "name": "아라핑",
+      "nameEn": "Wizping",
+      "grade": "빌런",
+      "emotion": "마왕",
+      "gender": "남",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/h3ekIv-LvcfVS8v7c2tNDeZa6GrVDcKMW0Dud2CyyCkWT4DPfs6Bx4s6zkI-dogPfEhF63XsLPmHAKCibnTVFw.webp",
+      "description": "어둠의 마법을 쓰는 마왕 티니핑."
+    },
+    {
+      "name": "행운핑",
+      "nameEn": "Luckyping",
+      "grade": "일반",
+      "emotion": "행운",
+      "gender": "여",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/TInz_4Gzc5FEIjJvxEQlchnB62ha51O72i2_8VdgtgTS4oSriu1bcBcudvdONByMBvHnvoSRdMWAnupgeLerJw.webp",
+      "description": "행운의 감정을 가진 티니핑"
+    },
+    {
+      "name": "빨리핑",
+      "nameEn": "Quickping",
+      "grade": "일반",
+      "emotion": "빠름",
+      "gender": "남",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/NCwNZrEsofLP83zkO5vXr89lqjGJlvkdrVlpEi8OCjCEGZ-EmYm4NYPDJHmEvsNc-N_1FK4v32Bqr8kwoyV5Dw.webp",
+      "description": "빠름의 감정을 가진 티니핑"
+    },
+    {
+      "name": "얌얌핑",
+      "nameEn": "Yamyamping",
+      "grade": "일반",
+      "emotion": "먹보",
+      "gender": "남",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/rdv8pjyeZUfR22rvpTR-bi0AH1n-yKhD5AvIiyib8F1-HnmQtUG_o02WcoAJnezTa4OFe9MGjHBCX0bMh4FbKw.webp",
+      "description": "먹보의 감정을 가진 티니핑"
+    },
+    {
+      "name": "뜨거핑",
+      "nameEn": "Hotping",
+      "grade": "빌런",
+      "emotion": "열정",
+      "gender": "남",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/BcuQEsEf7XjpdQ47D56aDcrC6y1HeaeYjqNGI2UYQXzkrTrwB679RkCm7koVUUK8KkfojRg9SUEeCvD7mqM67w.webp",
+      "description": "뜨거운 열정의 열쇠 티니핑."
+    },
+    {
+      "name": "힘내핑",
+      "nameEn": "Cheerping",
+      "grade": "일반",
+      "emotion": "힘냄",
+      "gender": "남",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/jmzyQN3qnOrfi3Zl0yazSUoVXs-LRdjMtTB7gm6VGLnR67rmFBCtfC8vzVTHm1Hk-D4aQNb0C696VSdF0fevEw.webp",
+      "description": "힘냄의 감정을 가진 티니핑"
+    },
+    {
+      "name": "고쳐핑",
+      "nameEn": "Fixping",
+      "grade": "일반",
+      "emotion": "수리",
+      "gender": "남",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/myEm1Bxl5Ya53TrkeveM-TlYzhkVq3JYApJrvVSLc9v7ZkztLmQbPhGKkM5pQXU0oL_9p_g1BX6Qe-39zc10Gg.webp",
+      "description": "수리의 감정을 가진 티니핑"
+    },
+    {
+      "name": "꼼딱핑",
+      "nameEn": "Stuckping",
+      "grade": "일반",
+      "emotion": "꼼짝",
+      "gender": "남",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/tSgLf3BmvNJkjDJVp-6msoZok0NDYyu8o52k___lYfLZYgUdWqHq58KTmQNs4smdn4iGgpvdHiE8Q1p_rqiz0Q.webp",
+      "description": "꼼짝의 감정을 가진 티니핑"
+    },
+    {
+      "name": "퐁당핑",
+      "nameEn": "Plungeping",
+      "grade": "일반",
+      "emotion": "물놀이",
+      "gender": "여",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/xaAa9oRrPagDbtQI9rxg6tcyeSNkaVfqmPyRGG30tlPQCZcK5kZffNo63KI9cJBmzL_sZVo_64Z4VaHzzxYFpA.webp",
+      "description": "물에 빠지는 것을 좋아하는 티니핑."
+    },
+    {
+      "name": "파티핑",
+      "nameEn": "Partyping",
+      "grade": "일반",
+      "emotion": "파티",
+      "gender": "여",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/LpMINgleQo-AUWN62A8I9XkkYDM_KBWqq5K5iVYrH6k7WM_lTTdWRPTNGSJMzrn0UyUJn6GnpY4RFIU-mWP8ww.webp",
+      "description": "파티를 좋아하는 열쇠 티니핑."
+    },
+    {
+      "name": "삐짐핑",
+      "nameEn": "Sulkping",
+      "grade": "일반",
+      "emotion": "삐짐",
+      "gender": "여",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/8FL2CoN6V7veoX1VYVk_3uKznDafMjTMUsRET9wccIHlvx95A4aysr8o7QZAcpnfTb_nJt3hkq56aEAn7Z3Mcw.webp",
+      "description": "삐짐의 감정을 가진 티니핑"
+    },
+    {
+      "name": "빙글핑",
+      "nameEn": "Spinping",
+      "grade": "일반",
+      "emotion": "회전",
+      "gender": "남",
+      "mainSeason": 3,
+      "image": "https://i.namu.wiki/i/Iy93Z-JhEljtYEMOp8EzZUtVVGpWcwQeyZvvgeS5iGmZBmiNPMNgv1Zg7kyncpEoH-tOz8nGslELOvFTY9GPhQ.webp",
+      "description": "빙글빙글 도는 티니핑."
+    },
+    {
+      "name": "말랑핑",
+      "nameEn": "Jellyping",
+      "grade": "로열",
+      "emotion": "말랑",
+      "gender": "여",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/vHs-r9CvNxfXBxSPcvvt1DpOLRlMOTtabmqUOWa9EKnw9hYCWjEau9XC33emgBNnqJUYQBgaLGB-UE6bMXGmqQ.webp",
+      "description": "쫄깃한 젤리 티니핑."
+    },
+    {
+      "name": "멜로핑",
+      "nameEn": "Mallowping",
+      "grade": "로열",
+      "emotion": "멜로",
+      "gender": "여",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/zaFX9KuysLnjKbvvdT7nFG_MIPvF3mp1fBWqqfH0rJ9pmXn5tSpc_6z5M-4IzJQ6MBX7iHr-1YJ-nw35MCJC2Q.webp",
+      "description": "말랑함의 디저트 티니핑."
+    },
+    {
+      "name": "샤샤핑",
+      "nameEn": "Shashaping",
+      "grade": "로열",
+      "emotion": "샤샤",
+      "gender": "여",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/UmgKzeTmtdG7siAcAk4eDL5ROo3dpaw_XJAa6W5TYCno7UlJLDA0PE59vgvdE78Fh8Pw0sSlarTUFAjWXoomaA.webp",
+      "description": "시원함의 디저트 티니핑."
+    },
+    {
+      "name": "새콤핑",
+      "nameEn": "Tangyping",
+      "grade": "일반",
+      "emotion": "새콤",
+      "gender": "여",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/DQvVZZXwJNQ1mCpjGZEIg1Ft2SeZjwaSIP_dbMkf74lx5CqkDLOt4IVCtlSrMfr223uvVH1hQcvcqtMigebWyA.webp",
+      "description": "따끔한 맛의 티니핑."
+    },
+    {
+      "name": "포실핑",
+      "nameEn": "Fluffyping",
+      "grade": "일반",
+      "emotion": "포실",
+      "gender": "여",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/HZ0JWBKiiSdcnm-r-6ck8IdY4t3PjqewaW3q-8hs-r4UNvn0-MrjJpX7uF_OD1d6tXefBMICBxBm1zrg3fzPUQ.webp",
+      "description": "포근함의 디저트 티니핑."
+    },
+    {
+      "name": "또너핑",
+      "nameEn": "Donutping",
+      "grade": "일반",
+      "emotion": "도넛",
+      "gender": "남",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/lDJxcnS7sV1Mm4DFMtKtAP0md6RXv1qBZJL_dgVcHxX77yu8frAX92I9O7r2AGcCayi2k-SH-JRXRoMYDDunmw.webp",
+      "description": "도넛을 좋아하는 티니핑."
+    },
+    {
+      "name": "달콤핑",
+      "nameEn": "Sweetping",
+      "grade": "일반",
+      "emotion": "달콤",
+      "gender": "여",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/1Xq-qqU9jC7JND2rCJsaogjsDb84me6e8q4luTnY1rMOmxLJYtXh0UuO54AaZOluNniYbyZTcOlpbzZNt7OOuQ.webp",
+      "description": "달콤한 디저트 티니핑."
+    },
+    {
+      "name": "롤리핑",
+      "nameEn": "Lolliping",
+      "grade": "일반",
+      "emotion": "롤리팝",
+      "gender": "여",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/NgEE1DaJbzFGoq77sfsLb6_27sh-zzsJF2x_4YlJKI3Ej3JS4Sy-Pu89iiW_naYGPSLaV7K9oxeBgN3JQglMLQ.webp",
+      "description": "롤리팝 캔디 티니핑."
+    },
+    {
+      "name": "커핑",
+      "nameEn": "Cupping",
+      "grade": "일반",
+      "emotion": "컵케이크",
+      "gender": "남",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/DqER6DG9AAPBiqaoZKinjIbU_NXJLDNMV8cnVH5dU-VyVbVWlhVyUQP2wiKEQEvFp1_0h9nUIL5-ekIKwCnO-A.webp",
+      "description": "컵 모양의 디저트 티니핑."
+    },
+    {
+      "name": "머핑",
+      "nameEn": "Muffping",
+      "grade": "일반",
+      "emotion": "머핀",
+      "gender": "남",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/DqER6DG9AAPBiqaoZKinjIbU_NXJLDNMV8cnVH5dU-VyVbVWlhVyUQP2wiKEQEvFp1_0h9nUIL5-ekIKwCnO-A.webp",
+      "description": "머핀 디저트 티니핑."
+    },
+    {
+      "name": "오로라핑",
+      "nameEn": "Auroraping",
+      "grade": "레전드",
+      "emotion": "오로라",
+      "gender": "여",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/3qHgLrB-WE7yh1s9XOEfkEhwfaFipJ6AkYjXGdS6fNh5p0NSDewwUKO402Vplw-9V8277ltelNX8FC7SgIoElQ.webp",
+      "description": "아름다운 오로라 티니핑."
+    },
+    {
+      "name": "캔디핑",
+      "nameEn": "Candyping",
+      "grade": "일반",
+      "emotion": "사탕",
+      "gender": "여",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/79srDcFv-_NdthAQamS10009EBArvp_MK0U4Hi3QFGvLv52UgpxLIW6LtULOwsMFmSJsG8rbcWxDF3ipo9O98Q.webp",
+      "description": "사탕처럼 달콤한 디저트 티니핑."
+    },
+    {
+      "name": "와플핑",
+      "nameEn": "Waffleping",
+      "grade": "일반",
+      "emotion": "와플",
+      "gender": "남",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/mf00f1hpbHuwAuJivSY7wN9nYQ10yBH4ia3IHQ3wqL9Q9cwQ7Rl_TjttimYrCz2BUuVxeaqxqvaB5Xkg1x9jFQ.webp",
+      "description": "와플 디저트 티니핑."
+    },
+    {
+      "name": "요거핑",
+      "nameEn": "Yogurtping",
+      "grade": "일반",
+      "emotion": "요거트",
+      "gender": "여",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/uxzgr9jn_6LTnqckDAJU9NuONlYDCEvaRuT75Mz4o1ABqaAGxMNYxVdXe6f3a54aJu3AW_vw5nudq7VLeAOgeg.webp",
+      "description": "요거트 디저트 티니핑."
+    },
+    {
+      "name": "마카핑",
+      "nameEn": "Macaping",
+      "grade": "일반",
+      "emotion": "마카롱",
+      "gender": "여",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/3nrziJshuiNIxmy1LoO63OmhrHOpQOsQltsKCzbhtic8T8jO8BgdzqVAPb8jWQkPiYXJBNjRmD6-lwoCxCR3_Q.webp",
+      "description": "마카롱 디저트 티니핑."
+    },
+    {
+      "name": "머랭핑",
+      "nameEn": "Meringueping",
+      "grade": "일반",
+      "emotion": "머랭",
+      "gender": "여",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/RyyTiuE8moE0MNKK-wHL6hoMNReDSXUpDszJ-liPKxd4NgkIbQWxuyjgBnNkXw6qVqnvkzyNroheXlZf38luuQ.webp",
+      "description": "머랭의 감정을 가진 티니핑"
+    },
+    {
+      "name": "푸딩핑",
+      "nameEn": "Puddingping",
+      "grade": "일반",
+      "emotion": "푸딩",
+      "gender": "남",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/NpfY75qvzYdrgHBK6pdgaprPO-e3BZKtgv-sjoOD4AxiAXWxrNSWQqqFslQYViDs8ZFzvPNaucpk7iayTUSLEA.webp",
+      "description": "푸딩의 감정을 가진 티니핑"
+    },
+    {
+      "name": "뿌뿌핑",
+      "nameEn": "Ppuppuping",
+      "grade": "일반",
+      "emotion": "뿌뿌",
+      "gender": "여",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/AZ4OX0Phtspz349rQ150KweMFpj3Y7Y7D6-p82s8vZikVeyldUJdjWT7hEZorRxhJED4zf4yo8y9nvQEO-x9Rw.webp",
+      "description": "뿌뿌의 감정을 가진 티니핑"
+    },
+    {
+      "name": "샌드핑",
+      "nameEn": "Sandping",
+      "grade": "일반",
+      "emotion": "샌드위치",
+      "gender": "남",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/22lVtluv4hZKJBw3Qn790bEUeI_Y-l1DwciNM4lXkoj1jFqX_F9RihLPPh30jIW8EJnK12iGMO_atfHMRbzzIg.webp",
+      "description": "샌드위치의 감정을 가진 티니핑"
+    },
+    {
+      "name": "핫케핑",
+      "nameEn": "Hotcakeping",
+      "grade": "일반",
+      "emotion": "핫케이크",
+      "gender": "여",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/eatYeFcHbDTAm9iNVyMzSAOMtd9O_0CtcoB7O1kdxbPVbh_85DUIi7BKesTm-v0UY02rXbNY53Vetxo89Cz03w.webp",
+      "description": "핫케이크의 감정을 가진 티니핑"
+    },
+    {
+      "name": "눈꽃핑",
+      "nameEn": "Snowflakeping",
+      "grade": "일반",
+      "emotion": "눈꽃",
+      "gender": "여",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/RLSzBX01apFQAUA13c5hLkWxTDUk2nVebAWQD1XziaLiF3PfMZJE1GPdaL1ndpGu9RRgY96vZMlUip6rcSOcJQ.webp",
+      "description": "눈꽃의 감정을 가진 티니핑"
+    },
+    {
+      "name": "쪼꼬핑",
+      "nameEn": "Chocoping",
+      "grade": "일반",
+      "emotion": "초코",
+      "gender": "남",
+      "mainSeason": 4,
+      "image": "https://i.namu.wiki/i/aCfip6kbMKftwReCjCYqfCxsl2yrvTr7A0meyPpazjWoWFFl8mgfjQzmAvwfGYJI1RkVlXTkM679os3fzaDkHg.webp",
+      "description": "초코의 감정을 가진 티니핑"
+    },
+    {
+      "name": "빤짝핑",
+      "nameEn": "Twinkleping",
+      "grade": "로열",
+      "emotion": "반짝",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/7SGJXyFS5kx1GvCE5jePEzP39gHDZ-JKuFTCkcwXurXJCvBBlZ4Aiu00NyhjFw0en9-LWDIh43Jxxk7v9egVGw.webp",
+      "description": "반짝이는 스타 티니핑."
+    },
+    {
+      "name": "뽀뽀핑",
+      "nameEn": "Kissyping",
+      "grade": "로열",
+      "emotion": "뽀뽀",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/Ab0uhOovVONd7_2kNApjpiQpBF2nOs5OhlF1tkpycJ-OzIGozCJTowUUqZjGa--9xbDE2bHZ2uFHyo248dcbRQ.webp",
+      "description": "애교가 많은 티니핑."
+    },
+    {
+      "name": "스노우핑",
+      "nameEn": "Snowping",
+      "grade": "일반",
+      "emotion": "눈",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/zzMMLkkzvjDRnB29uxUBm1FXXmWZ7nbMZI0ZwkGZSZaRL5ETjqYfSaz2dnFX778EpJ8gmedyD84xfR4-sG8roA.webp",
+      "description": "눈송이처럼 맑은 티니핑."
+    },
+    {
+      "name": "나그네핑",
+      "nameEn": "Wanderping",
+      "grade": "일반",
+      "emotion": "방랑",
+      "gender": "남",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/px7Pq-wfobCNHSrY3jq1bP5JJ3lCFdwJR2sNNB00DF7qXBZNtaXv9AparIJ4JC5FHL2QutU0Q3BG6wxP88_Ilw.webp",
+      "description": "떠돌아다니기를 좋아하는 티니핑."
+    },
+    {
+      "name": "왕자핑",
+      "nameEn": "Princeping",
+      "grade": "일반",
+      "emotion": "왕자",
+      "gender": "남",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/mqyi_l8dYGlCRci_uustmOniu_2356eE5u8omxFiNoqkWpUul8_Er_2DhA8iAZC-Zz64e4qJ0-Oc3mRpTK8_aw.webp",
+      "description": "왕자병에 걸린 보석 티니핑."
+    },
+    {
+      "name": "초롱핑",
+      "nameEn": "Lanternping",
+      "grade": "일반",
+      "emotion": "초롱",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/M_500QXukareLzRqi1bh4894HvO1IufVcGT3ZQuPhfnu80r4JMIRas8IgYj9Adi8_1xglPHOn_8DrE-2uVZhWA.webp",
+      "description": "초롱의 감정을 가진 티니핑"
+    },
+    {
+      "name": "여우핑",
+      "nameEn": "Foxping",
+      "grade": "일반",
+      "emotion": "여우",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/yhDoCAnN0zjmUUvr8RdDTIV45f9zfQcBjVCFc-xOAIYtTDzXoXpgssiznJTFPtHl6Aa8BmGEYhFy54EJwRuU-w.webp",
+      "description": "여우의 감정을 가진 티니핑"
+    },
+    {
+      "name": "아롱핑",
+      "nameEn": "Colorping",
+      "grade": "일반",
+      "emotion": "아롱",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/2Y10z6eGX4JG4gTr53HO02rdWnCWEr332S2hHFyK70JftD5XwmFO3qVxveT7EM5Kswb-2-ievycxJbmMLNW9Ug.webp",
+      "description": "아롱의 감정을 가진 티니핑"
+    },
+    {
+      "name": "댄스핑",
+      "nameEn": "Danceping",
+      "grade": "일반",
+      "emotion": "댄스",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/-RR4ZH7PekkQV4tRzkUTllMz1_9uDemtOxk0sre52JkeOnZkuScX2rNSKhLFajWevbt5KLkMVY8OO1P3RU6YgQ.webp",
+      "description": "댄스의 감정을 가진 티니핑"
+    },
+    {
+      "name": "딩동핑",
+      "nameEn": "Dingdongping",
+      "grade": "일반",
+      "emotion": "딩동",
+      "gender": "남",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/WT1Iot5-nzU1fkFeiv8Bsq4WV_x6lIGST7FEK2SHytlwAJGFIgVC1UMRDRZTlVzeWQo6ILhGIWAMywSiHR-w8A.webp",
+      "description": "딩동의 감정을 가진 티니핑"
+    },
+    {
+      "name": "뿌쵸핑",
+      "nameEn": "Ppuchoping",
+      "grade": "일반",
+      "emotion": "뿌쵸",
+      "gender": "남",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/KK1SAWU1JQmH1We33Tc6yU7erZ7K_6KFwPicebYUF4Q-hci8oavr9OJ9HgcNVnR99exmqH_JYbpZqlBKmDXTQg.webp",
+      "description": "뿌쵸의 감정을 가진 티니핑"
+    },
+    {
+      "name": "루루핑",
+      "nameEn": "Luluping",
+      "grade": "일반",
+      "emotion": "루루",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/9pAmhL8jKrQ1a1korLUgCAVywxF_E2KaEkJL01BfI80z1eTqxopQ6mYokAymFekyq747VWh3PFXL8phHra_D5w.webp",
+      "description": "루루의 감정을 가진 티니핑"
+    },
+    {
+      "name": "몰래핑",
+      "nameEn": "Secretping",
+      "grade": "일반",
+      "emotion": "몰래",
+      "gender": "남",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/sTXKL7h9ohDP3wKAUgEHLOZe7Mq9tr2fWWWmzwx4IQBBEGmxpsNvH_49BfphCm6uEbdH1m89TTYe7fsgwmg86Q.webp",
+      "description": "몰래의 감정을 가진 티니핑"
+    },
+    {
+      "name": "빛나핑",
+      "nameEn": "Shineping",
+      "grade": "일반",
+      "emotion": "빛남",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/680FULqoB5dp5hI5ZA5tjEYxidpPkWoSBL-AMVM7GNl5lepnhMxuaxShy0Xm5bD8D5CAEpvNonHb1Nl0ToGBqg.webp",
+      "description": "빛남의 감정을 가진 티니핑"
+    },
+    {
+      "name": "깡총핑",
+      "nameEn": "Hop-ping2",
+      "grade": "일반",
+      "emotion": "깡총",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/LRdYs3oEkNnSlmHK8XMBAfbmRp0svFVBGsCiHvgZtdLRPeJCvSXgIM6oZo1j-J9kiYLFurvXu1hQ-pdgmtB6Ow.webp",
+      "description": "깡총깡총 뛰어다니는 티니핑."
+    },
+    {
+      "name": "훌라핑",
+      "nameEn": "Hulaping",
+      "grade": "일반",
+      "emotion": "훌라",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/pfaRu6BdUFmtHivTecK2FqSndxLoSO35aIheDZqxBqy0h3fNGn9Bmbt5xnN5HyNOWHcpbD5g99RN319KTg3KgA.webp",
+      "description": "훌라의 감정을 가진 티니핑"
+    },
+    {
+      "name": "나눔핑",
+      "nameEn": "Shareping",
+      "grade": "일반",
+      "emotion": "나눔",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/PGqq92KU6uMnDgw3AKF46eoZMMmeZ7QuNAALICL8PPQp7yxOEf3zDEZci7Y5dt36c0yfh00luvEh8E1uGC1XtA.webp",
+      "description": "나눔의 감정을 가진 티니핑"
+    },
+    {
+      "name": "오로라핑",
+      "nameEn": "Auroraping2",
+      "grade": "레전드",
+      "emotion": "오로라",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/3qHgLrB-WE7yh1s9XOEfkEhwfaFipJ6AkYjXGdS6fNh5p0NSDewwUKO402Vplw-9V8277ltelNX8FC7SgIoElQ.webp",
+      "description": "아름다운 오로라 티니핑."
+    },
+    {
+      "name": "고고핑",
+      "nameEn": "Gogoping",
+      "grade": "일반",
+      "emotion": "고고",
+      "gender": "남",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/r4io1uazLl8X8C5k-hXeJBOwO5-8RUfERKVjDRdfepUR5dvpKcfXrWKMRmn_JjnqvS9x-HHRnnLCJIVmUWJjmQ.webp",
+      "description": "고고의 감정을 가진 티니핑"
+    },
+    {
+      "name": "고마핑",
+      "nameEn": "Thankping",
+      "grade": "일반",
+      "emotion": "감사",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/KYj4-dlaQXx087sG8RA07UCNK5lLsdpDx3yUOURomIuQaiY7YIcwRfDVSHqbYBMFO9thJcEXWYi2Q_jdXY-eMA.webp",
+      "description": "감사의 감정을 가진 티니핑"
+    },
+    {
+      "name": "다롱핑",
+      "nameEn": "Darongping",
+      "grade": "일반",
+      "emotion": "다롱",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/2Y10z6eGX4JG4gTr53HO02rdWnCWEr332S2hHFyK70JftD5XwmFO3qVxveT7EM5Kswb-2-ievycxJbmMLNW9Ug.webp",
+      "description": "다롱의 감정을 가진 티니핑"
+    },
+    {
+      "name": "뽀송핑",
+      "nameEn": "Freshping",
+      "grade": "일반",
+      "emotion": "뽀송",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/GrXO-mhicUo46MxDi6xY617tc9_gfmQWrAAzysfQ54iTJZnmefGIgMkiR48ai6iVUbvhvJPr1eT44NPdj7FihA.webp",
+      "description": "뽀송의 감정을 가진 티니핑"
+    },
+    {
+      "name": "유리핑",
+      "nameEn": "Glassping",
+      "grade": "일반",
+      "emotion": "유리",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/BFLYbYNkSUHp6QnOhUDdBIjbSrWwVOAO6JIxk6aFEkdDNvr0Q7URP3IkL7ngHcqJjgTosDvYj8lalRx1GFyJtw.webp",
+      "description": "유리의 감정을 가진 티니핑"
+    },
+    {
+      "name": "함께핑",
+      "nameEn": "Togetherping",
+      "grade": "일반",
+      "emotion": "함께",
+      "gender": "여",
+      "mainSeason": 5,
+      "image": "https://i.namu.wiki/i/Zdumh1iwKH2_APIjcUVqcmgngUSOSqIe-aIh7eOdVac9R-0Q1Ux_ooM2TF0ocVv7lcFXqTiOzne8RkxBvJbWJQ.webp",
+      "description": "함께의 감정을 가진 티니핑"
+    },
+    {
+      "name": "다이아나핑",
+      "nameEn": "Dianaping",
+      "grade": "레전드",
+      "emotion": "빛",
+      "gender": "여",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/0dBy5uDllIzU2xSkH3jAkLZpGABi3ROv3BX0y3bweJ9Lm7RGRsNfotGgQRtplC5MRp1VVCyl_Kh8dHKkrcdBlg.webp",
+      "description": "빛나는 다이아몬드 프린세스 티니핑."
+    },
+    {
+      "name": "이클립스핑",
+      "nameEn": "Eclipseping",
+      "grade": "빌런",
+      "emotion": "어둠",
+      "gender": "여",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/MSltdo-pHSBhaciS0hLo0qqbaUudPXNCU4NUrUiBOBPqK4QgB-W8qhbEoMhqg1p2miFt6hmU99Usf17cwdHH-A.webp",
+      "description": "어둠을 가져오는 프린세스 티니핑."
+    },
+    {
+      "name": "큐핑",
+      "nameEn": "Cuping",
+      "grade": "일반",
+      "emotion": "큐트",
+      "gender": "여",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/FsReY3p3s_5PnOpdTQaFM3kIWEAjwc8c01DdcjyhKd6KEIFXN73nuiWcReU1VEO23Sz1Zjai9TKJ2BLiSmYOTw.webp",
+      "description": "신호를 보내는 티니핑."
+    },
+    {
+      "name": "스노우핑",
+      "nameEn": "Snowping2",
+      "grade": "일반",
+      "emotion": "눈",
+      "gender": "여",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/zzMMLkkzvjDRnB29uxUBm1FXXmWZ7nbMZI0ZwkGZSZaRL5ETjqYfSaz2dnFX778EpJ8gmedyD84xfR4-sG8roA.webp",
+      "description": "눈송이처럼 맑은 티니핑."
+    },
+    {
+      "name": "아름핑",
+      "nameEn": "Beautyping",
+      "grade": "일반",
+      "emotion": "아름",
+      "gender": "여",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/1jgD8gTCcq1HIHVeWEFfUoJyf5D_XybZnrYXnqif6-x-LVnO7eZpVPLdciB-Z_ceIEr0C_VHoTgFcxXLP2YX3g.webp",
+      "description": "아름의 감정을 가진 티니핑"
+    },
+    {
+      "name": "코러스핑",
+      "nameEn": "Chorusping",
+      "grade": "일반",
+      "emotion": "합창",
+      "gender": "여",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/l8vVURZkb_gS6WwiGE2sa0jgqzpuvZ9XfN6V2BMC-FE0Rh4sUCeJ9Bq_40LL3Uq81AJ-k1m8mHH9Y7KfNdcyUw.webp",
+      "description": "합창의 감정을 가진 티니핑"
+    },
+    {
+      "name": "쿨쿨핑",
+      "nameEn": "Sleepyping",
+      "grade": "일반",
+      "emotion": "잠",
+      "gender": "남",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/DrRif4yEY23b3KLeu1QJOjlOWqdRchwVEAtGIP_-FhVJXLZAzFARZcPtHv4w8d-4SxO_TxHTVXTBvxew55O7_g.webp",
+      "description": "잠의 감정을 가진 티니핑"
+    },
+    {
+      "name": "슈슈핑",
+      "nameEn": "Shushuping",
+      "grade": "일반",
+      "emotion": "슈슈",
+      "gender": "여",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/fPri6y9l6x0zP_p1dz5A38tWd4UzpHTRQIBqFHL7B1_xqPv6igEmVFK6jjfNuu8i7OO4GFC2hkRDao_cmfYXQA.webp",
+      "description": "슈슈의 감정을 가진 티니핑"
+    },
+    {
+      "name": "차밍핑",
+      "nameEn": "Charmingping",
+      "grade": "일반",
+      "emotion": "매력",
+      "gender": "남",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/3ebkUfL3OU62vpSI6SujKZsV2o87Ot4I63eP0xKy6_dexigF0PUYsSyhr5oarIqayVAV_BjaQWeyXoqAVrO1XA.webp",
+      "description": "매력의 감정을 가진 티니핑"
+    },
+    {
+      "name": "뽀득핑",
+      "nameEn": "Squeakyping",
+      "grade": "일반",
+      "emotion": "뽀득",
+      "gender": "여",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/ISI7FNs-FWVys-e8SKCXTivGDRVNNZ_Z5g-uInBt7El-A4RKGWHJVsWmy3jw85C21da-uTZV6YIaku-Ogw9g2Q.webp",
+      "description": "뽀득의 감정을 가진 티니핑"
+    },
+    {
+      "name": "나비핑",
+      "nameEn": "Butterflyping",
+      "grade": "일반",
+      "emotion": "나비",
+      "gender": "여",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/4bPtxC5Z5xk9ho7lEvwqyFcQSfyNLoc7VFJq5O60LvzDS-IomkjxxTRC9cKp7kPigV7PhkPg8vieONRIqf4vkg.webp",
+      "description": "나비의 감정을 가진 티니핑"
+    },
+    {
+      "name": "사뿐핑",
+      "nameEn": "Lightping",
+      "grade": "일반",
+      "emotion": "가벼움",
+      "gender": "여",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/rz8SQTzks3hRbkbJZSI7o5mHkg-Wry7dZRBo9eu7mJ1gYp-62YyeZddswLgXyzi87ePriR4M_NoHBCMF191Nng.webp",
+      "description": "가벼움의 감정을 가진 티니핑"
+    },
+    {
+      "name": "뽀니핑",
+      "nameEn": "Ponyping",
+      "grade": "일반",
+      "emotion": "뽀니",
+      "gender": "여",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/uf4IDz-JPhKPy_V-y2rbnrfdfVbp0i-4cxHDqRQ8TEXhKhIin86Ky0M1ZkgsKdEGSImm_HaQ6n5RWAfSq8l85A.webp",
+      "description": "뽀니의 감정을 가진 티니핑"
+    },
+    {
+      "name": "실크핑",
+      "nameEn": "Silkping",
+      "grade": "일반",
+      "emotion": "실크",
+      "gender": "여",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/ffM1jl676MDR0ti3VehpNs-kWWoKwhpTJDBV8fsuflAhsULPsoNieDjBjxvJ4WoiG3ThX1TiEtD-CEq-Aq8DZA.webp",
+      "description": "실크의 감정을 가진 티니핑"
+    },
+    {
+      "name": "샤를핑",
+      "nameEn": "Charleping",
+      "grade": "일반",
+      "emotion": "샤를",
+      "gender": "남",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/yWoHeoPVXhOM7rp93U4Ysq7ITshm1CnjiP5CNtgYJeHDQ-S3sIJqi6uQ8XtrL84rmiEzLz1hkGNpUtc1ukcBlg.webp",
+      "description": "샤를의 감정을 가진 티니핑"
+    },
+    {
+      "name": "트롯핑",
+      "nameEn": "Trotping",
+      "grade": "일반",
+      "emotion": "트로트",
+      "gender": "남",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/l8vVURZkb_gS6WwiGE2sa0jgqzpuvZ9XfN6V2BMC-FE0Rh4sUCeJ9Bq_40LL3Uq81AJ-k1m8mHH9Y7KfNdcyUw.webp",
+      "description": "트로트의 감정을 가진 티니핑"
+    },
+    {
+      "name": "이슬핑",
+      "nameEn": "Dewping",
+      "grade": "일반",
+      "emotion": "이슬",
+      "gender": "여",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/iS74qSVGu0UznMFXZitf2AjdWTGTF-mulKd0Mf7prEvBlQExY56Uv6w9V0UhxMsz1YYi0fGZ8wD8ZWT512zEYQ.webp",
+      "description": "이슬의 감정을 가진 티니핑"
+    },
+    {
+      "name": "롱롱핑",
+      "nameEn": "Longping",
+      "grade": "일반",
+      "emotion": "롱롱",
+      "gender": "여",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/60VuwSGx-sfi1cDXzAvZHdt4_mFIXhNdGx3Ec64j-doAG123rHolCb19rDoBsS5Y5xDWxXDpGP54au5p1Mk1GA.webp",
+      "description": "롱롱의 감정을 가진 티니핑"
+    },
+    {
+      "name": "야옹핑",
+      "nameEn": "Meowping",
+      "grade": "일반",
+      "emotion": "고양이",
+      "gender": "여",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/tceyyuUvmel9RnL2DdIP0tME7_YwDWwJ1OufTBsiEJtbVcHYSGUcpTcGjwDKIPkjadjGbBARgd8j9sv6not0cg.webp",
+      "description": "고양이의 감정을 가진 티니핑"
+    },
+    {
+      "name": "트러핑",
+      "nameEn": "Truffleping",
+      "grade": "일반",
+      "emotion": "트러플",
+      "gender": "남",
+      "mainSeason": 6,
+      "image": "https://i.namu.wiki/i/JLFJOUJ9READF3DtX5rg1udBklBMdiSZ0K8MTuMv5rtjMBLdhHRMe1fgZnicFs4ItDCBYWyuwzshdVfSC3Ge8A.webp",
+      "description": "고급스러운 향의 티니핑."
+    }
+  ]
+}

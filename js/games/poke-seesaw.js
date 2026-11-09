@@ -168,105 +168,164 @@
 
   function buildSeesawMarkup(myPoke, initialQ) {
     var opp = initialQ.rightPokemon;
+    var compareInitText = initialQ.mode === 'height' ? '📏 키 비교 VS' : '⚖️ 무게 비교 VS';
     return (
       '<style>' +
         '.poke-seesaw-root {' +
-          'position: relative; width: 100%; height: 100%; min-height: 360px;' +
+          'position: relative; width: 100%; max-width: 900px; height: 100%; min-height: 360px;' +
+          'margin: 0 auto;' +
           'display: flex; flex-direction: column; justify-content: space-between;' +
-          'background: linear-gradient(180deg, #E1F5FE 0%, #B3E5FC 55%, #AED581 56%, #7CB342 100%);' +
-          'border-radius: 16px; overflow: hidden; padding: 12px; box-sizing: border-box;' +
+          'background: ' +
+            'radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0) 52%),' +
+            'linear-gradient(180deg, #bae6fd 0%, #e0f2fe 54%, #bef264 55%, #65a30d 100%);' +
+          'border-radius: 18px; overflow: hidden; padding: 18px 16px 12px; box-sizing: border-box;' +
           'font-family: "Noto Sans KR", "Outfit", sans-serif; user-select: none; color: #1A237E;' +
+          'box-shadow: 0 12px 32px rgba(0, 0, 0, 0.36), inset 0 2px 0 rgba(255,255,255,0.65);' +
+        '}' +
+        '.poke-seesaw-root::before, .seesaw-awning {' +
+          'position: absolute; top: 0; left: 0; right: 0; height: 12px; z-index: 4; pointer-events: none;' +
+          'background: repeating-linear-gradient(90deg, #ef4444 0px, #ef4444 24px, #ffffff 24px, #ffffff 48px, #3b82f6 48px, #3b82f6 72px, #ffffff 72px, #ffffff 96px);' +
+          'border-bottom: 3px solid #1e293b;' +
+          'box-shadow: 0 3px 8px rgba(0,0,0,0.22);' +
         '}' +
         '.seesaw-hud {' +
           'display: flex; align-items: center; justify-content: space-between; gap: 8px;' +
-          'background: rgba(255,255,255,0.92); border-radius: 14px; padding: 7px 12px;' +
-          'box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 3;' +
+          'background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(241,245,249,0.94) 100%);' +
+          'border: 3px solid #cbd5e1; border-radius: 16px; padding: 7px 14px;' +
+          'box-shadow: 0 5px 0 rgba(15, 23, 42, 0.14), 0 8px 14px rgba(0,0,0,0.12); z-index: 3;' +
         '}' +
         '.seesaw-round-badge {' +
-          'background: #E1F5FE; color: #0277BD; border: 2px solid #29B6F6;' +
-          'border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 900;' +
+          'background: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 100%); color: #0369a1; border: 2.5px solid #0284c7;' +
+          'border-radius: 999px; padding: 4px 14px; font-size: 13px; font-weight: 900;' +
         '}' +
         '.seesaw-score-group { display: flex; align-items: center; gap: 8px; }' +
         '.seesaw-streak-badge {' +
-          'background: #FFF8E1; color: #F57F17; border-radius: 999px;' +
-          'padding: 4px 10px; font-size: 12px; font-weight: 900;' +
+          'background: linear-gradient(180deg, #fef9c3 0%, #fde047 100%); color: #b45309; border: 2px solid #f59e0b; border-radius: 999px;' +
+          'padding: 4px 12px; font-size: 12px; font-weight: 900;' +
         '}' +
         '.seesaw-score-pill {' +
-          'background: #0277BD; color: #FFFFFF; border-radius: 999px;' +
-          'padding: 5px 12px; font-size: 14px; font-weight: 900;' +
+          'background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%); color: #FFFFFF; border-radius: 999px;' +
+          'border: 2.5px solid #7dd3fc; padding: 5px 14px; font-size: 16px; font-weight: 900;' +
+          'box-shadow: 0 3px 0 #0c4a6e;' +
         '}' +
         '.seesaw-question-banner {' +
-          'margin-top: 6px; background: #FFFDE7; border: 3px solid #FFCA28;' +
-          'border-radius: 16px; padding: 8px 14px; text-align: center;' +
-          'font-size: 20px; font-weight: 900; color: #E65100;' +
-          'box-shadow: 0 4px 12px rgba(0,0,0,0.12); z-index: 3;' +
+          'margin-top: 6px; background: linear-gradient(180deg, #fefce8 0%, #fef08a 100%); border: 3.5px solid #f59e0b;' +
+          'border-radius: 18px; padding: 8px 16px; text-align: center;' +
+          'font-size: 20px; font-weight: 900; color: #b45309;' +
+          'box-shadow: 0 5px 0 #d97706, 0 8px 16px rgba(0,0,0,0.14); z-index: 3;' +
         '}' +
         '.seesaw-stage-area {' +
           'position: relative; flex: 1; display: flex; flex-direction: column;' +
-          'align-items: center; justify-content: center; min-height: 150px; z-index: 2;' +
+          'align-items: center; justify-content: center; min-height: 176px; z-index: 2;' +
+        '}' +
+        '.seesaw-compare-badge {' +
+          'margin-bottom: 10px; padding: 5px 18px; border-radius: 999px;' +
+          'background: rgba(255, 255, 255, 0.95); border: 3px solid #0284c7;' +
+          'color: #01579B; font-size: 14px; font-weight: 900;' +
+          'box-shadow: 0 4px 10px rgba(0,0,0,0.14); transition: transform 0.2s, background 0.2s, border-color 0.2s;' +
+        '}' +
+        '.seesaw-compare-badge.is-revealed {' +
+          'background: #FFF8E1; border-color: #FFA000; color: #BF360C;' +
+          'transform: scale(1.06); box-shadow: 0 6px 14px rgba(255, 160, 0, 0.35);' +
         '}' +
         '.seesaw-assembly {' +
-          'position: relative; width: 92%; max-width: 420px; height: 120px;' +
+          'position: relative; width: 94%; max-width: 530px; height: 156px;' +
           'display: flex; flex-direction: column; align-items: center; justify-content: flex-end;' +
         '}' +
         '.seesaw-plank {' +
-          'position: relative; width: 100%; height: 16px;' +
-          'background: linear-gradient(90deg, #8D6E63 0%, #A1887F 50%, #8D6E63 100%);' +
-          'border: 3px solid #4E342E; border-radius: 10px;' +
+          'position: relative; width: 100%; height: 22px;' +
+          'background: linear-gradient(180deg, #fbbf24 0%, #d97706 28%, #92400e 82%, #78350f 100%);' +
+          'border: 3.5px solid #451a03; border-radius: 14px;' +
           'transform: rotate(0deg); transform-origin: center center;' +
           'transition: transform 0.45s cubic-bezier(0.22, 1.25, 0.36, 1);' +
           'display: flex; align-items: flex-end; justify-content: space-between;' +
-          'padding: 0 14px; box-sizing: border-box; z-index: 2;' +
+          'padding: 0 18px; box-sizing: border-box; z-index: 2;' +
+          'box-shadow: inset 0 3px 0 rgba(254, 243, 199, 0.72), 0 8px 16px rgba(0,0,0,0.28);' +
         '}' +
         '.seesaw-seat {' +
-          'position: relative; top: -12px; display: flex; flex-direction: column;' +
-          'align-items: center; width: 96px;' +
+          'position: relative; top: -8px; display: flex; flex-direction: column;' +
+          'align-items: center; justify-content: flex-end; width: 100px; height: 100px;' +
         '}' +
         '.seesaw-seat-sprite {' +
-          'width: 74px; height: 74px; object-fit: contain;' +
-          'filter: drop-shadow(0 5px 6px rgba(0,0,0,0.25));' +
-          'transition: transform 0.35s ease;' +
+          'width: 100px; height: 100px; object-fit: contain;' +
+          'filter: drop-shadow(0 8px 10px rgba(0,0,0,0.32));' +
+          'transition: transform 0.35s ease; z-index: 2;' +
+        '}' +
+        '.seesaw-seat-cushion {' +
+          'width: 92px; height: 14px; min-height: 14px; border-radius: 10px 10px 5px 5px;' +
+          'margin-top: -6px; border: 3px solid #1e293b;' +
+          'box-shadow: inset 0 3px 0 rgba(255,255,255,0.68), 0 3px 0 rgba(15,23,42,0.45); z-index: 1;' +
+        '}' +
+        '.seesaw-seat-left .seesaw-seat-cushion {' +
+          'background: linear-gradient(180deg, #38bdf8 0%, #0284c7 65%, #0369a1 100%);' +
+        '}' +
+        '.seesaw-seat-right .seesaw-seat-cushion {' +
+          'background: linear-gradient(180deg, #fb7185 0%, #e11d48 65%, #be123c 100%);' +
         '}' +
         '.seesaw-seat-sprite.is-bouncing-up {' +
           'animation: seesawLightBounce 0.55s ease-out;' +
         '}' +
         '@keyframes seesawLightBounce {' +
           '0% { transform: translateY(0) scale(1); }' +
-          '35% { transform: translateY(-32px) scale(1.12) rotate(-8deg); }' +
+          '35% { transform: translateY(-34px) scale(1.12) rotate(-8deg); }' +
           '70% { transform: translateY(-8px) scale(1.03) rotate(5deg); }' +
           '100% { transform: translateY(0) scale(1); }' +
         '}' +
         '.seesaw-fulcrum {' +
-          'width: 0; height: 0; border-left: 24px solid transparent;' +
-          'border-right: 24px solid transparent; border-bottom: 34px solid #5D4037;' +
-          'margin-top: -3px; z-index: 1;' +
+          'position: relative; width: 0; height: 0; border-left: 32px solid transparent;' +
+          'border-right: 32px solid transparent; border-bottom: 44px solid #b45309;' +
+          'margin-top: -4px; z-index: 3; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.32));' +
+        '}' +
+        '.seesaw-fulcrum::before {' +
+          'content: ""; position: absolute; top: 8px; left: -22px;' +
+          'width: 0; height: 0; border-left: 22px solid transparent;' +
+          'border-right: 22px solid transparent; border-bottom: 32px solid #f59e0b;' +
+        '}' +
+        '.seesaw-fulcrum-bolt {' +
+          'position: absolute; top: -6px; left: -11px; width: 22px; height: 22px; border-radius: 50%;' +
+          'background: radial-gradient(circle at 35% 35%, #fef08a 0%, #f59e0b 62%, #78350f 100%);' +
+          'border: 3px solid #451a03; box-sizing: border-box;' +
+          'box-shadow: 0 2px 6px rgba(0,0,0,0.4), inset 0 2px 2px rgba(255,255,255,0.8);' +
         '}' +
         '.seesaw-feedback-bar {' +
-          'min-height: 34px; margin: 4px 0; padding: 4px 12px; border-radius: 12px;' +
-          'background: rgba(255,255,255,0.94); font-size: 14px; font-weight: 900;' +
+          'min-height: 36px; margin: 4px 0; padding: 6px 14px; border-radius: 14px;' +
+          'background: rgba(255,255,255,0.96); border: 2px solid #bae6fd; font-size: 14px; font-weight: 900;' +
           'color: #1B5E20; text-align: center; display: flex; align-items: center;' +
-          'justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 3;' +
+          'justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.12); z-index: 3;' +
         '}' +
         '.seesaw-cards-row {' +
-          'display: grid; grid-template-columns: 1fr 1fr; gap: 10px; z-index: 3;' +
+          'display: grid; grid-template-columns: 1fr 1fr; gap: 14px; z-index: 3;' +
         '}' +
         '.seesaw-choice-card {' +
-          'background: #FFFFFF; border: 3px solid #29B6F6; border-radius: 16px;' +
-          'padding: 8px 10px; cursor: pointer; display: flex; flex-direction: column;' +
-          'align-items: center; justify-content: center; gap: 2px;' +
-          'box-shadow: 0 5px 0 #0288D1, 0 8px 14px rgba(0,0,0,0.15);' +
-          'transition: transform 0.1s ease, border-color 0.2s, background 0.2s;' +
+          'background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);' +
+          'border: 4px solid #0284c7; border-width: 4px; border-radius: 18px;' +
+          'padding: 10px 14px; cursor: pointer; display: flex; flex-direction: column;' +
+          'align-items: center; justify-content: center; gap: 3px;' +
+          'box-shadow: 0 7px 0 #0369a1, 0 12px 20px rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.9);' +
+          'transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s, background 0.2s, box-shadow 0.2s;' +
+          'touch-action: manipulation;' +
         '}' +
-        '.seesaw-choice-card:active { transform: translateY(3px); box-shadow: 0 2px 0 #0288D1; }' +
-        '.seesaw-choice-card.is-winner { background: #E8F5E9; border-color: #43A047; }' +
-        '.seesaw-card-tag { font-size: 11px; font-weight: 800; color: #0277BD; }' +
-        '.seesaw-card-name { font-size: 17px; font-weight: 900; color: #263238; }' +
+        '.seesaw-choice-card[data-side="right"] {' +
+          'background: linear-gradient(180deg, #ffffff 0%, #fff1f2 100%);' +
+          'border-color: #e11d48; box-shadow: 0 7px 0 #9f1239, 0 12px 20px rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.9);' +
+        '}' +
+        '.seesaw-choice-card:active { transform: translateY(4px); box-shadow: 0 3px 0 #0369a1; }' +
+        '.seesaw-choice-card[data-side="right"]:active { transform: translateY(4px); box-shadow: 0 3px 0 #9f1239; }' +
+        '.seesaw-choice-card.is-winner {' +
+          'background: linear-gradient(180deg, #fefce8 0%, #fef08a 100%);' +
+          'border-color: #f59e0b; transform: translateY(-4px) scale(1.04);' +
+          'box-shadow: 0 7px 0 #b45309, 0 0 24px rgba(250, 204, 21, 0.88), inset 0 2px 0 #ffffff;' +
+        '}' +
+        '.seesaw-card-tag { font-size: 12px; font-weight: 900; color: #0277BD; letter-spacing: -0.2px; }' +
+        '.seesaw-choice-card[data-side="right"] .seesaw-card-tag { color: #be123c; }' +
+        '.seesaw-card-name { font-size: 20px; font-weight: 900; color: #0f172a; letter-spacing: -0.4px; }' +
         '.seesaw-card-metric {' +
           'font-size: 16px; font-weight: 900; color: #D84315;' +
-          'background: #FFF3E0; border-radius: 999px; padding: 2px 10px; margin-top: 2px;' +
+          'background: #FFF3E0; border: 2px solid #ffcc80; border-radius: 999px; padding: 2px 14px; margin-top: 2px;' +
         '}' +
       '</style>' +
       '<div class="poke-seesaw-root">' +
+        '<div class="seesaw-awning" aria-hidden="true"></div>' +
         '<div class="seesaw-hud">' +
           '<span class="seesaw-round-badge" data-role="round-badge">문제 1 / 5</span>' +
           '<div class="seesaw-score-group">' +
@@ -276,16 +335,19 @@
         '</div>' +
         '<div class="seesaw-question-banner" data-role="question-banner">' + initialQ.questionText + '</div>' +
         '<div class="seesaw-stage-area">' +
+          '<div class="seesaw-compare-badge" data-role="compare-badge">' + compareInitText + '</div>' +
           '<div class="seesaw-assembly">' +
             '<div class="seesaw-plank" data-role="seesaw-plank" style="transform: rotate(0deg);">' +
               '<div class="seesaw-seat seesaw-seat-left">' +
-                '<img class="seesaw-seat-sprite" data-role="left-sprite" src="' + myPoke.artworkUrl + '" alt="' + myPoke.nameKr + '" />' +
+                '<img class="seesaw-seat-sprite" data-role="left-sprite" src="' + myPoke.artworkUrl + '" alt="' + myPoke.nameKr + '" width="100" height="100" draggable="false" />' +
+                '<div class="seesaw-seat-cushion"></div>' +
               '</div>' +
               '<div class="seesaw-seat seesaw-seat-right">' +
-                '<img class="seesaw-seat-sprite" data-role="right-sprite" src="' + opp.artworkUrl + '" alt="' + opp.nameKr + '" />' +
+                '<img class="seesaw-seat-sprite" data-role="right-sprite" src="' + opp.artworkUrl + '" alt="' + opp.nameKr + '" width="100" height="100" draggable="false" />' +
+                '<div class="seesaw-seat-cushion"></div>' +
               '</div>' +
             '</div>' +
-            '<div class="seesaw-fulcrum"></div>' +
+            '<div class="seesaw-fulcrum"><div class="seesaw-fulcrum-bolt"></div></div>' +
           '</div>' +
         '</div>' +
         '<div class="seesaw-feedback-bar" data-role="feedback-bar">왼쪽 카드나 오른쪽 카드를 터치해 보세요!</div>' +
@@ -334,6 +396,7 @@
     };
 
     var timers = [];
+    var lastPointerTriggerAt = 0;
 
     function addTimer(fn, delay) {
       var id = setTimeout(function () {
@@ -364,6 +427,7 @@
     var elStreakBadge = queryRole('streak-badge');
     var elScorePill = queryRole('score-pill');
     var elQuestionBanner = queryRole('question-banner');
+    var elCompareBadge = queryRole('compare-badge');
     var elPlank = queryRole('seesaw-plank');
     var elLeftSprite = queryRole('left-sprite');
     var elRightSprite = queryRole('right-sprite');
@@ -381,6 +445,10 @@
       }
       if (elQuestionBanner) {
         elQuestionBanner.textContent = q.questionText;
+      }
+      if (elCompareBadge) {
+        elCompareBadge.className = 'seesaw-compare-badge';
+        elCompareBadge.textContent = q.mode === 'height' ? '📏 키 비교 VS' : '⚖️ 무게 비교 VS';
       }
       if (elPlank && elPlank.style) {
         elPlank.style.transform = 'rotate(0deg)';
@@ -525,6 +593,13 @@
       if (elPlank && elPlank.style) {
         elPlank.style.transform = plankTransform;
       }
+      if (elCompareBadge) {
+        elCompareBadge.className = 'seesaw-compare-badge is-revealed';
+        elCompareBadge.textContent =
+          q.leftPokemon.nameKr + ' ' + leftFormatted +
+          (q.correctSide === 'left' ? '  >  ' : '  <  ') +
+          q.rightPokemon.nameKr + ' ' + rightFormatted;
+      }
       if (elLeftSprite && elRightSprite) {
         if (q.correctSide === 'left') {
           elRightSprite.className = 'seesaw-seat-sprite is-bouncing-up';
@@ -577,6 +652,12 @@
       if (e && typeof e.preventDefault === 'function') {
         e.preventDefault();
       }
+      var now = Date.now();
+      if (e && e.type === 'pointerdown') {
+        lastPointerTriggerAt = now;
+      } else if (e && e.type === 'click' && lastPointerTriggerAt && (now - lastPointerTriggerAt < 350)) {
+        return;
+      }
       if (state.cleanedUp || state.finished || state.uiLocked) {
         return;
       }
@@ -587,9 +668,11 @@
     function onRightClick(e) { handleCardClick('right', e); }
 
     if (elCardLeft && typeof elCardLeft.addEventListener === 'function') {
+      elCardLeft.addEventListener('pointerdown', onLeftClick);
       elCardLeft.addEventListener('click', onLeftClick);
     }
     if (elCardRight && typeof elCardRight.addEventListener === 'function') {
+      elCardRight.addEventListener('pointerdown', onRightClick);
       elCardRight.addEventListener('click', onRightClick);
     }
 
@@ -644,9 +727,11 @@
         global.removeEventListener('keydown', onKeyDown);
       }
       if (elCardLeft && typeof elCardLeft.removeEventListener === 'function') {
+        elCardLeft.removeEventListener('pointerdown', onLeftClick);
         elCardLeft.removeEventListener('click', onLeftClick);
       }
       if (elCardRight && typeof elCardRight.removeEventListener === 'function') {
+        elCardRight.removeEventListener('pointerdown', onRightClick);
         elCardRight.removeEventListener('click', onRightClick);
       }
       if (stageEl._seesawGame === gameInstance) {

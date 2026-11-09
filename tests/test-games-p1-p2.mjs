@@ -123,6 +123,12 @@ function createMockElement(tagName = 'div') {
     getListenerCount(type) {
       return listeners.has(type) ? listeners.get(type).size : 0;
     },
+    dispatchEvent(type, ev = {}) {
+      if (!listeners.has(type)) return;
+      for (const fn of listeners.get(type)) {
+        fn(ev);
+      }
+    },
     getBoundingClientRect() {
       return { left: 0, top: 0, width: el.width || 520, height: el.height || 260 };
     },
@@ -422,3 +428,42 @@ test('3. berry 게임 마운트 후 열매 수집 시 점수 증가 및 진화 �
   cleanup();
   assert.equal(stageEl._berryGame, null, 'cleanup() 호출 후 _berryGame 훅이 해제되어야 합니다');
 });
+
+test('4. P1/P2 퍼센트 좌표 동기화, 그림자, 우측 방향 플립 및 점프 버튼 중복 클릭 방지가 동작한다', () => {
+  const stageEl = createMockElement('div');
+  const cleanupRunner = globalThis.PokeGameRunner.mount(stageEl, { id: 1, nameKr: '이상해씨' }, {});
+
+  const runnerHero = stageEl.querySelector('.poke-runner-hero');
+  const runnerShadow = stageEl.querySelector('.poke-runner-shadow');
+  const runnerImg = stageEl.querySelector('.poke-runner-hero-img');
+  const jumpBtn = stageEl.querySelector('.poke-runner-btn-jump');
+
+  assert.ok(runnerHero.style.left.endsWith('%'), 'runner 주인공 left는 퍼센트 좌표여야 합니다');
+  assert.ok(runnerHero.style.bottom.endsWith('%'), 'runner 주인공 bottom은 잔디 라인 퍼센트 좌표여야 합니다');
+  assert.ok(runnerShadow, 'runner 바닥 그림자(.poke-runner-shadow)가 존재해야 합니다');
+  assert.ok(runnerImg.style.transform.includes('scale(-'), 'runner 주인공 스프라이트는 오른쪽(음수 scaleX)을 바라봐야 합니다');
+
+  // pointerdown 직후 click 이벤트가 발생해도 1단 점프만 수행되어야 함
+  jumpBtn.dispatchEvent('pointerdown', { preventDefault() {} });
+  jumpBtn.dispatchEvent('click', { preventDefault() {} });
+  assert.equal(
+    stageEl._runnerGame.getState().jumpCount,
+    1,
+    'pointerdown 직후 이어지는 click 이벤트로 인해 2단 점프가 오발동하면 안 됩니다'
+  );
+
+  cleanupRunner();
+
+  const berryStage = createMockElement('div');
+  const cleanupBerry = globalThis.PokeGameBerry.mount(berryStage, { id: 1, nameKr: '이상해씨' }, {});
+  const berryHero = berryStage.querySelector('.poke-berry-hero');
+  const berryShadow = berryStage.querySelector('.poke-berry-shadow');
+  const berryAura = berryStage.querySelector('.poke-berry-aura');
+
+  assert.ok(berryHero.style.bottom.endsWith('%'), 'berry 주인공 bottom은 잔디 라인 퍼센트 좌표여야 합니다');
+  assert.ok(berryShadow, 'berry 바닥 그림자(.poke-berry-shadow)가 존재해야 합니다');
+  assert.ok(berryAura, 'berry 진화 오라(.poke-berry-aura)가 존재해야 합니다');
+
+  cleanupBerry();
+});
+

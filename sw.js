@@ -1,7 +1,8 @@
-const CACHE_NAME = 'pokedex-v3';
+const CACHE_NAME = 'pokedex-v4';
 const STATIC_ASSETS = [
   './',
   './index.html',
+  './pokemon.html',
   './style.css',
   './css/minigames.css',
   './js/api.js',
@@ -13,6 +14,17 @@ const STATIC_ASSETS = [
   './js/games/poke-seesaw.js',
   './js/games/poke-memory.js',
   './js/games/poke-flipbattle.js',
+  './tiniping/index.html',
+  './tiniping/style.css',
+  './tiniping/data.json',
+  './tiniping/css/minigames.css',
+  './tiniping/js/app.js',
+  './tiniping/js/minigames-core.js',
+  './tiniping/js/games/tp-runner.js',
+  './tiniping/js/games/tp-parfait.js',
+  './tiniping/js/games/tp-bubble.js',
+  './tiniping/js/games/tp-memory.js',
+  './tiniping/js/games/tp-flipbattle.js',
   './manifest.json'
 ];
 

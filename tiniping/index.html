@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💖 조은의 샤랄라 티니핑 도감 💖</title>
+    <meta name="description" content="조은의 샤랄라 티니핑 도감. 1기~7기 149마리 티니핑 도감">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/minigames.css">
+    <style>
+        .portal-nav-bar {
+            position: fixed;
+            top: 10px;
+            left: 12px;
+            z-index: 19500;
+            display: flex;
+            gap: 6px;
+        }
+        .portal-nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-family: 'Jua', 'Noto Sans KR', sans-serif;
+            font-size: 13px;
+            text-decoration: none;
+            color: #fff;
+            background: rgba(88, 28, 135, 0.85);
+            border: 2px solid rgba(255, 255, 255, 0.65);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(6px);
+            transition: transform 0.15s ease;
+        }
+        .portal-nav-btn:hover, .portal-nav-btn:active {
+            transform: scale(1.06);
+        }
+        .portal-nav-btn.to-pokemon {
+            background: linear-gradient(135deg, #EF4444, #DC0A2D);
+            border-color: #FDE047;
+        }
+    </style>
+</head>
+<body>
+    <!-- 상단 도감 전환/홈 네비게이션 -->
+    <nav class="portal-nav-bar" aria-label="도감 전환">
+        <a href="../index.html" class="portal-nav-btn">🏠 홈으로</a>
+        <a href="../pokemon.html" class="portal-nav-btn to-pokemon">⚡ 포켓몬 도감</a>
+    </nav>
+    <!-- ========== PACT INTRO (닫힌 상태) ========== -->
+    <div id="pactIntro" class="pact-intro">
+        <div class="pact-bg-sparkles" id="pactSparkles"></div>
+        <p class="pact-hint">✨ 팩트를 터치하여 도감을 열어보세요! ✨</p>
+        
+        <div class="pact-container" id="pactContainer">
+            <div class="pact-door pact-left">
+                <div class="door-inner">
+                    <div class="door-deco">
+                        <div class="door-wing left">🪽</div>
+                        <div class="door-gem">💎</div>
+                        <div class="door-swirl">✦</div>
+                    </div>
+                    <div class="door-center-half">
+                        <div class="door-heart-half">💖</div>
+                    </div>
+                </div>
+            </div>
+            <div class="pact-clasp" id="pactClasp">
+                <div class="clasp-star">⭐</div>
+                <div class="clasp-ribbon">🎀</div>
+            </div>
+            <div class="pact-door pact-right">
+                <div class="door-inner">
+                    <div class="door-deco">
+                        <div class="door-wing right">🪽</div>
+                        <div class="door-gem">💎</div>
+                        <div class="door-swirl">✧</div>
+                    </div>
+                    <div class="door-center-half">
+                        <div class="door-heart-half">💖</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p class="pact-sub-hint">조은의 샤랄라 티니핑 도감</p>
+    </div>
+
+    <!-- ========== OPENED PACT (열린 팩트 = 도감 프레임) ========== -->
+    <div id="pactFrame" class="pact-frame hidden">
+        <!-- 팩트 외곽 프레임 장식 -->
+        <div class="pact-frame-border">
+            <!-- 왼쪽 날개 장식 -->
+            <div class="frame-wing frame-wing-left">🪽</div>
+            <!-- 오른쪽 날개 장식 -->
+            <div class="frame-wing frame-wing-right">🪽</div>
+            <!-- 상단 장식 -->
+            <div class="frame-top-deco">
+                <span>✦</span><span>💖</span><span>⭐</span><span>💖</span><span>✦</span>
+            </div>
+            <!-- 하단 장식 -->
+            <div class="frame-bottom-deco">
+                <span>🎀</span>
+                <span class="frame-title">조은의 샤랄라 티니핑 도감</span>
+                <span>🎀</span>
+            </div>
+        </div>
+        
+        <!-- 팩트 내부 스크린 (여기에 도감 콘텐츠) -->
+        <div class="pact-screen">
+            <div class="screen-scanlines"></div>
+            
+            <!-- Sound Toggle Button -->
+            <button id="soundToggleBtn" class="sound-toggle-btn" title="사운드 켜기/끄기">
+                <span class="sound-icon">🎵</span>
+                <span class="sound-text">사운드 ON</span>
+            </button>
+
+            <header class="hero">
+                <div class="hero-inner">
+                    <div class="logo-badge">
+                        <span class="logo-heart">💖</span>
+                        <span class="logo-star left">⭐</span>
+                        <span class="logo-star right">🌟</span>
+                    </div>
+                    <h1 class="title">
+                        <span class="title-deco">✦</span>
+                        조은의 샤랄라 티니핑 도감
+                        <span class="title-deco">✦</span>
+                    </h1>
+                    <p class="subtitle">하츄핑과 친구들을 모두 만나보세요! 🧚‍♀️</p>
+                    
+                    <div class="hero-action-row">
+                        <div class="search-container">
+                            <span class="search-icon">🔮</span>
+                            <input type="text" id="searchInput" placeholder="✨ 티니핑 이름을 검색해보세요!">
+                            <span class="search-sparkle">✨</span>
+                        </div>
+                        <button id="randomDrawBtn" class="random-draw-btn">
+                            <span class="btn-icon">🎲</span>
+                            <span>오늘의 티니핑 뽑기!</span>
+                        </button>
+                        <button id="heroMinigameBtn" class="hero-minigame-btn">
+                            <span class="btn-icon">🎮</span>
+                            <span>샤랄라 미니게임방!</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main>
+                <section class="filters-section">
+                    <div class="section-title-row">
+                        <span class="section-icon">🌈</span>
+                        <h2 class="section-title">시즌 선택</h2>
+                    </div>
+                    <div class="season-tabs" id="seasonTabs"></div>
+                </section>
+
+                <section class="grade-section">
+                    <div class="section-title-row">
+                        <span class="section-icon">👑</span>
+                        <h2 class="section-title">등급 & 필터</h2>
+                    </div>
+                    <div class="grade-filters" id="gradeFilters">
+                        <button class="grade-btn active" data-grade="로열" style="--grade-color: #FFD700; --grade-glow: rgba(255,215,0,0.4)">👑 로열</button>
+                        <button class="grade-btn active" data-grade="일반" style="--grade-color: #60A5FA; --grade-glow: rgba(96,165,250,0.4)">💫 일반</button>
+                        <button class="grade-btn active" data-grade="레전드" style="--grade-color: #F472B6; --grade-glow: rgba(244,114,182,0.4)">🌈 레전드</button>
+                        <button class="grade-btn active" data-grade="빌런" style="--grade-color: #A855F7; --grade-glow: rgba(168,85,247,0.4)">😈 빌런</button>
+                        <button class="grade-btn caught-filter-btn" id="caughtFilterBtn" style="--grade-color: #EC4899; --grade-glow: rgba(236,72,153,0.4)">💖 내 캐치 도감 (<span id="caughtCount">0</span>)</button>
+                    </div>
+                </section>
+
+                <div class="stats-banner">
+                    <span class="stats-icon">🧚</span>
+                    <span id="statsCounter">총 0마리의 티니핑</span>
+                    <span class="stats-icon">🧚‍♂️</span>
+                </div>
+
+                <div class="grid-container" id="tinipingGrid"></div>
+            </main>
+
+            <footer>
+                <div class="footer-content">
+                    <p>💖 조은의 샤랄라 티니핑 도감 💖</p>
+                    <p class="footer-sub">내 사랑을 듬뿍듬뿍 줄게~ 츄~♥︎</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- ========== DETAIL MODAL ========== -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-sparkle tl">✦</div>
+            <div class="modal-sparkle tr">✦</div>
+            <div class="modal-sparkle bl">✧</div>
+            <div class="modal-sparkle br">✧</div>
+            <span class="close-btn">&times;</span>
+            <div class="modal-header">
+                <div class="modal-avatar" id="modalAvatar"></div>
+                <h2 id="modalNameKo">이름</h2>
+                <p id="modalNameEn">Name</p>
+            </div>
+            <div class="modal-body">
+                <div class="badge-container">
+                    <span id="modalGrade" class="badge"></span>
+                    <span id="modalEmotion" class="badge"></span>
+                    <span id="modalSeason" class="badge"></span>
+                </div>
+                <p id="modalDescription" class="description"></p>
+                <div class="modal-action-row">
+                    <div class="gender-indicator" id="modalGender"></div>
+                    <button id="modalCatchBtn" class="modal-catch-btn">
+                        <span class="heart-icon">🤍</span>
+                        <span class="catch-text">캐치하기!</span>
+                    </button>
+                    <button id="modalMinigameBtn" class="modal-minigame-btn">
+                        <span class="game-icon">🎮</span>
+                        <span class="game-text">이 친구와 미니게임!</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/minigames-core.js"></script>
+    <script src="js/games/tp-runner.js"></script>
+    <script src="js/games/tp-parfait.js"></script>
+    <script src="js/games/tp-bubble.js"></script>
+    <script src="js/games/tp-memory.js"></script>
+    <script src="js/games/tp-flipbattle.js"></script>
+</body>
+</html>

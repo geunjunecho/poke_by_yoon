@@ -1,0 +1,1142 @@
+/* ==========================================================
+   ✨ 조은의 샤랄라 티니핑 도감 — 미니게임 오락실 스타일시트 (minigames.css)
+   6~7세 어린이 눈높이 핑크·라벤더·골드 마법 팩트 테마
+   ========================================================== */
+
+/* ===== 1. 도감 진입 버튼 (Hero & 상세 모달) ===== */
+.hero-minigame-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.9rem 1.45rem;
+    border-radius: 50px;
+    background: linear-gradient(135deg, #A855F7 0%, #EC4899 50%, #FBBF24 100%);
+    background-size: 200% 200%;
+    border: 2.5px solid #FFF;
+    color: #FFF;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.02rem;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(168, 85, 247, 0.45), inset 0 2px 5px rgba(255, 255, 255, 0.45);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+    animation: tpMagicGrad 3.2s ease infinite;
+}
+
+.hero-minigame-btn:hover {
+    transform: translateY(-3px) scale(1.06);
+    box-shadow: 0 10px 28px rgba(236, 72, 153, 0.6);
+}
+
+.hero-minigame-btn:active {
+    transform: translateY(0) scale(0.96);
+}
+
+.hero-minigame-btn .btn-icon {
+    font-size: 1.25rem;
+    animation: tpIconBounce 1.4s ease-in-out infinite alternate;
+}
+
+.modal-action-row {
+    flex-wrap: wrap;
+}
+
+.modal-minigame-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.35rem;
+    min-height: 48px;
+    border-radius: 50px;
+    background: linear-gradient(135deg, #FF69B4 0%, #A855F7 55%, #FBBF24 100%);
+    background-size: 200% 200%;
+    border: 2.5px solid #FFD700;
+    color: #FFF;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.08rem;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.65), 0 6px 18px rgba(0, 0, 0, 0.25);
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: tpMagicGrad 3s ease infinite, tpPulseGlow 1.8s ease-in-out infinite alternate;
+}
+
+.modal-minigame-btn:hover {
+    transform: translateY(-3px) scale(1.08);
+    box-shadow: 0 0 28px rgba(255, 215, 0, 0.85), 0 8px 24px rgba(236, 72, 153, 0.7);
+}
+
+.modal-minigame-btn:active {
+    transform: scale(0.96);
+}
+
+.modal-minigame-btn .game-icon {
+    font-size: 1.3rem;
+}
+
+@keyframes tpMagicGrad {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+@keyframes tpPulseGlow {
+    0% { box-shadow: 0 0 15px rgba(255, 105, 180, 0.55), 0 4px 14px rgba(0, 0, 0, 0.25); }
+    100% { box-shadow: 0 0 26px rgba(255, 215, 0, 0.85), 0 6px 20px rgba(236, 72, 153, 0.65); }
+}
+
+@keyframes tpIconBounce {
+    0% { transform: translateY(0) rotate(-6deg); }
+    100% { transform: translateY(-4px) rotate(8deg); }
+}
+
+/* ===== 2. 전체화면 마법 팩트 오락실 모달 (#tp-minigame-overlay) ===== */
+#tp-minigame-overlay,
+.tp-minigame-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 22000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: radial-gradient(circle at center, rgba(45, 27, 78, 0.88) 0%, rgba(18, 10, 38, 0.94) 100%);
+    backdrop-filter: blur(16px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#tp-minigame-overlay.open,
+.tp-minigame-overlay.open {
+    display: flex;
+    opacity: 1;
+}
+
+.tp-minigame-shell {
+    width: 100%;
+    max-width: 980px;
+    max-height: 94vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, #FFF5FA 0%, #F5E8FF 50%, #E8F4FD 100%);
+    border-radius: 36px;
+    border: 5px solid #DAA520;
+    box-shadow:
+        0 0 45px rgba(255, 105, 180, 0.45),
+        0 24px 64px rgba(0, 0, 0, 0.45),
+        inset 0 2px 12px rgba(255, 255, 255, 0.8);
+    overflow: hidden;
+    position: relative;
+}
+
+/* 상단 파트너 티니핑 헤더 */
+.tp-mg-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1.1rem 1.5rem;
+    background: linear-gradient(135deg, rgba(255, 228, 238, 0.95), rgba(235, 215, 255, 0.95));
+    border-bottom: 3px solid rgba(218, 165, 32, 0.45);
+}
+
+.tp-mg-companion {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1 1 360px;
+}
+
+.tp-mg-companion-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.tp-mg-companion-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.tp-mg-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.18rem 0.65rem;
+    border-radius: 50px;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.78rem;
+    color: #FFF;
+    background: linear-gradient(135deg, #FF69B4, #EC4899);
+    box-shadow: 0 2px 6px rgba(236, 72, 153, 0.25);
+}
+
+.tp-mg-pill.grade {
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+}
+
+.tp-mg-pill.season {
+    background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+}
+
+.tp-mg-companion-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.45rem;
+    color: #4A2040;
+    margin: 0;
+}
+
+.tp-mg-speech-bubble {
+    font-family: 'Gaegu', cursive;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #B81D73;
+    background: rgba(255, 255, 255, 0.88);
+    padding: 0.3rem 0.85rem;
+    border-radius: 16px;
+    border: 1.5px solid #FFB6D3;
+    display: inline-block;
+    box-shadow: 0 2px 8px rgba(255, 105, 180, 0.15);
+}
+
+.tp-mg-header-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.tp-mg-switcher {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.tp-mg-char-select {
+    padding: 0.55rem 0.9rem;
+    border-radius: 50px;
+    border: 2px solid #FF85B3;
+    background: #FFF;
+    color: #4A2040;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.92rem;
+    cursor: pointer;
+    outline: none;
+    box-shadow: 0 3px 10px rgba(255, 105, 180, 0.15);
+}
+
+.tp-mg-random-btn {
+    padding: 0.58rem 1rem;
+    border-radius: 50px;
+    border: 2px solid #FFF;
+    background: linear-gradient(135deg, #FF69B4, #A855F7);
+    color: #FFF;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.92rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tp-mg-random-btn:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 6px 16px rgba(236, 72, 153, 0.45);
+}
+
+.tp-mg-close-btn {
+    padding: 0.58rem 1.1rem;
+    border-radius: 50px;
+    border: 2px solid #FFB6D3;
+    background: rgba(255, 255, 255, 0.9);
+    color: #8B3A62;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tp-mg-close-btn:hover {
+    background: #FF69B4;
+    color: #FFF;
+    border-color: #FF69B4;
+    transform: scale(1.05);
+}
+
+/* ===== 3. 공통 티니핑 아바타 ===== */
+.tp-mg-avatar {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    border: 3px solid #FFD700;
+    box-shadow: 0 4px 14px rgba(255, 105, 180, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #FF69B4, #FFB6D3);
+}
+
+.tp-mg-avatar-sm { width: 48px; height: 48px; border-width: 2px; }
+.tp-mg-avatar-md { width: 76px; height: 76px; border-width: 3.5px; }
+.tp-mg-avatar-lg { width: 104px; height: 104px; border-width: 4px; }
+
+.tp-mg-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 3px;
+}
+
+.tp-mg-avatar-fallback {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.45rem;
+    color: #FFF;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.22);
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* ===== 4. 오락실 중앙 스테이지 & 2x2 게임 카드 그리드 ===== */
+.tp-minigame-stage {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 1.4rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.tp-hub-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
+    width: 100%;
+}
+
+.tp-hub-game-card:nth-child(5):last-child {
+    grid-column: 1 / -1;
+}
+
+.tp-hub-game-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    padding: 1.35rem 1.4rem;
+    border-radius: 28px;
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    background: var(--card-grad, linear-gradient(135deg, #FF69B4, #A855F7));
+    color: #FFF;
+    cursor: pointer;
+    box-shadow: 0 10px 28px rgba(236, 72, 153, 0.28), inset 0 2px 6px rgba(255, 255, 255, 0.45);
+    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.tp-hub-game-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 16px 36px rgba(236, 72, 153, 0.45);
+    border-color: #FFD700;
+}
+
+.tp-hub-game-card:active {
+    transform: scale(0.98);
+}
+
+.tp-hub-card-top {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.65rem;
+}
+
+.tp-hub-card-icon {
+    font-size: 2.6rem;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+.tp-hub-card-badge {
+    padding: 0.28rem 0.75rem;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.28);
+    backdrop-filter: blur(6px);
+    font-family: 'Jua', sans-serif;
+    font-size: 0.85rem;
+    color: #FFF;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.tp-hub-card-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.5rem;
+    margin-bottom: 0.35rem;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.tp-hub-card-desc {
+    font-family: 'Gaegu', cursive;
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.35;
+    opacity: 0.96;
+    margin-bottom: 1rem;
+}
+
+.tp-hub-card-footer {
+    width: 100%;
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.65rem;
+    border-top: 1.5px dashed rgba(255, 255, 255, 0.45);
+    font-family: 'Jua', sans-serif;
+    font-size: 0.98rem;
+}
+
+.tp-hub-card-play {
+    background: rgba(255, 255, 255, 0.92);
+    color: #D91B78;
+    padding: 0.35rem 0.95rem;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== 5. 개별 게임 실행 상단 바 & 스테이지 ===== */
+.tp-game-active-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    padding: 0.65rem 1rem;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 20px;
+    border: 2px solid #FFB6D3;
+    box-shadow: 0 4px 14px rgba(255, 105, 180, 0.12);
+}
+
+.tp-game-back-btn,
+.tp-game-restart-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    border: 2px solid #FF85B3;
+    background: #FFF;
+    color: #C2185B;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tp-game-back-btn:hover,
+.tp-game-restart-btn:hover {
+    background: #FF69B4;
+    color: #FFF;
+    transform: translateY(-1px);
+}
+
+.tp-game-active-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.25rem;
+    color: #4A2040;
+}
+
+.tp-game-char-tag {
+    padding: 0.2rem 0.7rem;
+    border-radius: 50px;
+    color: #FFF;
+    font-size: 0.85rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.tp-game-stage-body {
+    position: relative;
+    width: 100%;
+    min-height: 430px;
+    background: linear-gradient(180deg, #FFF9FC 0%, #FDF2FF 60%, #F0F9FF 100%);
+    border-radius: 26px;
+    border: 3px solid #F9A8D4;
+    box-shadow: inset 0 4px 18px rgba(255, 105, 180, 0.12);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== 6. 러너 캐릭터 양옆 마법 날개 (.tp-wing-left, .tp-wing-right) ===== */
+.tp-wing-left,
+.tp-wing-right {
+    position: absolute;
+    top: 22%;
+    font-size: 1.6rem;
+    pointer-events: none;
+    user-select: none;
+    z-index: 1;
+    filter: drop-shadow(0 2px 6px rgba(255, 105, 180, 0.5));
+    transition: transform 0.06s linear;
+}
+
+.tp-wing-left {
+    left: -18px;
+    transform-origin: right center;
+}
+
+.tp-wing-right {
+    right: -18px;
+    transform-origin: left center;
+}
+
+/* ===== 7. 6~7세용 초대형 터치 컨트롤 버튼 (.tp-ctrl-btn, 최소 높이 60px) ===== */
+.tp-ctrl-btn {
+    min-height: 60px;
+    padding: 0.8rem 1.5rem;
+    border-radius: 22px;
+    border: 3px solid #FFF;
+    background: linear-gradient(135deg, #FF69B4 0%, #EC4899 55%, #A855F7 100%);
+    color: #FFF;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.25rem;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+    box-shadow: 0 6px 18px rgba(236, 72, 153, 0.38), inset 0 2px 6px rgba(255, 255, 255, 0.45);
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+}
+
+.tp-ctrl-btn:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 8px 24px rgba(236, 72, 153, 0.5);
+}
+
+.tp-ctrl-btn:active {
+    transform: translateY(2px) scale(0.96);
+}
+
+/* ===== 8. 결과 축하 오버레이 & 도감 캐치 보상 토스트 ===== */
+.tp-mg-result-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    background: rgba(35, 16, 60, 0.78);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.2rem;
+    animation: tpFadeIn 0.3s ease;
+}
+
+.tp-mg-result-card {
+    width: 100%;
+    max-width: 440px;
+    background: linear-gradient(160deg, #FFF5FA 0%, #F5E6FF 100%);
+    border-radius: 32px;
+    border: 4px solid #FFD700;
+    padding: 1.6rem 1.4rem;
+    text-align: center;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 215, 0, 0.45);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.tp-mg-result-sparkles {
+    font-size: 1.3rem;
+    letter-spacing: 4px;
+}
+
+.tp-mg-result-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.75rem;
+    color: #D91B78;
+}
+
+.tp-mg-result-stars {
+    font-size: 2rem;
+    letter-spacing: 6px;
+    filter: drop-shadow(0 3px 8px rgba(251, 191, 36, 0.5));
+}
+
+.tp-mg-result-msg {
+    font-family: 'Gaegu', cursive;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #5A2850;
+}
+
+.tp-mg-result-scores {
+    display: flex;
+    gap: 0.8rem;
+    width: 100%;
+    justify-content: center;
+    margin: 0.3rem 0;
+}
+
+.tp-mg-score-box {
+    flex: 1;
+    background: #FFF;
+    border-radius: 18px;
+    padding: 0.6rem 0.8rem;
+    border: 2px solid #FFB6D3;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.tp-mg-score-box.best {
+    border-color: #FBBF24;
+    background: linear-gradient(180deg, #FFFBEB, #FEF3C7);
+}
+
+.tp-mg-score-box .score-label {
+    font-family: 'Jua', sans-serif;
+    font-size: 0.8rem;
+    color: #8B6F87;
+}
+
+.tp-mg-score-box .score-value {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.35rem;
+    color: #D91B78;
+}
+
+.tp-mg-result-reward-banner {
+    width: 100%;
+    padding: 0.55rem 0.9rem;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #FCE7F3, #EDE9FE);
+    border: 1.5px solid #F472B6;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.92rem;
+    color: #9D174D;
+}
+
+.tp-mg-result-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.4rem;
+}
+
+.tp-mg-result-actions .tp-ctrl-btn {
+    flex: 1 1 160px;
+    font-size: 1.08rem;
+}
+
+.tp-result-hub-btn {
+    background: linear-gradient(135deg, #8B5CF6, #6366F1);
+}
+
+.tp-mg-reward-toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(40px);
+    z-index: 32000;
+    background: linear-gradient(135deg, #FF69B4, #A855F7);
+    color: #FFF;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.08rem;
+    padding: 0.85rem 1.6rem;
+    border-radius: 50px;
+    border: 3px solid #FFD700;
+    box-shadow: 0 10px 30px rgba(236, 72, 153, 0.55);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+}
+
+.tp-mg-reward-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+@keyframes tpFadeIn {
+    from { opacity: 0; transform: scale(0.94); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* ===== 9. T5 마법 판 뒤집기 대결 (tp-flipbattle) — 레퍼런스 황혼 보라 스테이지 & 정사각 메탈 베벨 타일 ===== */
+.tp-flipbattle-wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 480px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background:
+        radial-gradient(circle at 14% 22%, rgba(255, 255, 255, 0.22) 0 1.5px, transparent 2px),
+        radial-gradient(circle at 82% 16%, rgba(255, 255, 255, 0.18) 0 2px, transparent 2.5px),
+        radial-gradient(circle at 48% 80%, rgba(255, 255, 255, 0.14) 0 1.5px, transparent 2px),
+        linear-gradient(180deg, #433352 0%, #6A4F73 55%, #583F62 100%);
+    border-radius: 22px;
+    padding: 0 16px 18px 16px;
+    box-sizing: border-box;
+    box-shadow: inset 0 2px 14px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(34, 18, 48, 0.35);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    overflow: hidden;
+}
+
+.tp-flipbattle-hud {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0.5rem 0 0.25rem 0;
+    margin-bottom: 0.25rem;
+}
+
+.tp-flipbattle-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+    min-height: 60px;
+}
+
+.tp-flipbattle-hud-stat,
+.tp-flipbattle-hud-clock {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.tp-flipbattle-hud-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #FFFFFF 0%, #FFE4F2 75%, #F8BBD0 100%);
+    border: 3px solid #FFFFFF;
+    box-shadow: 0 4px 0 #2A1B38, 0 6px 14px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.tp-flipbattle-hud-avatar img {
+    width: 88% !important;
+    height: 88% !important;
+    object-fit: contain;
+}
+
+.tp-flipbattle-big-num {
+    font-family: 'Jua', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #FFFFFF;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-shadow: 0 3px 0 #2A1B38, 0 5px 12px rgba(0, 0, 0, 0.45);
+    -webkit-text-stroke: 1.5px #2A1B38;
+}
+
+.tp-flipbattle-clock-svg {
+    width: 46px;
+    height: 46px;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.38));
+    flex-shrink: 0;
+}
+
+.tp-flipbattle-hud-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.tp-flipbattle-corner-ribbon {
+    background: linear-gradient(180deg, #39A9DB 0%, #2B8BB8 100%);
+    color: #FFFFFF;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 900;
+    padding: 10px 22px 10px 26px;
+    border-radius: 0 0 0 32px;
+    margin-top: -10px;
+    margin-right: -16px;
+    box-shadow: 0 4px 0 #1E6385, 0 6px 14px rgba(0, 0, 0, 0.32);
+    text-shadow: 0 2px 3px rgba(0, 0, 0, 0.28);
+    white-space: nowrap;
+}
+
+.tp-flipbattle-timer-pill {
+    padding: 0.28rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(254, 243, 199, 0.9);
+    border: 1.5px solid #F59E0B;
+    color: #92400E;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.85rem;
+}
+
+.tp-flipbattle-score-pill {
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1.5px solid rgba(255, 255, 255, 0.28);
+    color: #FFF;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.88rem;
+}
+
+.tp-flipbattle-finish-btn {
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.75);
+    background: linear-gradient(135deg, #EC4899, #8B5CF6);
+    color: #FFF;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s ease;
+    white-space: nowrap;
+}
+
+.tp-flipbattle-finish-btn:active {
+    transform: scale(0.95);
+}
+
+.tp-flipbattle-subrow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(34, 21, 46, 0.42);
+    border: 1.5px solid rgba(255, 255, 255, 0.16);
+}
+
+.tp-flipbattle-tug {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    flex: 1;
+    min-width: 200px;
+}
+
+.tp-flipbattle-tug-labels {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.82rem;
+}
+
+.tp-tug-hero-label {
+    color: #FBCFE8;
+}
+
+.tp-tug-vs {
+    font-size: 0.75rem;
+    color: #FDE047;
+}
+
+.tp-tug-villain-label {
+    color: #FECACA;
+}
+
+.tp-flipbattle-tug-bar {
+    width: 100%;
+    height: 11px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #EF4444, #991B1B);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    position: relative;
+}
+
+.tp-flipbattle-tug-fill-hero {
+    height: 100%;
+    background: linear-gradient(90deg, #38BDF8 0%, #EC4899 65%, #FBBF24 100%);
+    border-radius: 999px 0 0 999px;
+    transition: width 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tp-flipbattle-banner {
+    font-family: 'Jua', sans-serif;
+    font-size: 0.86rem;
+    color: #F5E8FF;
+    margin: 0;
+}
+
+.tp-flipbattle-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    width: 100%;
+    max-width: 580px;
+    margin: 4px auto;
+    padding: 4px;
+    flex: 1;
+    align-content: center;
+    perspective: 750px;
+}
+
+.tp-flipbattle-tile {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    height: auto;
+    min-height: 88px;
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    perspective: 750px;
+    overflow: visible;
+    touch-action: none;
+    box-sizing: border-box;
+    transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tp-flipbattle-tile:hover {
+    transform: translateY(-2px);
+    z-index: 4;
+}
+
+.tp-flipbattle-tile-card {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+    transition: transform 0.32s cubic-bezier(0.22, 1.15, 0.36, 1);
+}
+
+.tp-flipbattle-tile.is-hero .tp-flipbattle-tile-card {
+    transform: rotateY(0deg);
+}
+
+.tp-flipbattle-tile.is-villain .tp-flipbattle-tile-card {
+    transform: rotateY(180deg);
+}
+
+.tp-flipbattle-tile.is-flipping.is-hero .tp-flipbattle-tile-card {
+    transform: rotateY(0deg) rotate(-4deg) scale(1.06);
+}
+
+.tp-flipbattle-tile.is-flipping.is-villain .tp-flipbattle-tile-card {
+    transform: rotateY(180deg) rotate(4deg) scale(1.06);
+}
+
+.tp-flipbattle-tile.has-magic-wand {
+    animation: tpWandTilePulse 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes tpWandTilePulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+}
+
+.tp-flipbattle-tile-inner {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    padding: 6px;
+    box-sizing: border-box;
+    background: linear-gradient(145deg, #8B939A 0%, #737B82 55%, #5E666D 100%);
+    border: 3px solid #4E555B;
+    box-shadow: 0 6px 0 #393E43, 0 10px 18px rgba(0, 0, 0, 0.38), inset 0 2px 1px rgba(255, 255, 255, 0.35);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.tp-flipbattle-tile-inner.tp-tile-hero {
+    transform: rotateY(0deg);
+    z-index: 2;
+}
+
+.tp-flipbattle-tile-inner.tp-tile-villain {
+    transform: rotateY(180deg);
+    z-index: 1;
+}
+
+.tp-flipbattle-tile.is-villain .tp-flipbattle-tile-inner.tp-tile-villain {
+    z-index: 3;
+}
+
+.tp-flipbattle-well {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    background: radial-gradient(circle at 50% 42%, #F4F7F9 0%, #E2E7EB 75%, #D2D9DF 100%);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.14);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 4px;
+    box-sizing: border-box;
+}
+
+.tp-flipbattle-well-hero {
+    background: radial-gradient(circle at 50% 42%, #F5FAFF 0%, #E4F0FB 72%, #D4E6F8 100%);
+}
+
+.tp-flipbattle-well-villain {
+    background: radial-gradient(circle at 50% 42%, #FFF5F5 0%, #F5E1E4 72%, #EBD0D5 100%);
+}
+
+.tp-flipbattle-tile.has-magic-wand .tp-flipbattle-tile-inner {
+    border-color: #FFD700;
+    box-shadow: 0 6px 0 #B45309, 0 0 22px rgba(255, 215, 0, 0.9);
+}
+
+.tp-flipbattle-avatar-wrap {
+    width: 72%;
+    height: 72%;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.tp-flipbattle-avatar-wrap img,
+.tp-flipbattle-villain-svg {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain;
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.2));
+}
+
+.tp-flipbattle-tile-name {
+    position: absolute;
+    bottom: 3px;
+    left: 4px;
+    right: 4px;
+    text-align: center;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.68rem;
+    line-height: 1.1;
+    color: #374151;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tp-flipbattle-tile-inner.tp-tile-villain .tp-flipbattle-tile-name {
+    color: #991B1B;
+}
+
+.tp-flipbattle-wand-badge {
+    position: absolute;
+    top: -8px;
+    right: -6px;
+    z-index: 6;
+    background: linear-gradient(135deg, #FDE047, #F59E0B);
+    color: #78350F;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.68rem;
+    padding: 2px 6px;
+    border-radius: 999px;
+    border: 1.5px solid #FFF;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.55);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* ===== 10. 반응형 모바일 대응 ===== */
+@media (max-width: 720px) {
+    .tp-hub-grid {
+        grid-template-columns: 1fr;
+    }
+    .tp-hub-game-card:nth-child(5):last-child {
+        grid-column: auto;
+    }
+    .tp-mg-header {
+        padding: 0.9rem 1rem;
+    }
+    .tp-mg-companion-title {
+        font-size: 1.2rem;
+    }
+    .tp-minigame-stage {
+        padding: 1rem;
+    }
+    .tp-flipbattle-grid {
+        gap: 9px;
+    }
+    .tp-flipbattle-tile {
+        min-height: 72px;
+    }
+    .tp-flipbattle-big-num {
+        font-size: 1.9rem;
+    }
+    .tp-flipbattle-hud-avatar {
+        width: 42px;
+        height: 42px;
+    }
+    .tp-flipbattle-clock-svg {
+        width: 38px;
+        height: 38px;
+    }
+    .tp-flipbattle-corner-ribbon {
+        font-size: 0.95rem;
+        padding: 8px 14px 8px 18px;
+    }
+    .tp-mg-reward-toast {
+        font-size: 0.92rem;
+        padding: 0.7rem 1.1rem;
+        max-width: 92vw;
+        white-space: normal;
+        text-align: center;
+    }
+}

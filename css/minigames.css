@@ -788,66 +788,154 @@
 }
 
 /* =========================================================
-   9. P5: 포켓몬 카드 짝맞추기! (.poke-memory-*)
+   9. P5: 포켓몬 카드 짝맞추기! (.poke-memory-*) — 레퍼런스 트와일라잇 아케이드 테마
    ========================================================= */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 @keyframes mg-memory-hint-pulse {
   0%, 100% {
     box-shadow: 0 0 0 3px #FFD600, 0 0 18px rgba(255, 214, 0, 0.85);
-    transform: scale(1);
+    transform: rotateY(180deg) rotate(-3deg) scale(1.03);
   }
   50% {
     box-shadow: 0 0 0 5px #FFF59D, 0 0 28px rgba(255, 214, 0, 1);
-    transform: scale(1.04);
+    transform: rotateY(180deg) rotate(-5deg) scale(1.07);
   }
 }
 
+.poke-catch-root,
+.poke-seesaw-root {
+  max-width: 900px;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+}
+
 .poke-memory-root {
+  max-width: 920px;
+  margin: 0 auto;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 10px 14px;
+  padding: 0 18px 12px 18px;
   box-sizing: border-box;
-  background: radial-gradient(circle at 50% 20%, #311b47 0%, #1a102b 60%, #110b1d 100%);
+  background:
+    radial-gradient(circle at 12% 28%, rgba(255, 255, 255, 0.55) 1.5px, transparent 2.5px),
+    radial-gradient(circle at 86% 24%, rgba(255, 255, 255, 0.45) 1.5px, transparent 2.5px),
+    radial-gradient(circle at 24% 74%, rgba(255, 255, 255, 0.4) 1.5px, transparent 2.5px),
+    radial-gradient(circle at 76% 68%, rgba(255, 255, 255, 0.5) 1.5px, transparent 2.5px),
+    linear-gradient(180deg, #433352 0%, #6A4F73 55%, #583F62 100%);
+  border-radius: 18px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42);
   color: #ffffff;
   overflow: hidden;
+  position: relative;
 }
 
 .poke-memory-hud {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(171, 71, 188, 0.55);
-  border-radius: 14px;
-  padding: 6px 12px;
+  gap: 10px;
+  min-height: 62px;
+  padding: 4px 0 4px 4px;
   flex-shrink: 0;
 }
 
 .poke-memory-hud-left,
+.poke-memory-hud-clock,
 .poke-memory-hud-right {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.poke-memory-hud-avatar,
+.poke-flipbattle-hud-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #7DD3FC 0%, #38BDF8 60%, #0284C7 100%);
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.poke-memory-hud-avatar img,
+.poke-flipbattle-hud-avatar img {
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.28));
+}
+
+.poke-memory-big-num,
+.poke-flipbattle-big-num {
+  font-family: "Jua", "Outfit", "Arial Black", sans-serif;
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 1;
+  color: #FFFFFF;
+  letter-spacing: -0.5px;
+  text-shadow:
+    0 3px 0 #2A1B38,
+    0 5px 12px rgba(0, 0, 0, 0.45);
+}
+
+.poke-arcade-clock-svg {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
+}
+
+.poke-memory-corner-ribbon,
+.poke-flipbattle-corner-ribbon {
+  background: linear-gradient(180deg, #38BDF8 0%, #3299C7 100%);
+  color: #FFFFFF;
+  font-weight: 900;
+  font-size: 19px;
+  letter-spacing: 0.5px;
+  padding: 10px 24px 12px 26px;
+  border-radius: 0 0 0 32px;
+  box-shadow: -2px 4px 12px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  margin-right: -18px;
+  margin-top: -6px;
+  white-space: nowrap;
 }
 
 .poke-memory-stage-pill {
-  background: #AB47BC;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
   color: #ffffff;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
-  padding: 4px 12px;
+  padding: 4px 10px;
   border-radius: 999px;
+  white-space: nowrap;
 }
 
 .poke-memory-pairs-pill {
   background: rgba(255, 255, 255, 0.16);
   color: #f3e5f5;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   padding: 4px 10px;
   border-radius: 999px;
@@ -863,6 +951,7 @@
   font-weight: 900;
   cursor: pointer;
   transition: transform 0.1s ease, filter 0.12s ease;
+  white-space: nowrap;
 }
 
 .poke-memory-hint-btn {
@@ -885,68 +974,98 @@
 .poke-memory-score-pill {
   background: #FFD600;
   color: #1e293b;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 900;
-  padding: 5px 12px;
+  padding: 4px 11px;
   border-radius: 999px;
 }
 
 .poke-memory-banner {
-  background: rgba(255, 255, 255, 0.94);
-  color: #4A148C;
-  border: 2px solid #CE93D8;
-  border-radius: 12px;
-  padding: 6px 12px;
+  background: rgba(35, 22, 48, 0.55);
+  color: #FDE68A;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 5px 14px;
   text-align: center;
-  font-size: 15px;
-  font-weight: 900;
+  font-size: 13.5px;
+  font-weight: 800;
   flex-shrink: 0;
 }
 
 .poke-memory-grid {
+  max-width: 620px;
+  width: 100%;
+  margin: 0 auto;
   flex: 1;
   min-height: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  gap: 14px;
+  align-content: center;
 }
 
 .poke-memory-grid.rows-2 {
   grid-template-rows: repeat(2, minmax(0, 1fr));
+  max-width: 580px;
 }
 
 .poke-memory-grid.rows-3 {
   grid-template-rows: repeat(3, minmax(0, 1fr));
+  max-width: 540px;
 }
 
 .poke-memory-card {
   position: relative;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 128px;
+  margin: 0 auto;
+  min-height: 0;
+  overflow: visible;
   background: transparent;
   border: none;
   padding: 0;
   cursor: pointer;
   perspective: 800px;
   font-family: inherit;
+  touch-action: manipulation;
 }
 
 .poke-memory-card-inner {
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 16px;
+  border-radius: 8px;
   transform-style: preserve-3d;
-  transition: transform 0.36s cubic-bezier(0.22, 1.15, 0.36, 1);
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.38s cubic-bezier(0.22, 1.15, 0.36, 1), box-shadow 0.25s ease;
 }
 
 .poke-memory-card.is-flipped .poke-memory-card-inner {
   transform: rotateY(180deg);
 }
 
+.poke-memory-card:hover .poke-memory-card-inner,
+.poke-memory-card.is-flipped:not(.is-matched) .poke-memory-card-inner {
+  transform: rotateY(180deg) rotate(-3.5deg) scale(1.04);
+}
+
+.poke-memory-card:not(.is-flipped):hover .poke-memory-card-inner {
+  transform: rotateY(0deg) rotate(-3deg) scale(1.04);
+}
+
 .poke-memory-card-back,
 .poke-memory-card-front {
   position: absolute;
   inset: 0;
-  border-radius: 16px;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #7A8288;
+  border: 3px solid #52585E;
+  box-shadow: 0 6px 0 #3E4348, 0 10px 18px rgba(0, 0, 0, 0.38);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   display: flex;
@@ -957,22 +1076,42 @@
   box-sizing: border-box;
 }
 
-.poke-memory-card-back {
-  background: linear-gradient(155deg, #AB47BC 0%, #6A1B9A 100%);
-  border: 3px solid #F3E5F5;
-  box-shadow: 0 5px 0 #4A148C, 0 8px 16px rgba(0, 0, 0, 0.35);
-  gap: 6px;
+.poke-memory-well {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  background: #E5E9EC;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.14);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+.poke-memory-well-back {
+  background: radial-gradient(circle, #F1F5F9 0%, #CBD5E1 100%);
+  gap: 5px;
+}
+
+.poke-memory-well-front {
+  background: radial-gradient(circle, #EBF5FF 0%, #D6E8FA 100%);
+  gap: 2px;
 }
 
 .poke-memory-pokeball-emblem {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   border: 3px solid #212121;
   background: #ffffff;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
 }
 
 .poke-memory-pokeball-top {
@@ -995,125 +1134,159 @@
 }
 
 .poke-memory-back-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.8px;
-  color: #FFE082;
+  color: #475569;
 }
 
 .poke-memory-card-front {
   transform: rotateY(180deg);
-  background: linear-gradient(180deg, #FFFFFF 0%, #F3E5F5 100%);
-  border: 3px solid #AB47BC;
-  box-shadow: 0 5px 0 #6A1B9A, 0 8px 16px rgba(0, 0, 0, 0.35);
   color: #1e293b;
-  gap: 3px;
 }
 
-.poke-memory-card.is-hero-card .poke-memory-card-front {
-  border-color: #FFB300;
-  background: linear-gradient(180deg, #FFFDE7 0%, #FFE082 100%);
+.poke-memory-card.is-hero-card .poke-memory-well-front {
+  background: radial-gradient(circle, #FFFBEB 0%, #FDE68A 100%);
 }
 
 .poke-memory-card.is-matched .poke-memory-card-front {
-  border-color: #10B981;
-  box-shadow: 0 0 18px rgba(16, 185, 129, 0.75);
+  border-color: #38BDF8;
+  box-shadow: 0 6px 0 #0284C7, 0 0 16px rgba(56, 189, 248, 0.65);
 }
 
 .poke-memory-card.is-hinted .poke-memory-card-inner {
   animation: mg-memory-hint-pulse 0.7s ease-in-out infinite;
 }
 
+.poke-memory-card.is-hinted .poke-memory-card-front {
+  border-color: #FFD600;
+  box-shadow: 0 0 22px rgba(255, 214, 0, 0.95);
+}
+
 .poke-memory-hero-badge {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 3px;
+  right: 3px;
   background: #FF8F00;
   color: #ffffff;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 900;
-  padding: 2px 6px;
+  padding: 1px 5px;
   border-radius: 999px;
+  z-index: 2;
 }
 
 .poke-memory-card-img {
-  max-width: 66%;
-  max-height: 62%;
+  width: 74%;
+  height: 74%;
+  max-width: 78px;
+  max-height: 78px;
   object-fit: contain;
-  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.2));
+  flex-shrink: 0;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.22));
+  pointer-events: none;
 }
 
 .poke-memory-card-name {
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 900;
-  color: #263238;
+  color: #1E293B;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
+  max-width: 96%;
+  flex-shrink: 0;
+  line-height: 1.1;
 }
 
 /* =========================================================
-   10. P6: 후다닥! 판 뒤집기 대결! (.poke-flipbattle-*)
+   10. P6: 후다닥! 판 뒤집기 대결! (.poke-flipbattle-*) — 레퍼런스 트와일라잇 아케이드 테마
    ========================================================= */
 @keyframes mg-rainbow-spin {
   0%, 100% {
     transform: scale(1);
-    box-shadow: 0 0 0 3px #FFD600, 0 0 18px #FF4081;
+    filter: drop-shadow(0 0 10px #FFD600);
   }
   50% {
-    transform: scale(1.06);
-    box-shadow: 0 0 0 5px #00E5FF, 0 0 26px #FFD600;
+    transform: scale(1.04);
+    filter: drop-shadow(0 0 16px #00E5FF);
   }
 }
 
-@keyframes mg-tile-flip-pop {
-  0% { transform: scale(0.9) rotateY(-65deg); }
-  70% { transform: scale(1.05) rotateY(8deg); }
-  100% { transform: scale(1) rotateY(0deg); }
+@keyframes mg-burst-flash {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.38) drop-shadow(0 0 18px #FFD600); }
 }
 
 .poke-flipbattle-root {
+  max-width: 920px;
+  margin: 0 auto;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px 14px;
+  gap: 6px;
+  padding: 0 18px 12px 18px;
   box-sizing: border-box;
-  background: radial-gradient(circle at 50% 15%, #2b1d3a 0%, #14192d 70%, #0d1120 100%);
+  background:
+    radial-gradient(circle at 14% 25%, rgba(255, 255, 255, 0.55) 1.5px, transparent 2.5px),
+    radial-gradient(circle at 84% 30%, rgba(255, 255, 255, 0.5) 1.5px, transparent 2.5px),
+    radial-gradient(circle at 22% 76%, rgba(255, 255, 255, 0.45) 1.5px, transparent 2.5px),
+    radial-gradient(circle at 88% 72%, rgba(255, 255, 255, 0.4) 1.5px, transparent 2.5px),
+    linear-gradient(180deg, #433352 0%, #6A4F73 55%, #583F62 100%);
+  border-radius: 18px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42);
   color: #ffffff;
   overflow: hidden;
   touch-action: none;
+  position: relative;
 }
 
 .poke-flipbattle-hud {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 112, 67, 0.6);
-  border-radius: 14px;
-  padding: 6px 12px;
+  gap: 10px;
+  min-height: 60px;
+  padding: 4px 0 2px 4px;
+  flex-shrink: 0;
+}
+
+.poke-flipbattle-hud-stat,
+.poke-flipbattle-hud-clock,
+.poke-flipbattle-hud-ribbon-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.poke-flipbattle-subhud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(35, 22, 48, 0.48);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  padding: 4px 12px;
   flex-shrink: 0;
 }
 
 .poke-flipbattle-timer-pill {
   background: #FF7043;
   color: #ffffff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 900;
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 999px;
   white-space: nowrap;
 }
 
 .poke-flipbattle-banner {
-  flex: 1;
-  text-align: center;
-  font-size: 14px;
-  font-weight: 900;
+  flex: 1.2;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 800;
   color: #FFF59D;
   white-space: nowrap;
   overflow: hidden;
@@ -1121,150 +1294,274 @@
 }
 
 .poke-flipbattle-score-pill {
-  background: #FFD600;
+  background: rgba(255, 214, 0, 0.92);
   color: #1e293b;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 900;
   padding: 5px 12px;
   border-radius: 999px;
   white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 .poke-flipbattle-tug-wrap {
-  background: rgba(15, 23, 42, 0.85);
-  border: 2px solid rgba(255, 255, 255, 0.22);
-  border-radius: 14px;
-  padding: 6px 12px;
+  flex: 1;
+  min-width: 200px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  flex-shrink: 0;
+  gap: 3px;
 }
 
 .poke-flipbattle-tug-labels {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 900;
 }
 
 .poke-flipbattle-tug-my {
-  color: #FFE082;
+  color: #7DD3FC;
 }
 
 .poke-flipbattle-tug-vs {
   color: #ffffff;
-  font-size: 12px;
+  font-size: 11px;
+  opacity: 0.85;
 }
 
 .poke-flipbattle-tug-rival {
-  color: #CE93D8;
+  color: #FCA5A5;
 }
 
 .poke-flipbattle-tug-bar {
   width: 100%;
-  height: 16px;
+  height: 10px;
   border-radius: 999px;
   overflow: hidden;
   display: flex;
-  background: #311B92;
-  border: 2px solid rgba(255, 255, 255, 0.45);
+  background: #EF4444;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
 }
 
 .poke-flipbattle-tug-fill-player {
   height: 100%;
-  background: var(--hero-color, #FF7043);
+  background: #38BDF8;
   transition: width 0.2s ease;
 }
 
 .poke-flipbattle-tug-fill-rival {
   height: 100%;
-  background: linear-gradient(90deg, #5E35B1 0%, #4527A0 100%);
+  background: linear-gradient(90deg, #EF4444 0%, #DC2626 100%);
   transition: width 0.2s ease;
 }
 
 .poke-flipbattle-board {
+  max-width: 520px;
+  width: 100%;
+  margin: 0 auto;
   flex: 1;
   min-height: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   grid-template-rows: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  gap: 12px;
+  align-content: center;
   touch-action: none;
 }
 
 .poke-flipbattle-tile {
   position: relative;
-  border-radius: 14px;
-  border: 3px solid rgba(255, 255, 255, 0.65);
-  padding: 4px;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 108px;
+  margin: 0 auto;
+  min-height: 0;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  padding: 0;
   cursor: pointer;
+  perspective: 800px;
   font-family: inherit;
   color: #ffffff;
-  overflow: hidden;
-  transition: transform 0.1s ease, background 0.15s ease;
-  animation: mg-tile-flip-pop 0.22s ease;
-}
-
-.poke-flipbattle-tile.is-player {
-  background: linear-gradient(160deg, var(--player-tile-color, #FF7043) 0%, #1e293b 125%);
-  border-color: #FFF59D;
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.45);
-}
-
-.poke-flipbattle-tile.is-rival {
-  background: linear-gradient(160deg, #5E35B1 0%, #311B92 100%);
-  border-color: #B39DDB;
-  box-shadow: 0 4px 0 #1A093B;
-}
-
-.poke-flipbattle-tile.has-rainbow {
-  animation: mg-rainbow-spin 0.8s ease-in-out infinite;
-  border-color: #FFD600;
+  overflow: visible;
+  touch-action: none;
 }
 
 .poke-flipbattle-tile-inner {
+  position: relative;
   width: 100%;
   height: 100%;
+  border-radius: 8px;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.34s cubic-bezier(0.22, 1.15, 0.36, 1), box-shadow 0.24s ease;
+  pointer-events: none;
+}
+
+.poke-flipbattle-tile.is-player .poke-flipbattle-tile-inner {
+  transform: rotateY(0deg);
+}
+
+.poke-flipbattle-tile.is-rival .poke-flipbattle-tile-inner {
+  transform: rotateY(180deg);
+}
+
+.poke-flipbattle-tile.is-tilted-flip.is-player .poke-flipbattle-tile-inner,
+.poke-flipbattle-tile.is-player:hover .poke-flipbattle-tile-inner {
+  transform: rotateY(0deg) rotate(-4deg) scale(1.06);
+}
+
+.poke-flipbattle-tile.is-rival:hover .poke-flipbattle-tile-inner {
+  transform: rotateY(180deg) rotate(-4deg) scale(1.06);
+}
+
+.poke-flipbattle-face,
+.poke-flipbattle-face-player,
+.poke-flipbattle-face-rival {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #7A8288;
+  border: 3px solid #52585E;
+  box-shadow: 0 6px 0 #3E4348, 0 10px 18px rgba(0, 0, 0, 0.38);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  pointer-events: none;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.poke-flipbattle-tile.is-tilted-flip .poke-flipbattle-face-player,
+.poke-flipbattle-tile:hover .poke-flipbattle-face-player,
+.poke-flipbattle-tile:hover .poke-flipbattle-face-rival {
+  box-shadow: 8px 12px 18px rgba(0, 0, 0, 0.45), 0 6px 0 #3E4348;
+}
+
+.poke-flipbattle-well {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  background: #E5E9EC;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.14);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.poke-flipbattle-well-player {
+  background: radial-gradient(circle, #F0F9FF 0%, #D8ECF8 100%);
+}
+
+.poke-flipbattle-well-rival {
+  background: radial-gradient(circle, #FFF1F2 0%, #F5D0D6 100%);
+}
+
+.poke-flipbattle-face-player {
+  transform: rotateY(0deg);
+}
+
+.poke-flipbattle-face-rival {
+  transform: rotateY(180deg);
+}
+
+.poke-flipbattle-tile.has-rainbow {
+  animation: mg-rainbow-spin 0.8s ease-in-out infinite;
+}
+
+.poke-flipbattle-tile.has-rainbow .poke-flipbattle-face-player,
+.poke-flipbattle-tile.has-rainbow .poke-flipbattle-face-rival {
+  border-color: #FFD600;
+  box-shadow: 0 0 0 2px #FFD600, 0 0 16px rgba(255, 64, 129, 0.85);
+}
+
+.poke-flipbattle-tile.is-burst-flash,
+.poke-flipbattle-tile.is-bursting {
+  animation: mg-burst-flash 0.42s ease;
 }
 
 .poke-flipbattle-rainbow-badge {
   position: absolute;
-  top: 3px;
+  top: -6px;
   left: 50%;
   transform: translateX(-50%);
   background: linear-gradient(90deg, #FF4081, #FFD600, #00E5FF);
   color: #111827;
   font-size: 10px;
   font-weight: 900;
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: 999px;
   white-space: nowrap;
-  z-index: 2;
+  z-index: 5;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .poke-flipbattle-tile-img {
-  max-width: 58%;
-  max-height: 58%;
+  width: 78%;
+  height: 78%;
+  max-width: 74px;
+  max-height: 74px;
   object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+  flex-shrink: 0;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.25));
+  pointer-events: none;
+}
+
+.poke-flipbattle-rival-emblem {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: rgba(220, 38, 38, 0.9);
+  border: 1.5px solid #FFFFFF;
+  border-radius: 999px;
+  padding: 1px 5px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.poke-flipbattle-rival-r {
+  font-family: "Outfit", "Arial Black", sans-serif;
+  font-size: 10px;
+  font-weight: 900;
+  color: #FFFFFF;
+  line-height: 1;
 }
 
 .poke-flipbattle-rival-icon {
-  font-size: 26px;
+  font-size: 10px;
   line-height: 1;
 }
 
 .poke-flipbattle-tile-label {
-  font-size: 11px;
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
   font-weight: 900;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+  color: #1E293B;
+  background: rgba(255, 255, 255, 0.78);
+  padding: 0 5px;
+  border-radius: 999px;
   white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.2;
 }

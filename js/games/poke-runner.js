@@ -2,20 +2,21 @@
  * 포켓몬 도감 미니게임 P1: 달려라! 포켓몬 점프런 (poke-runner.js)
  * - 6~7세 눈높이 맞춤 클래식 무한 러너 (하트 3개 + 더블 점프 + 0.65초 자동 숙이기 유지)
  * - 주인공 포켓몬은 움직이는 GIF(runnerSpriteUrl)가 멈추지 않도록 DOM 오버레이(.poke-runner-hero)로 렌더링
+ * - 레트로 16비트 픽셀아트 플랫폼 월드 캔버스 렌더링 적용
  */
 (function (global) {
   'use strict';
 
   var GROUND_OBSTACLES = [
-    { emoji: '🌲', label: '꼬지모 나무', width: 44, height: 52 },
-    { emoji: '🪨', label: '뾰족 바위', width: 42, height: 42 },
-    { emoji: '🌵', label: '선인장', width: 40, height: 50 }
+    { emoji: '🌲', label: '강철 가시 함정', spriteKind: 'spikes', width: 48, height: 36 },
+    { emoji: '🪨', label: '가시 잔디 블록', spriteKind: 'spiked_block', width: 48, height: 50 },
+    { emoji: '🌵', label: '쌍둥이 가시 바위', spriteKind: 'spikes_wide', width: 52, height: 38 }
   ];
 
   var AIR_OBSTACLES = [
-    { emoji: '🦇', label: '주뱃', width: 44, height: 38 },
-    { emoji: '🌩️', label: '찌릿 번개구름', width: 48, height: 40 },
-    { emoji: '🌀', label: '바람개비', width: 42, height: 42 }
+    { emoji: '🦇', label: '둥둥 잔디섬 블록', spriteKind: 'floating_island', width: 52, height: 44 },
+    { emoji: '🌩️', label: '가시 공중 블록', spriteKind: 'spiked_island', width: 52, height: 46 },
+    { emoji: '🌀', label: '하늘 바위섬', spriteKind: 'floating_island', width: 48, height: 42 }
   ];
 
   var BERRY_EMOJIS = ['🍓', '🍎'];
@@ -33,37 +34,61 @@
         if (typeof h.computeRunTransform === 'function') {
           return h.computeRunTransform(state, tick);
         }
-        var y = (state && state.yOffset) || 0;
-        var scaleX = state && state.flipX ? -1 : 1;
-        var scaleY = 1;
-        var rot = 0;
-        if (state && state.isDucking) {
-          scaleX *= 1.22;
-          scaleY = 0.62;
-          y += 14;
-        } else if (state && state.isJumping) {
-          scaleY = 1.08;
-          rot = state.flipX ? 8 : -8;
+        var s = state || {};
+        var t = tick || 0;
+        var flipX = s.flipX !== undefined ? Boolean(s.flipX) : true;
+        var dirX = flipX ? -1 : 1;
+        var yOffset = s.yOffset || 0;
+        var bobY = 0;
+        var tilt = 0;
+        var sx = 1;
+        var sy = 1;
+
+        if (s.isJumping) {
+          bobY = yOffset;
+          sx = 0.88;
+          sy = 1.16;
+          tilt = flipX ? 10 : -10;
+        } else if (s.isDucking) {
+          bobY = 8;
+          sx = 1.32;
+          sy = 0.56;
+          tilt = flipX ? -12 : 12;
         } else {
-          var bob = Math.abs(Math.sin((tick || 0) * 0.28)) * 6;
-          y -= bob;
-          rot = Math.sin((tick || 0) * 0.28) * 5;
+          bobY = Math.abs(Math.sin(t * 0.35)) * -10;
+          tilt = Math.sin(t * 0.35) * 6;
+          sx = 1 + Math.sin(t * 0.7) * 0.06;
+          sy = 1 - Math.sin(t * 0.7) * 0.06;
         }
+
+        var shadowScale = s.isJumping
+          ? Math.max(0.35, 1 - Math.abs(yOffset) / 140)
+          : s.isDucking
+          ? 1.25
+          : 0.95 - Math.abs(bobY) * 0.02;
+
         var transform =
-          'translate3d(0px, ' +
-          y.toFixed(1) +
-          'px, 0) scale(' +
-          scaleX.toFixed(2) +
+          'translateY(' +
+          Math.round(bobY) +
+          'px) rotate(' +
+          tilt.toFixed(1) +
+          'deg) scale(' +
+          (sx * dirX).toFixed(2) +
           ', ' +
-          scaleY.toFixed(2) +
-          ') rotate(' +
-          rot.toFixed(1) +
-          'deg)';
-        var filter =
-          state && state.isHit
-            ? 'drop-shadow(0 0 10px #ff5252) brightness(1.5)'
-            : 'drop-shadow(0 6px 8px rgba(0,0,0,0.28))';
-        return { transform: transform, filter: filter, opacity: state && state.isHit && tick % 6 < 3 ? '0.45' : '1' };
+          sy.toFixed(2) +
+          ')';
+        var filter = s.isHit
+          ? Math.floor(t / 3) % 2 === 0
+            ? 'brightness(2.2) saturate(0.3)'
+            : 'opacity(0.45)'
+          : 'drop-shadow(0 6px 8px rgba(0,0,0,0.45))';
+        return {
+          transform: transform,
+          filter: filter,
+          shadowScale: shadowScale,
+          scaleY: sy,
+          opacity: s.isHit && t % 6 < 3 ? '0.45' : '1'
+        };
       },
       getHighScore: function (gameId) {
         if (typeof h.getHighScore === 'function') return Number(h.getHighScore(gameId)) || 0;
@@ -88,65 +113,310 @@
     style.id = 'poke-runner-styles';
     style.textContent = [
       '.poke-runner-wrap {',
-      '  position: relative; width: 100%; height: 100%; min-height: 360px;',
+      '  position: relative; max-width: 960px; width: 100%; height: 100%; min-height: 360px; margin: 0 auto;',
       '  display: flex; flex-direction: column; justify-content: space-between;',
-      '  background: linear-gradient(180deg, #80d8ff 0%, #e1f5fe 62%, #a5d6a7 62%, #66bb6a 100%);',
-      '  border-radius: 18px; overflow: hidden; user-select: none; -webkit-user-select: none;',
+      '  background: #48B8F8;',
+      '  border-radius: 20px; border: 4px solid #181818; box-shadow: 0 12px 32px rgba(0,0,0,0.5);',
+      '  overflow: hidden; user-select: none; -webkit-user-select: none; box-sizing: border-box;',
       '  font-family: "Noto Sans KR", "Outfit", sans-serif;',
       '}',
       '.poke-runner-hud {',
       '  position: relative; z-index: 5; display: flex; align-items: center; justify-content: space-between;',
-      '  padding: 10px 14px; background: rgba(255,255,255,0.86); backdrop-filter: blur(6px);',
-      '  border-bottom: 3px solid rgba(0,0,0,0.08); font-weight: 900; gap: 8px; flex-wrap: wrap;',
+      '  padding: 10px 16px; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px);',
+      '  border-bottom: 3px solid #181818; font-weight: 900; gap: 8px; flex-wrap: wrap;',
       '}',
-      '.poke-runner-hearts { font-size: 1.35rem; letter-spacing: 3px; }',
+      '.poke-runner-hearts { font-size: 1.4rem; letter-spacing: 3px; }',
       '.poke-runner-score-box {',
       '  display: flex; align-items: center; gap: 10px; font-size: 1.05rem; color: #1b3a4b;',
       '}',
       '.poke-runner-score-pill {',
-      '  background: #fff3e0; border: 2px solid #ffb74d; border-radius: 999px; padding: 3px 12px; color: #e65100;',
+      '  background: #fff3e0; border: 2px solid #181818; border-radius: 999px; padding: 4px 14px; color: #e65100;',
       '}',
       '.poke-runner-best-pill {',
-      '  background: #ede7f6; border: 2px solid #b39ddb; border-radius: 999px; padding: 3px 10px; color: #4527a0; font-size: 0.9rem;',
+      '  background: #ede7f6; border: 2px solid #181818; border-radius: 999px; padding: 4px 12px; color: #4527a0; font-size: 0.92rem;',
       '}',
       '.poke-runner-stage-area {',
       '  position: relative; flex: 1; width: 100%; min-height: 220px; overflow: hidden;',
       '}',
       '.poke-runner-canvas {',
       '  position: absolute; inset: 0; width: 100%; height: 100%; display: block;',
+      '  image-rendering: pixelated; image-rendering: crisp-edges;',
       '}',
       '.poke-runner-hero {',
-      '  position: absolute; left: 56px; bottom: 50px; width: 76px; height: 76px;',
-      '  z-index: 3; pointer-events: none; display: flex; align-items: center; justify-content: center;',
+      '  position: absolute; left: 14.5833%; bottom: 21.25%; width: 88px; height: 88px;',
+      '  transform: translateX(-50%); z-index: 3; pointer-events: none;',
+      '  display: flex; align-items: flex-end; justify-content: center;',
+      '}',
+      '.poke-runner-shadow {',
+      '  position: absolute; bottom: -5px; left: 50%; width: 64px; height: 14px;',
+      '  border-radius: 50%; background: radial-gradient(ellipse at center, rgba(0,0,0,0.48) 0%, rgba(0,0,0,0.18) 65%, transparent 100%);',
+      '  transform: translateX(-50%); z-index: 1; pointer-events: none; transition: opacity 0.1s ease;',
       '}',
       '.poke-runner-hero-img {',
-      '  width: 72px; height: 72px; object-fit: contain; image-rendering: auto;',
-      '  transform-origin: center bottom; will-change: transform, filter;',
+      '  position: relative; z-index: 2; width: 88px; height: 88px; object-fit: contain; image-rendering: pixelated;',
+      '  transform-origin: center bottom; transform: scaleX(-1); will-change: transform, filter;',
       '}',
       '.poke-runner-bubble {',
-      '  position: absolute; bottom: 82px; left: 50%; transform: translateX(-35%);',
-      '  white-space: nowrap; background: #fff8e1; color: #d84315; font-weight: 900; font-size: 0.85rem;',
-      '  padding: 5px 11px; border-radius: 999px; border: 2px solid #ff7043;',
-      '  box-shadow: 0 4px 10px rgba(0,0,0,0.16); opacity: 0; transition: opacity 0.15s ease;',
+      '  position: absolute; bottom: 96px; left: 50%; transform: translateX(-50%); z-index: 4;',
+      '  white-space: nowrap; background: #fff8e1; color: #d84315; font-weight: 900; font-size: 0.88rem;',
+      '  padding: 5px 12px; border-radius: 999px; border: 2.5px solid #181818;',
+      '  box-shadow: 0 4px 0 rgba(0,0,0,0.28); opacity: 0; transition: opacity 0.15s ease;',
       '}',
       '.poke-runner-bubble.visible { opacity: 1; }',
       '.poke-runner-controls {',
-      '  position: relative; z-index: 5; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;',
-      '  padding: 10px 14px 14px; background: rgba(255,255,255,0.92); border-top: 3px solid rgba(0,0,0,0.08);',
+      '  position: relative; z-index: 5; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;',
+      '  padding: 10px 16px 14px; background: rgba(255,255,255,0.95); border-top: 3px solid #181818;',
       '}',
       '.poke-runner-btn {',
-      '  appearance: none; border: none; border-radius: 16px; padding: 15px 10px;',
-      '  font-size: 1.15rem; font-weight: 900; color: #fff; cursor: pointer;',
+      '  appearance: none; border: 3px solid #181818; border-radius: 16px; padding: 14px 10px;',
+      '  font-size: 1.18rem; font-weight: 900; color: #fff; cursor: pointer;',
       '  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;',
-      '  box-shadow: 0 6px 0 rgba(0,0,0,0.22); transition: transform 0.08s ease;',
+      '  box-shadow: 0 6px 0 #181818; transition: transform 0.08s ease;',
       '  touch-action: manipulation;',
       '}',
-      '.poke-runner-btn:active, .poke-runner-btn.active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.22); }',
+      '.poke-runner-btn:active, .poke-runner-btn.active { transform: translateY(4px); box-shadow: 0 2px 0 #181818; }',
       '.poke-runner-btn-jump { background: linear-gradient(180deg, #ff7043 0%, #f4511e 100%); }',
       '.poke-runner-btn-duck { background: linear-gradient(180deg, #29b6f6 0%, #0288d1 100%); }',
-      '.poke-runner-btn-sub { font-size: 0.76rem; font-weight: 700; opacity: 0.92; }'
+      '.poke-runner-btn-sub { font-size: 0.78rem; font-weight: 700; opacity: 0.95; }'
     ].join('\n');
     document.head.appendChild(style);
+  }
+
+  // ============================================================================
+  // 16비트 픽셀아트 플랫폼 월드 렌더러 헬퍼 (순수 fillRect 기반 - 모든 캔버스 호환)
+  // ============================================================================
+
+  function drawPixelStarCross(ctx, cx, cy, color) {
+    var x = Math.round(cx);
+    var y = Math.round(cy);
+    ctx.fillStyle = color;
+    ctx.fillRect(x - 2, y - 6, 4, 12);
+    ctx.fillRect(x - 6, y - 2, 12, 4);
+    ctx.fillRect(x - 4, y - 4, 8, 8);
+  }
+
+  function drawPixelCloud(ctx, x, y, scale) {
+    var s = scale || 1;
+    var bx = Math.round(x);
+    var by = Math.round(y);
+    var u = Math.max(2, Math.round(4 * s));
+    // 하단 하늘색 그림자 단
+    ctx.fillStyle = '#C8ECFF';
+    ctx.fillRect(bx - u * 5, by + u * 2, u * 11, u * 2);
+    // 흰색 계단식 픽셀 구름 몸통
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(bx - u * 4, by, u * 9, u * 2);
+    ctx.fillRect(bx - u * 3, by - u * 2, u * 6, u * 2);
+    ctx.fillRect(bx - u, by - u * 3, u * 3, u);
+  }
+
+  function drawPixelSpikeUp(ctx, x, bottomY, w, h) {
+    var bx = Math.round(x);
+    var by = Math.round(bottomY);
+    var sw = w || 14;
+    var sh = h || 18;
+    // 외곽선 계단형 삼각형
+    ctx.fillStyle = '#181818';
+    ctx.fillRect(bx, by - 4, sw, 4);
+    ctx.fillRect(bx + 2, by - 8, sw - 4, 4);
+    ctx.fillRect(bx + 4, by - 13, sw - 8, 5);
+    ctx.fillRect(bx + 6, by - sh, sw - 12, sh - 13);
+    // 좌측 밝은 메탈 하이라이트
+    ctx.fillStyle = '#E8F0F8';
+    ctx.fillRect(bx + 2, by - 4, Math.floor((sw - 4) * 0.5), 2);
+    ctx.fillRect(bx + 4, by - 8, Math.floor((sw - 8) * 0.5), 4);
+    ctx.fillRect(bx + 6, by - 13, 2, 5);
+    // 우측 메탈 그림자
+    ctx.fillStyle = '#788898';
+    ctx.fillRect(bx + Math.floor(sw * 0.5), by - 4, Math.floor((sw - 4) * 0.5), 2);
+    ctx.fillRect(bx + Math.floor(sw * 0.5), by - 8, Math.floor((sw - 8) * 0.5), 4);
+    ctx.fillRect(bx + Math.floor(sw * 0.5), by - 12, 2, 4);
+  }
+
+  function drawPixelSpikeDown(ctx, x, topY, w, h) {
+    var bx = Math.round(x);
+    var ty = Math.round(topY);
+    var sw = w || 14;
+    var sh = h || 16;
+    ctx.fillStyle = '#181818';
+    ctx.fillRect(bx, ty, sw, 4);
+    ctx.fillRect(bx + 2, ty + 4, sw - 4, 4);
+    ctx.fillRect(bx + 4, ty + 8, sw - 8, 4);
+    ctx.fillRect(bx + 6, ty + 12, sw - 12, sh - 12);
+    ctx.fillStyle = '#E8F0F8';
+    ctx.fillRect(bx + 2, ty + 2, Math.floor((sw - 4) * 0.5), 2);
+    ctx.fillRect(bx + 4, ty + 4, Math.floor((sw - 8) * 0.5), 4);
+    ctx.fillStyle = '#788898';
+    ctx.fillRect(bx + Math.floor(sw * 0.5), ty + 2, Math.floor((sw - 4) * 0.5), 2);
+    ctx.fillRect(bx + Math.floor(sw * 0.5), ty + 4, Math.floor((sw - 8) * 0.5), 4);
+  }
+
+  function drawPixelTree(ctx, cx, baseY, scale) {
+    var s = scale || 1;
+    var x = Math.round(cx);
+    var y = Math.round(baseY);
+    var tw = Math.round(12 * s);
+    var th = Math.round(16 * s);
+    // 기둥
+    ctx.fillStyle = '#385848';
+    ctx.fillRect(x - Math.floor(tw * 0.5) - 2, y - th, tw + 4, th);
+    ctx.fillStyle = '#587860';
+    ctx.fillRect(x - Math.floor(tw * 0.5), y - th, tw, th - 2);
+    // 수관 그림자층
+    var r = Math.round(22 * s);
+    ctx.fillStyle = '#389038';
+    ctx.fillRect(x - r, y - th - Math.round(r * 0.9), r * 2, Math.round(r * 0.9));
+    // 수관 본체
+    ctx.fillStyle = '#58B848';
+    ctx.fillRect(x - r + 2, y - th - Math.round(r * 1.45), (r - 2) * 2, Math.round(r * 1.15));
+    ctx.fillRect(x - Math.round(r * 0.75), y - th - Math.round(r * 1.75), Math.round(r * 1.5), Math.round(r * 0.4));
+    // 상단 밝은 하이라이트
+    ctx.fillStyle = '#88E060';
+    ctx.fillRect(x - Math.round(r * 0.65), y - th - Math.round(r * 1.65), Math.round(r * 1.3), Math.round(6 * s));
+    // 나무 위 픽셀 하얀 꽃송이 장식
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(x - Math.round(r * 0.45), y - th - Math.round(r * 1.1), 4, 4);
+    ctx.fillRect(x + Math.round(r * 0.3), y - th - Math.round(r * 0.8), 4, 4);
+  }
+
+  function drawPixelGoalDoor(ctx, x, groundY) {
+    var dx = Math.round(x);
+    var dy = Math.round(groundY);
+    var dw = 48;
+    var dh = 58;
+    var left = dx - dw * 0.5;
+    var top = dy - dh;
+
+    // 검은 외곽선 아치
+    ctx.fillStyle = '#181818';
+    ctx.fillRect(left - 3, top + 8, dw + 6, dh - 8);
+    ctx.fillRect(left + 3, top + 3, dw - 6, 6);
+    ctx.fillRect(left + 9, top, dw - 18, 4);
+
+    // 황금 아치 테두리
+    ctx.fillStyle = '#FFE840';
+    ctx.fillRect(left, top + 9, dw, dh - 9);
+    ctx.fillRect(left + 5, top + 5, dw - 10, 5);
+    ctx.fillRect(left + 11, top + 2, dw - 22, 4);
+
+    // 빨간 문 본체
+    ctx.fillStyle = '#F84858';
+    ctx.fillRect(left + 5, top + 12, dw - 10, dh - 14);
+    ctx.fillRect(left + 9, top + 8, dw - 18, 5);
+
+    // 문 중앙 분할선 및 하단 패널
+    ctx.fillStyle = '#D82838';
+    ctx.fillRect(dx - 1, top + 10, 2, dh - 12);
+    ctx.fillRect(left + 7, dy - 12, dw - 14, 8);
+
+    // 중앙 황금 열쇠구멍 패드
+    ctx.fillStyle = '#181818';
+    ctx.fillRect(dx - 11, top + 20, 22, 22);
+    ctx.fillStyle = '#FFE840';
+    ctx.fillRect(dx - 9, top + 22, 18, 18);
+    ctx.fillStyle = '#181818';
+    ctx.fillRect(dx - 3, top + 25, 6, 6);
+    ctx.fillRect(dx - 4, top + 31, 8, 6);
+  }
+
+  function drawPixelFloatingIsland(ctx, x, y, w, h, withTopSpikes) {
+    var bx = Math.round(x);
+    var by = Math.round(y);
+    var bw = Math.round(w || 48);
+    var bh = Math.round(h || 42);
+
+    if (withTopSpikes) {
+      drawPixelSpikeUp(ctx, bx + 6, by + 2, 16, 16);
+      drawPixelSpikeUp(ctx, bx + bw - 22, by + 2, 16, 16);
+    }
+
+    // 하단 둥근 테라코타 흙 블록 + 검은 외곽선
+    ctx.fillStyle = '#181818';
+    ctx.fillRect(bx + 2, by + 12, bw - 4, bh - 16);
+    ctx.fillRect(bx + 6, by + bh - 6, bw - 12, 6);
+    ctx.fillStyle = '#C07040';
+    ctx.fillRect(bx + 5, by + 14, bw - 10, bh - 20);
+    ctx.fillRect(bx + 9, by + bh - 8, bw - 18, 5);
+    // 흙 속 하얀 픽셀 별 장식
+    drawPixelStarCross(ctx, bx + bw - 16, by + bh - 14, '#FFFFFF');
+    ctx.fillStyle = '#703818';
+    ctx.fillRect(bx + 12, by + 22, 3, 3);
+
+    // 상단 픽셀 잔디 캡
+    ctx.fillStyle = '#181818';
+    ctx.fillRect(bx, by, bw, 16);
+    ctx.fillStyle = '#88E050';
+    ctx.fillRect(bx + 2, by + 2, bw - 4, 3);
+    ctx.fillStyle = '#78C830';
+    ctx.fillRect(bx + 2, by + 5, bw - 4, 6);
+    ctx.fillStyle = '#489818';
+    for (var tx = bx + 3; tx < bx + bw - 5; tx += 8) {
+      ctx.fillRect(tx, by + 10, 5, 4);
+    }
+  }
+
+  function drawPixelKeyItem(ctx, cx, cy) {
+    var x = Math.round(cx);
+    var y = Math.round(cy);
+    // 검은 외곽선
+    ctx.fillStyle = '#181818';
+    ctx.fillRect(x - 12, y - 16, 24, 15);
+    ctx.fillRect(x - 4, y - 1, 9, 17);
+    ctx.fillRect(x - 9, y + 6, 6, 4);
+    ctx.fillRect(x - 9, y + 11, 6, 4);
+    // 황금 몸통
+    ctx.fillStyle = '#FFE840';
+    ctx.fillRect(x - 10, y - 14, 20, 11);
+    ctx.fillRect(x - 2, y - 1, 5, 15);
+    ctx.fillRect(x - 7, y + 7, 5, 2);
+    ctx.fillRect(x - 7, y + 12, 5, 2);
+    // 음영
+    ctx.fillStyle = '#D89818';
+    ctx.fillRect(x - 10, y - 6, 20, 3);
+    ctx.fillRect(x + 1, y - 1, 2, 14);
+    // 열쇠 구멍
+    ctx.fillStyle = '#181818';
+    ctx.fillRect(x - 5, y - 10, 10, 4);
+  }
+
+  function drawPixelBerryItem(ctx, cx, cy) {
+    var x = Math.round(cx);
+    var y = Math.round(cy);
+    // 검은 외곽선
+    ctx.fillStyle = '#181818';
+    ctx.fillRect(x - 10, y - 8, 20, 18);
+    ctx.fillRect(x - 7, y - 10, 14, 22);
+    // 빨간 열매 본체
+    ctx.fillStyle = '#F83848';
+    ctx.fillRect(x - 8, y - 6, 16, 14);
+    ctx.fillRect(x - 5, y - 8, 10, 18);
+    // 하이라이트 및 씨앗 점
+    ctx.fillStyle = '#FF98A8';
+    ctx.fillRect(x - 5, y - 4, 4, 4);
+    ctx.fillStyle = '#FFE840';
+    ctx.fillRect(x + 2, y - 2, 2, 2);
+    ctx.fillRect(x - 2, y + 3, 2, 2);
+    ctx.fillRect(x + 3, y + 4, 2, 2);
+    // 초록 픽셀 잎사귀
+    ctx.fillStyle = '#181818';
+    ctx.fillRect(x - 6, y - 13, 12, 5);
+    ctx.fillStyle = '#78C830';
+    ctx.fillRect(x - 4, y - 12, 9, 3);
+  }
+
+  function drawPixelStarItem(ctx, cx, cy) {
+    var x = Math.round(cx);
+    var y = Math.round(cy);
+    ctx.fillStyle = '#181818';
+    ctx.fillRect(x - 4, y - 14, 8, 28);
+    ctx.fillRect(x - 14, y - 4, 28, 8);
+    ctx.fillRect(x - 9, y - 9, 18, 18);
+    ctx.fillStyle = '#FFE840';
+    ctx.fillRect(x - 2, y - 12, 4, 24);
+    ctx.fillRect(x - 12, y - 2, 24, 4);
+    ctx.fillRect(x - 7, y - 7, 14, 14);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(x - 3, y - 3, 6, 6);
   }
 
   function mountRunnerGame(stageEl, charCtx, rawHelpers) {
@@ -174,20 +444,24 @@
     var heroSprite =
       ctxData.runnerSpriteUrl || ctxData.spriteUrl || ctxData.artworkUrl || '';
 
-    var W = 560;
-    var H = 260;
-    var GROUND_Y = 206;
-    var PLAYER_X = 76;
+    var W = 720;
+    var H = 320;
+    var GROUND_Y = 252;
+    var PLAYER_X = 105;
+    var HERO_LEFT_PCT = (PLAYER_X / W) * 100;
+    var HERO_BOTTOM_PCT = ((H - GROUND_Y) / H) * 100;
     var GRAVITY = 0.68;
-    var JUMP_VELOCITY_1 = -11.8;
-    var JUMP_VELOCITY_2 = -10.4;
+    var JUMP_VELOCITY_1 = -12.2;
+    var JUMP_VELOCITY_2 = -10.8;
     var AUTO_DUCK_FRAMES = 40; // 약 0.65초 유지
+
+    var dpr = Math.min(2, (typeof window !== 'undefined' && window.devicePixelRatio) || 1);
 
     var lives = 3;
     var maxLives = 3;
     var score = 0;
     var highScore = helpers.getHighScore('runner');
-    var speed = 4.2;
+    var speed = 4.6;
     var tick = 0;
     var running = true;
     var isGameOver = false;
@@ -198,8 +472,8 @@
       x: PLAYER_X,
       y: 0, // 바닥 기준 오프셋 (음수 = 공중)
       vy: 0,
-      width: 54,
-      height: 58,
+      width: 58,
+      height: 62,
       isJumping: false,
       isDucking: false,
       duckKeyHeld: false,
@@ -214,9 +488,9 @@
     var particles = [];
     var popups = [];
     var clouds = [
-      { x: 70, y: 38, size: 28, speed: 0.5 },
-      { x: 250, y: 55, size: 22, speed: 0.35 },
-      { x: 430, y: 32, size: 32, speed: 0.6 }
+      { x: 110, y: 48, scale: 1.0, speed: 0.42 },
+      { x: 340, y: 84, scale: 1.35, speed: 0.3 },
+      { x: 560, y: 42, scale: 0.9, speed: 0.52 }
     ];
 
     var nextObstacleIn = 75;
@@ -255,11 +529,16 @@
 
     var canvas = document.createElement('canvas');
     canvas.className = 'poke-runner-canvas';
-    canvas.width = W;
-    canvas.height = H;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
 
     var heroEl = document.createElement('div');
     heroEl.className = 'poke-runner-hero';
+    heroEl.style.left = HERO_LEFT_PCT.toFixed(4) + '%';
+    heroEl.style.bottom = HERO_BOTTOM_PCT.toFixed(4) + '%';
+
+    var shadowEl = document.createElement('div');
+    shadowEl.className = 'poke-runner-shadow';
 
     var heroImg = document.createElement('img');
     heroImg.className = 'poke-runner-hero-img';
@@ -270,6 +549,7 @@
     bubbleEl.className = 'poke-runner-bubble';
 
     heroEl.appendChild(bubbleEl);
+    heroEl.appendChild(shadowEl);
     heroEl.appendChild(heroImg);
     stageArea.appendChild(canvas);
     stageArea.appendChild(heroEl);
@@ -325,31 +605,42 @@
         },
         tick
       );
+      var shadowScale = player.isJumping
+        ? Math.max(0.35, 1 - Math.abs(player.y) / 140)
+        : player.isDucking
+        ? 1.25
+        : 0.95;
+
       if (typeof tf === 'string') {
         heroImg.style.transform = tf;
         heroImg.style.filter =
           player.invincibleTimer > 0
             ? 'drop-shadow(0 0 10px #ff5252) brightness(1.5)'
-            : 'drop-shadow(0 6px 8px rgba(0,0,0,0.25))';
+            : 'drop-shadow(0 6px 8px rgba(0,0,0,0.35))';
       } else if (tf && typeof tf === 'object') {
         if (tf.transform !== undefined) heroImg.style.transform = tf.transform;
         if (tf.filter !== undefined) heroImg.style.filter = tf.filter;
         if (tf.opacity !== undefined) heroImg.style.opacity = tf.opacity;
+        if (typeof tf.shadowScale === 'number') shadowScale = tf.shadowScale;
       }
+
+      shadowEl.style.transform =
+        'translateX(-50%) scale(' + shadowScale.toFixed(2) + ')';
+      shadowEl.style.opacity = Math.max(0.22, Math.min(1, shadowScale * 0.85)).toFixed(2);
     }
 
     function spawnFootstepDust(count) {
       var n = count || 1;
       for (var i = 0; i < n; i++) {
         particles.push({
-          x: player.x - 12 + (Math.random() * 14 - 7),
+          x: player.x - 14 + (Math.random() * 16 - 8),
           y: GROUND_Y - 4 + (Math.random() * 6 - 3),
           vx: -speed * (0.45 + Math.random() * 0.4),
           vy: -(0.6 + Math.random() * 1.6),
-          size: 5 + Math.random() * 5,
+          size: 4 + Math.floor(Math.random() * 4),
           life: 18 + Math.floor(Math.random() * 10),
           maxLife: 28,
-          color: ctxData.typeColor || '#FFD54F'
+          color: i % 2 === 0 ? '#FFE840' : (ctxData.typeColor || '#88E050')
         });
       }
     }
@@ -389,7 +680,6 @@
         player.isDucking = true;
         player.duckKeyHeld = true;
         player.duckHoldTimer = AUTO_DUCK_FRAMES;
-        // 공중에서 숙이기를 누르면 빠르게 착지하여 슬라이딩 자세로 전환
         player.y = 0;
         player.vy = 0;
         player.isJumping = false;
@@ -409,7 +699,6 @@
 
     function tapDuckButton() {
       if (isGameOver) return;
-      // 살짝 탭해도 0.65초(40프레임) 동안 자동으로 숙이기 유지
       player.isDucking = true;
       player.duckHoldTimer = AUTO_DUCK_FRAMES;
       if (player.isJumping) {
@@ -431,11 +720,12 @@
       var tpl = pool[Math.floor(Math.random() * pool.length)];
       obstacles.push({
         category: category,
+        spriteKind: tpl.spriteKind,
         emoji: tpl.emoji,
         label: tpl.label,
-        hintText: category === 'ground' ? '⬆️점프!' : '⬇️숙이기!',
-        x: W + 40,
-        y: category === 'ground' ? GROUND_Y - tpl.height : GROUND_Y - 82,
+        hintText: category === 'ground' ? '⬆️ 점프!' : '⬇️ 숙이기!',
+        x: W + 44,
+        y: category === 'ground' ? GROUND_Y - tpl.height : GROUND_Y - 88,
         width: tpl.width,
         height: tpl.height,
         passed: false
@@ -449,7 +739,7 @@
         kind === 'star'
           ? '🌟'
           : kind === 'orb'
-          ? ctxData.typeEmoji || '⚡'
+          ? ctxData.typeEmoji || '🔑'
           : BERRY_EMOJIS[Math.floor(Math.random() * BERRY_EMOJIS.length)];
       var pts = kind === 'star' ? 50 : kind === 'orb' ? 30 : 15;
       var high = Math.random() < 0.45;
@@ -457,9 +747,9 @@
         kind: kind,
         emoji: emoji,
         points: pts,
-        x: W + 30,
-        y: high ? GROUND_Y - 96 : GROUND_Y - 46,
-        radius: 18,
+        x: W + 34,
+        y: high ? GROUND_Y - 104 : GROUND_Y - 48,
+        radius: 20,
         collected: false
       });
     }
@@ -499,19 +789,12 @@
       });
     }
 
-    function triggerObstacleHit(obs) {
+    function triggerObstacleHit() {
       if (player.invincibleTimer > 0 || isGameOver) return;
       lives = Math.max(0, lives - 1);
-      player.invincibleTimer = 90; // 90프레임(약 1.5초) 무적 깜빡임
+      player.invincibleTimer = 90;
       helpers.playSfx('hit');
       showBubble('앗! 조심조심~!', 90);
-      popups.push({
-        x: player.x,
-        y: GROUND_Y + player.y - 54,
-        text: '앗! 조심조심~!',
-        color: '#d32f2f',
-        life: 45
-      });
       updateHud();
       syncHeroTransform();
       if (lives <= 0) {
@@ -520,23 +803,21 @@
     }
 
     function checkCollisions() {
-      // 플레이어 판정 박스 (6~7세 친화적으로 관대한 히트박스 적용)
-      var pLeft = player.x - 16;
-      var pRight = player.x + 16;
-      var pHeight = player.isDucking ? 26 : 48;
+      var pLeft = player.x - 18;
+      var pRight = player.x + 18;
+      var pHeight = player.isDucking ? 28 : 50;
       var pBottom = GROUND_Y + player.y;
       var pTop = pBottom - pHeight;
 
-      // 아이템 수집 판정
       for (var i = items.length - 1; i >= 0; i--) {
         var it = items[i];
         var ix = it.x;
         var iy = it.y;
-        var catchTop = pTop - 16;
-        var catchBottom = pBottom + 10;
+        var catchTop = pTop - 18;
+        var catchBottom = pBottom + 12;
         if (
-          ix + it.radius >= pLeft - 12 &&
-          ix - it.radius <= pRight + 12 &&
+          ix + it.radius >= pLeft - 14 &&
+          ix - it.radius <= pRight + 14 &&
           iy + it.radius >= catchTop &&
           iy - it.radius <= catchBottom
         ) {
@@ -544,10 +825,10 @@
           if (it.kind === 'star') {
             lives = Math.min(maxLives, lives + 1);
             helpers.playSfx('powerup');
-            showBubble('무지개별! 하트 회복 ❤️+1', 50);
+            showBubble('황금별! 하트 회복 ❤️+1', 50);
           } else if (it.kind === 'orb') {
             helpers.playSfx('coin', 2);
-            showBubble(ctxData.typeEmoji + ' 에너지 +30점!', 40);
+            showBubble('🔑 황금 열쇠 +30점!', 40);
           } else {
             helpers.playSfx('coin', 1);
           }
@@ -557,9 +838,12 @@
           }
           popups.push({
             x: it.x,
-            y: it.y - 10,
-            text: '+' + it.points + '점!',
-            color: it.kind === 'star' ? '#ff6f00' : '#2e7d32',
+            y: it.y - 12,
+            text:
+              it.kind === 'star'
+                ? '+' + it.points + '점! ❤️+1'
+                : '+' + it.points + '점!',
+            color: it.kind === 'star' ? '#FFE840' : '#FFFFFF',
             life: 32
           });
           items.splice(i, 1);
@@ -567,7 +851,6 @@
         }
       }
 
-      // 장애물 충돌 판정
       if (player.invincibleTimer > 0) return;
 
       for (var j = 0; j < obstacles.length; j++) {
@@ -577,12 +860,10 @@
         if (pRight < oLeft || pLeft > oRight) continue;
 
         if (obs.category === 'ground') {
-          // 바닥 장애물: 점프해서 발 위치가 충분히 높으면 통과
           if (player.y < -26) continue;
           triggerObstacleHit(obs);
           break;
         } else if (obs.category === 'air') {
-          // 공중 장애물: 납작 숙이기 상태이면 안전하게 아래로 통과
           if (player.isDucking && player.y > -15) continue;
           triggerObstacleHit(obs);
           break;
@@ -592,114 +873,220 @@
 
     function renderCanvas() {
       if (!gCtx) return;
+      gCtx.save();
+      if (dpr !== 1) {
+        gCtx.scale(dpr, dpr);
+      }
       gCtx.clearRect(0, 0, W, H);
 
-      // 하늘 배경
-      var skyGrad = gCtx.createLinearGradient(0, 0, 0, GROUND_Y);
-      skyGrad.addColorStop(0, '#81d4fa');
-      skyGrad.addColorStop(1, '#e1f5fe');
-      gCtx.fillStyle = skyGrad;
+      // 1. 픽셀 블루 하늘 배경 (#48B8F8)
+      gCtx.fillStyle = '#48B8F8';
       gCtx.fillRect(0, 0, W, GROUND_Y);
 
-      // 구름
-      gCtx.fillStyle = 'rgba(255, 255, 255, 0.88)';
-      for (var c = 0; c < clouds.length; c++) {
-        var cl = clouds[c];
-        gCtx.beginPath();
-        gCtx.arc(cl.x, cl.y, cl.size * 0.6, 0, Math.PI * 2);
-        gCtx.arc(cl.x + cl.size * 0.5, cl.y - 4, cl.size * 0.5, 0, Math.PI * 2);
-        gCtx.arc(cl.x - cl.size * 0.5, cl.y + 2, cl.size * 0.45, 0, Math.PI * 2);
-        gCtx.fill();
+      // 2. 원경 거대 흰색 계단형 구름산맥 (패럴랙스 레이어 1)
+      var mtnScroll = (tick * speed * 0.1) % 240;
+      for (var mx = -mtnScroll - 120; mx < W + 240; mx += 240) {
+        var bmx = Math.round(mx);
+        gCtx.fillStyle = '#D8F0FF';
+        gCtx.fillRect(bmx, GROUND_Y - 102, 240, 26);
+        gCtx.fillStyle = '#FFFFFF';
+        gCtx.fillRect(bmx + 16, GROUND_Y - 118, 208, 18);
+        gCtx.fillRect(bmx + 36, GROUND_Y - 134, 156, 16);
+        gCtx.fillRect(bmx + 64, GROUND_Y - 150, 96, 16);
+        gCtx.fillRect(bmx + 88, GROUND_Y - 164, 48, 14);
       }
 
-      // 초원 언덕과 트랙 바닥
-      gCtx.fillStyle = '#81c784';
-      gCtx.fillRect(0, GROUND_Y - 8, W, 12);
-      gCtx.fillStyle = '#558b2f';
-      gCtx.fillRect(0, GROUND_Y, W, 6);
-      gCtx.fillStyle = '#d7ccc8';
-      gCtx.fillRect(0, GROUND_Y + 6, W, H - GROUND_Y - 6);
+      // 3. 상공 계단식 픽셀 구름
+      for (var c = 0; c < clouds.length; c++) {
+        drawPixelCloud(gCtx, clouds[c].x, clouds[c].y, clouds[c].scale);
+      }
 
-      // 발밑 내 속성 먼지/불꽃 파티클
+      // 4. 민트색 원경 덤불 수관 (#98E898, 패럴랙스 레이어 2)
+      var bushScroll = (tick * speed * 0.2) % 56;
+      gCtx.fillStyle = '#78D080';
+      gCtx.fillRect(0, GROUND_Y - 82, W, 24);
+      gCtx.fillStyle = '#98E898';
+      for (var bx = -bushScroll - 56; bx < W + 56; bx += 56) {
+        var rbx = Math.round(bx);
+        gCtx.fillRect(rbx + 4, GROUND_Y - 94, 48, 16);
+        gCtx.fillRect(rbx + 10, GROUND_Y - 100, 36, 8);
+        gCtx.fillStyle = '#68B870';
+        gCtx.fillRect(rbx + 26, GROUND_Y - 92, 4, 10);
+        gCtx.fillStyle = '#98E898';
+      }
+
+      // 5. 짙은 숲 배경띠 (#205848) 및 초원 잔디밭 (#58B848)
+      gCtx.fillStyle = '#205848';
+      gCtx.fillRect(0, GROUND_Y - 62, W, 30);
+      gCtx.fillStyle = '#307860';
+      var darkTreeScroll = (tick * speed * 0.28) % 44;
+      for (var dtx = -darkTreeScroll; dtx < W + 44; dtx += 44) {
+        gCtx.fillRect(Math.round(dtx) + 8, GROUND_Y - 56, 24, 24);
+      }
+      gCtx.fillStyle = '#58B848';
+      gCtx.fillRect(0, GROUND_Y - 32, W, 32);
+
+      // 초원 위 작은 픽셀 꽃 장식
+      var flowerScroll = (tick * speed * 0.45) % 90;
+      for (var flx = -flowerScroll; flx < W + 90; flx += 90) {
+        var rflx = Math.round(flx);
+        gCtx.fillStyle = '#FFFFFF';
+        gCtx.fillRect(rflx + 20, GROUND_Y - 22, 4, 4);
+        gCtx.fillRect(rflx + 26, GROUND_Y - 16, 4, 4);
+        gCtx.fillStyle = '#389038';
+        gCtx.fillRect(rflx + 54, GROUND_Y - 20, 6, 4);
+      }
+
+      // 6. 둥근 픽셀 나무 행렬 (패럴랙스 레이어 3)
+      var treeSpacing = 128;
+      var treeScroll = (tick * speed * 0.45) % treeSpacing;
+      for (var tx = -treeScroll; tx < W + treeSpacing; tx += treeSpacing) {
+        drawPixelTree(gCtx, tx + 32, GROUND_Y - 14, 0.95);
+        drawPixelTree(gCtx, tx + 92, GROUND_Y - 6, 0.78);
+      }
+
+      // 7. 스테이지 랜드마크: 빨간 아치형 픽셀 골 도어 (배경 장식)
+      var doorCycle = 680;
+      var doorX = W - ((tick * speed * 0.65 + 160) % doorCycle) + 80;
+      if (doorX > -40 && doorX < W + 40) {
+        drawPixelGoalDoor(gCtx, doorX, GROUND_Y - 12);
+      }
+
+      // 8. 상단 천장 픽셀 가시 장식 (레퍼런스 이미지 상단 가시열 재현)
+      for (var sx = 28; sx < W - 40; sx += 22) {
+        drawPixelSpikeDown(gCtx, sx, 0, 14, 15);
+      }
+
+      // 9. 테라코타 별무늬 흙 바닥 (#C07040) & 픽셀 잔디 캡 (#78C830)
+      gCtx.fillStyle = '#C07040';
+      gCtx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+
+      var groundPatternSpacing = 56;
+      var groundScroll = Math.round((tick * speed) % groundPatternSpacing);
+      for (var gx = -groundScroll - groundPatternSpacing; gx < W + groundPatternSpacing; gx += groundPatternSpacing) {
+        drawPixelStarCross(gCtx, gx + 18, GROUND_Y + 28, '#FFFFFF');
+        drawPixelStarCross(gCtx, gx + 46, GROUND_Y + 48, '#703818');
+        gCtx.fillStyle = '#703818';
+        gCtx.fillRect(gx + 34, GROUND_Y + 24, 4, 4);
+        gCtx.fillRect(gx + 12, GROUND_Y + 50, 4, 4);
+      }
+
+      // 잔디 캡 상단 2px 검은 외곽선 + 초록 잔디 + 톱니 프린지
+      gCtx.fillStyle = '#181818';
+      gCtx.fillRect(0, GROUND_Y - 12, W, 16);
+      gCtx.fillStyle = '#88E050';
+      gCtx.fillRect(0, GROUND_Y - 10, W, 3);
+      gCtx.fillStyle = '#78C830';
+      gCtx.fillRect(0, GROUND_Y - 7, W, 6);
+      gCtx.fillStyle = '#489818';
+      var toothScroll = Math.round((tick * speed) % 12);
+      for (varzgx = -toothScroll; varzgx < W + 12; varzgx += 12) {
+        gCtx.fillRect(varzgx, GROUND_Y - 2, 7, 4);
+      }
+
+      // 10. 좌우 테라코타 픽셀 기둥 프레임 (레퍼런스 이미지의 좌우 벽면 재현)
+      var pillarW = 22;
+      gCtx.fillStyle = '#181818';
+      gCtx.fillRect(0, 0, pillarW + 3, H);
+      gCtx.fillRect(W - pillarW - 3, 0, pillarW + 3, H);
+      gCtx.fillStyle = '#C07040';
+      gCtx.fillRect(0, 0, pillarW, H);
+      gCtx.fillRect(W - pillarW, 0, pillarW, H);
+      for (var py = 24; py < H - 16; py += 48) {
+        drawPixelStarCross(gCtx, 11, py, '#FFFFFF');
+        drawPixelStarCross(gCtx, W - 11, py, '#FFFFFF');
+        gCtx.fillStyle = '#703818';
+        gCtx.fillRect(8, py + 24, 4, 4);
+        gCtx.fillRect(W - 12, py + 24, 4, 4);
+      }
+
+      // 11. 발밑 픽셀 파티클
       for (var p = 0; p < particles.length; p++) {
         var pt = particles[p];
         gCtx.save();
         gCtx.globalAlpha = Math.max(0, pt.life / pt.maxLife);
+        gCtx.fillStyle = '#181818';
+        gCtx.fillRect(Math.round(pt.x) - 1, Math.round(pt.y) - 1, pt.size + 2, pt.size + 2);
         gCtx.fillStyle = pt.color;
-        gCtx.beginPath();
-        gCtx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
-        gCtx.fill();
+        gCtx.fillRect(Math.round(pt.x), Math.round(pt.y), pt.size, pt.size);
         gCtx.restore();
       }
 
-      // 아이템 그리기
-      gCtx.textAlign = 'center';
-      gCtx.textBaseline = 'middle';
+      // 12. 픽셀아트 수집 아이템 렌더링 (황금 열쇠 / 빨간 열매 / 황금별)
       for (var i = 0; i < items.length; i++) {
         var it = items[i];
-        var bobY = it.y + Math.sin((tick + i * 12) * 0.12) * 4;
-        if (it.kind === 'orb' || it.kind === 'star') {
-          gCtx.save();
-          gCtx.fillStyle =
-            it.kind === 'star'
-              ? 'rgba(255, 215, 64, 0.36)'
-              : 'rgba(255, 255, 255, 0.45)';
-          gCtx.beginPath();
-          gCtx.arc(it.x, bobY, 22, 0, Math.PI * 2);
-          gCtx.fill();
-          gCtx.restore();
+        var bobY = it.y + Math.round(Math.sin((tick + i * 12) * 0.12) * 4);
+        if (it.kind === 'star') {
+          drawPixelStarItem(gCtx, it.x, bobY);
+        } else if (it.kind === 'orb') {
+          drawPixelKeyItem(gCtx, it.x, bobY);
+        } else {
+          drawPixelBerryItem(gCtx, it.x, bobY);
         }
-        gCtx.font = '28px sans-serif';
-        gCtx.fillText(it.emoji, it.x, bobY);
       }
 
-      // 장애물 및 6~7세용 힌트 배지(⬆️점프! / ⬇️숙이기!) 그리기
+      // 13. 픽셀아트 장애물 & 6~7세용 힌트 배지(⬆️ 점프! / ⬇️ 숙이기!) 렌더링
+      gCtx.textAlign = 'center';
+      gCtx.textBaseline = 'middle';
       for (var j = 0; j < obstacles.length; j++) {
         var obs = obstacles[j];
-        var centerX = obs.x + obs.width * 0.5;
-        var centerY = obs.y + obs.height * 0.5;
+        var centerX = Math.round(obs.x + obs.width * 0.5);
 
-        // 힌트 배지
-        var badgeY = obs.y - 16;
-        gCtx.save();
-        gCtx.fillStyle = obs.category === 'ground' ? '#ff7043' : '#0288d1';
-        gCtx.beginPath();
-        if (typeof gCtx.roundRect === 'function') {
-          gCtx.roundRect(centerX - 34, badgeY - 11, 68, 20, 10);
+        if (obs.category === 'ground') {
+          if (obs.spriteKind === 'spiked_block') {
+            drawPixelFloatingIsland(gCtx, obs.x, GROUND_Y - 44, obs.width, 36, true);
+          } else {
+            drawPixelSpikeUp(gCtx, obs.x + 2, GROUND_Y - 10, 15, 22);
+            drawPixelSpikeUp(gCtx, obs.x + 17, GROUND_Y - 10, 15, 24);
+            drawPixelSpikeUp(gCtx, obs.x + 32, GROUND_Y - 10, 15, 22);
+          }
         } else {
-          gCtx.rect(centerX - 34, badgeY - 11, 68, 20);
+          drawPixelFloatingIsland(
+            gCtx,
+            obs.x,
+            obs.y,
+            obs.width,
+            obs.height,
+            obs.spriteKind === 'spiked_island'
+          );
         }
-        gCtx.fill();
-        gCtx.fillStyle = '#ffffff';
-        gCtx.font = 'bold 11px "Noto Sans KR", sans-serif';
-        gCtx.fillText(obs.hintText, centerX, badgeY);
-        gCtx.restore();
 
-        // 장애물 본체 이모지
-        gCtx.font = '38px sans-serif';
-        gCtx.fillText(obs.emoji, centerX, centerY);
+        // 픽셀 스타일 안내 배지
+        var badgeY = obs.y - 22;
+        var badgeW = 84;
+        var badgeH = 22;
+        gCtx.fillStyle = '#181818';
+        gCtx.fillRect(centerX - badgeW * 0.5 - 2, badgeY - badgeH * 0.5 - 2, badgeW + 4, badgeH + 4);
+        gCtx.fillStyle = obs.category === 'ground' ? '#FF5722' : '#0288D1';
+        gCtx.fillRect(centerX - badgeW * 0.5, badgeY - badgeH * 0.5, badgeW, badgeH);
+        gCtx.fillStyle = '#FFFFFF';
+        gCtx.font = '900 12px "Noto Sans KR", sans-serif';
+        gCtx.fillText(obs.hintText, centerX, badgeY);
       }
 
-      // 점수 팝업
+      // 14. 점수 보너스 팝업
       for (var k = 0; k < popups.length; k++) {
         var pop = popups[k];
         gCtx.save();
+        gCtx.fillStyle = '#181818';
+        gCtx.font = '900 15px "Noto Sans KR", sans-serif';
+        gCtx.fillText(pop.text, pop.x + 1, pop.y + 1);
         gCtx.fillStyle = pop.color;
-        gCtx.font = 'bold 14px "Noto Sans KR", sans-serif';
         gCtx.fillText(pop.text, pop.x, pop.y);
         gCtx.restore();
       }
+
+      gCtx.restore();
     }
+
+    var varzgx = 0;
 
     function stepFrame() {
       if (isGameOver) return getState();
 
       tick += 1;
+      speed = Math.min(6.8, 4.6 + Math.floor(tick / 360) * 0.22);
 
-      // 완만한 속도 증가 (6~7세 배려: 최대 속도 제한)
-      speed = Math.min(6.4, 4.2 + Math.floor(tick / 360) * 0.22);
-
-      // 시간 경과 점수 증가
       if (tick % 15 === 0) {
         score += 1;
         if (score >= 100 && !rewarded) {
@@ -709,12 +1096,10 @@
         updateHud();
       }
 
-      // 무적 타이머 감소
       if (player.invincibleTimer > 0) {
         player.invincibleTimer -= 1;
       }
 
-      // 말풍선 타이머 감소
       if (bubbleTimer > 0) {
         bubbleTimer -= 1;
         if (bubbleTimer === 0) {
@@ -722,7 +1107,6 @@
         }
       }
 
-      // 자동 숙이기 유지 타이머 처리
       if (player.isDucking && !player.duckKeyHeld) {
         if (player.duckHoldTimer > 0) {
           player.duckHoldTimer -= 1;
@@ -735,7 +1119,6 @@
         player.duckHoldTimer -= 1;
       }
 
-      // 점프 물리 업데이트
       if (player.isJumping || player.y < 0 || player.vy !== 0) {
         player.y += player.vy;
         player.vy += GRAVITY;
@@ -747,17 +1130,14 @@
           spawnFootstepDust(3);
         }
       } else if (tick % 4 === 0) {
-        // 달리는 동안 발밑 속성 파티클 생성
         spawnFootstepDust(1);
       }
 
-      // 구름 이동
       for (var c = 0; c < clouds.length; c++) {
         clouds[c].x -= clouds[c].speed;
-        if (clouds[c].x < -50) clouds[c].x = W + 50;
+        if (clouds[c].x < -60) clouds[c].x = W + 60;
       }
 
-      // 파티클 업데이트
       for (var p = particles.length - 1; p >= 0; p--) {
         var pt = particles[p];
         pt.x += pt.vx;
@@ -766,14 +1146,12 @@
         if (pt.life <= 0) particles.splice(p, 1);
       }
 
-      // 팝업 업데이트
       for (var k = popups.length - 1; k >= 0; k--) {
-        popups[k].y -= 0.8;
+        popups[k].y -= 0.85;
         popups[k].life -= 1;
         if (popups[k].life <= 0) popups.splice(k, 1);
       }
 
-      // 스폰 관리
       nextObstacleIn -= 1;
       if (nextObstacleIn <= 0) {
         spawnObstacle();
@@ -786,7 +1164,6 @@
         nextItemIn = 42 + Math.floor(Math.random() * 35);
       }
 
-      // 장애물 이동
       for (var j = obstacles.length - 1; j >= 0; j--) {
         obstacles[j].x -= speed;
         if (obstacles[j].x + obstacles[j].width < -40) {
@@ -794,7 +1171,6 @@
         }
       }
 
-      // 아이템 이동
       for (var i = items.length - 1; i >= 0; i--) {
         items[i].x -= speed;
         if (items[i].x < -40) {
@@ -820,7 +1196,7 @@
     function resetGame() {
       lives = 3;
       score = 0;
-      speed = 4.2;
+      speed = 4.6;
       tick = 0;
       isGameOver = false;
       running = true;
@@ -874,14 +1250,30 @@
       };
     }
 
-    // 이벤트 리스너 바인딩
-    function onJumpInput(e) {
+    var lastJumpPointerTime = -1000;
+    var lastDuckPointerTime = -1000;
+
+    function onJumpPointerDown(e) {
       if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      lastJumpPointerTime = Date.now();
       jump();
     }
 
-    function onDuckStart(e) {
+    function onJumpClick(e) {
       if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      if (Date.now() - lastJumpPointerTime < 300) return;
+      jump();
+    }
+
+    function onDuckPointerDown(e) {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      lastDuckPointerTime = Date.now();
+      tapDuckButton();
+    }
+
+    function onDuckClick(e) {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      if (Date.now() - lastDuckPointerTime < 300) return;
       tapDuckButton();
     }
 
@@ -909,18 +1301,17 @@
       }
     }
 
-    jumpBtn.addEventListener('pointerdown', onJumpInput);
-    jumpBtn.addEventListener('click', onJumpInput);
-    duckBtn.addEventListener('pointerdown', onDuckStart);
+    jumpBtn.addEventListener('pointerdown', onJumpPointerDown);
+    jumpBtn.addEventListener('click', onJumpClick);
+    duckBtn.addEventListener('pointerdown', onDuckPointerDown);
     duckBtn.addEventListener('pointerup', onDuckEnd);
-    duckBtn.addEventListener('click', onDuckStart);
+    duckBtn.addEventListener('click', onDuckClick);
 
     if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
       window.addEventListener('keydown', onKeyDown);
       window.addEventListener('keyup', onKeyUp);
     }
 
-    // 테스트 및 외부 제어 훅 노출
     stageEl._runnerGame = {
       jump: jump,
       duck: duck,
@@ -945,11 +1336,11 @@
         cancelAnimationFrame(rafId);
         rafId = null;
       }
-      jumpBtn.removeEventListener('pointerdown', onJumpInput);
-      jumpBtn.removeEventListener('click', onJumpInput);
-      duckBtn.removeEventListener('pointerdown', onDuckStart);
+      jumpBtn.removeEventListener('pointerdown', onJumpPointerDown);
+      jumpBtn.removeEventListener('click', onJumpClick);
+      duckBtn.removeEventListener('pointerdown', onDuckPointerDown);
       duckBtn.removeEventListener('pointerup', onDuckEnd);
-      duckBtn.removeEventListener('click', onDuckStart);
+      duckBtn.removeEventListener('click', onDuckClick);
       if (typeof window !== 'undefined' && typeof window.removeEventListener === 'function') {
         window.removeEventListener('keydown', onKeyDown);
         window.removeEventListener('keyup', onKeyUp);

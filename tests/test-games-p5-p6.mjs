@@ -47,12 +47,17 @@ function createMockElement(tagName = 'div', attrs = {}) {
 function createMockStage() {
   const roleMap = new Map();
   let htmlContent = '';
+  let innerHtmlWrites = 0;
   return {
+    get innerHtmlWrites() {
+      return innerHtmlWrites;
+    },
     get innerHTML() {
       return htmlContent;
     },
     set innerHTML(val) {
       htmlContent = String(val || '');
+      innerHtmlWrites += 1;
       roleMap.clear();
     },
     querySelector(selector) {
@@ -236,9 +241,11 @@ test('2. memory 게임에서 skipPreview(), useHint(), flipCard() 짝맞추기 �
   }
 
   assert.equal(stageEl._memoryGame.getState().stageCleared, true, '1스테이지 4쌍 완료 시 stageCleared가 true여야 함');
+  assert.equal(stageEl.innerHtmlWrites, 1, '1스테이지 진행 중 카드 뒤집기/힌트로 인해 innerHTML이 재할당되지 않아야 함');
 
   // 2스테이지(6쌍, 12장) 전환 확인
   stageEl._memoryGame.nextStage();
+  assert.equal(stageEl.innerHtmlWrites, 2, '2스테이지 전환 시에만 새 스테이지 보드가 마운트되어야 함');
   const st2 = stageEl._memoryGame.getState();
   assert.equal(st2.stage, 2);
   assert.equal(st2.totalPairs, 6);
@@ -317,6 +324,7 @@ test('3. flipbattle 게임에서 flipTile(), triggerRainbowBurst() 십자 뒤집
   assert.equal(helpers.highScores.flipbattle, 195);
   assert.equal(helpers.calls.rewards, 1);
   assert.equal(helpers.calls.overlays.length, 1);
+  assert.equal(stageEl.innerHtmlWrites, 1, '판 뒤집기 대결 중 타일 클릭/십자 폭발/타이머 진행 시 innerHTML이 재할당되지 않아야 함');
 
   cleanup();
   assert.equal(stageEl._flipBattleGame, null, 'cleanup 호출 후 _flipBattleGame 훅이 해제되어야 함');

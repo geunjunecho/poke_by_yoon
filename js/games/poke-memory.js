@@ -182,6 +182,18 @@
     });
   }
 
+  var ALARM_CLOCK_SVG =
+    '<svg class="poke-arcade-clock-svg" viewBox="0 0 64 64" width="44" height="44" aria-hidden="true">' +
+      '<path d="M10 18 C6 12, 14 4, 22 10 L18 20 Z" fill="#FACC15" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<path d="M54 18 C58 12, 50 4, 42 10 L46 20 Z" fill="#FACC15" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<rect x="29" y="5" width="6" height="8" rx="3" fill="#EAB308" stroke="#FFFFFF" stroke-width="2"/>' +
+      '<path d="M18 52 L13 59 M46 52 L51 59" stroke="#FACC15" stroke-width="5" stroke-linecap="round"/>' +
+      '<circle cx="32" cy="35" r="22" fill="#FACC15" stroke="#FFFFFF" stroke-width="3"/>' +
+      '<circle cx="32" cy="35" r="17" fill="#FFFFFF" stroke="#EAB308" stroke-width="2"/>' +
+      '<path d="M32 35 L32 24 M32 35 L25 40" stroke="#334155" stroke-width="2.8" stroke-linecap="round"/>' +
+      '<circle cx="32" cy="35" r="2.6" fill="#334155"/>' +
+    '</svg>';
+
   function buildMemoryMarkup(hero, state) {
     var cfg = STAGE_CONFIGS[state.stage] || STAGE_CONFIGS[1];
     var cardsHtml = state.cards.map(function (card) {
@@ -193,19 +205,23 @@
       if (card.isHero) cls += ' is-hero-card';
 
       return (
-        '<button type="button" class="' + cls + '" data-role="memory-card" data-card-index="' + card.index + '" aria-label="' + (showFace ? card.nameKr : '뒤집힌 포켓몬 카드') + '">' +
+        '<button type="button" class="' + cls + '" data-role="memory-card" data-card-index="' + card.index + '" data-flipped="' + (showFace ? 'true' : 'false') + '" data-matched="' + (card.isMatched ? 'true' : 'false') + '" aria-label="' + (showFace ? card.nameKr : '뒤집힌 포켓몬 카드') + '">' +
           '<div class="poke-memory-card-inner">' +
             '<div class="poke-memory-card-back">' +
-              '<div class="poke-memory-pokeball-emblem">' +
-                '<div class="poke-memory-pokeball-top"></div>' +
-                '<div class="poke-memory-pokeball-center"></div>' +
+              '<div class="poke-memory-well poke-memory-well-back">' +
+                '<div class="poke-memory-pokeball-emblem">' +
+                  '<div class="poke-memory-pokeball-top"></div>' +
+                  '<div class="poke-memory-pokeball-center"></div>' +
+                '</div>' +
+                '<span class="poke-memory-back-label">POKÉMON</span>' +
               '</div>' +
-              '<span class="poke-memory-back-label">POKÉMON</span>' +
             '</div>' +
             '<div class="poke-memory-card-front">' +
-              (card.isHero ? '<span class="poke-memory-hero-badge">👑 내 파트너</span>' : '') +
-              '<img class="poke-memory-card-img" src="' + card.artworkUrl + '" alt="' + card.nameKr + '" />' +
-              '<span class="poke-memory-card-name">' + card.nameKr + '</span>' +
+              '<div class="poke-memory-well poke-memory-well-front">' +
+                (card.isHero ? '<span class="poke-memory-hero-badge">👑 내 파트너</span>' : '') +
+                '<img class="poke-memory-card-img" src="' + card.artworkUrl + '" alt="' + card.nameKr + '" width="72" height="72" decoding="async" draggable="false" />' +
+                '<span class="poke-memory-card-name">' + card.nameKr + '</span>' +
+              '</div>' +
             '</div>' +
           '</div>' +
         '</button>'
@@ -216,15 +232,22 @@
       '<div class="poke-memory-root" data-stage="' + state.stage + '">' +
         '<div class="poke-memory-hud">' +
           '<div class="poke-memory-hud-left">' +
+            '<div class="poke-memory-hud-avatar">' +
+              '<img src="' + hero.artworkUrl + '" alt="' + hero.nameKr + '" width="46" height="46" decoding="async" draggable="false" />' +
+            '</div>' +
+            '<span class="poke-memory-big-num" data-role="hud-pairs-num">' + state.matchedPairs + '/' + state.totalPairs + '</span>' +
             '<span class="poke-memory-stage-pill" data-role="stage-pill">🃏 ' + cfg.label + '</span>' +
-            '<span class="poke-memory-pairs-pill" data-role="pairs-pill">짝꿍 ' + state.matchedPairs + ' / ' + state.totalPairs + '</span>' +
+            '<span class="poke-memory-pairs-pill sr-only" data-role="pairs-pill">짝꿍 ' + state.matchedPairs + ' / ' + state.totalPairs + '</span>' +
+          '</div>' +
+          '<div class="poke-memory-hud-clock">' +
+            ALARM_CLOCK_SVG +
+            '<span class="poke-memory-big-num" data-role="hud-score-num">' + state.score + '</span>' +
+            '<span class="poke-memory-score-pill sr-only" data-role="score-pill">점수 ' + state.score + '점</span>' +
           '</div>' +
           '<div class="poke-memory-hud-right">' +
-            '<button type="button" class="poke-memory-hint-btn" data-role="hint-btn">⚡ 도감 레이더 힌트!</button>' +
-            (state.isPreviewing
-              ? '<button type="button" class="poke-memory-skip-btn" data-role="skip-btn">👀 바로 시작!</button>'
-              : '') +
-            '<span class="poke-memory-score-pill" data-role="score-pill">점수 ' + state.score + '점</span>' +
+            '<button type="button" class="poke-memory-hint-btn" data-role="hint-btn">⚡ 힌트!</button>' +
+            '<button type="button" class="poke-memory-skip-btn" data-role="skip-btn"' + (state.isPreviewing ? '' : ' style="display: none;"') + '>👀 시작!</button>' +
+            '<div class="poke-memory-corner-ribbon">카드 뒤집기</div>' +
           '</div>' +
         '</div>' +
         '<div class="poke-memory-banner" data-role="banner-text">' +
@@ -300,11 +323,28 @@
       stageTransitionTimerId = null;
     }
 
+    var cachedCardEls = [];
+
     function queryRole(role) {
       if (typeof stageEl.querySelector === 'function') {
         return stageEl.querySelector('[data-role="' + role + '"]');
       }
       return null;
+    }
+
+    function collectCardElements() {
+      cachedCardEls = [];
+      if (typeof stageEl.querySelectorAll === 'function') {
+        var found = stageEl.querySelectorAll('[data-role="memory-card"]');
+        if (!found || found.length === 0) {
+          found = stageEl.querySelectorAll('.poke-memory-card');
+        }
+        if (found && found.length) {
+          for (var i = 0; i < found.length; i++) {
+            cachedCardEls.push(found[i]);
+          }
+        }
+      }
     }
 
     function bindEvents() {
@@ -324,41 +364,116 @@
         });
       }
 
-      if (typeof stageEl.querySelectorAll === 'function') {
-        var cardEls = stageEl.querySelectorAll('.poke-memory-card');
-        if (!cardEls || cardEls.length === 0) {
-          cardEls = stageEl.querySelectorAll('[data-role="memory-card"]');
-        }
-        for (var i = 0; i < (cardEls ? cardEls.length : 0); i++) {
-          (function (cardEl, fallbackIdx) {
-            if (cardEl && typeof cardEl.addEventListener === 'function') {
-              cardEl.addEventListener('click', function (e) {
-                if (e && typeof e.preventDefault === 'function') e.preventDefault();
-                var attrIdx = cardEl.getAttribute ? cardEl.getAttribute('data-card-index') : null;
-                var idx = attrIdx !== null ? Number(attrIdx) : fallbackIdx;
-                flipCard(idx);
-              });
-            }
-          })(cardEls[i], i);
-        }
+      collectCardElements();
+      for (var i = 0; i < cachedCardEls.length; i++) {
+        (function (cardEl, fallbackIdx) {
+          if (cardEl && typeof cardEl.addEventListener === 'function') {
+            cardEl.addEventListener('click', function (e) {
+              if (e && typeof e.preventDefault === 'function') e.preventDefault();
+              var attrIdx = cardEl.getAttribute ? cardEl.getAttribute('data-card-index') : null;
+              var idx = attrIdx !== null ? Number(attrIdx) : fallbackIdx;
+              flipCard(idx);
+            });
+          }
+        })(cachedCardEls[i], i);
       }
     }
 
-    function render() {
+    /**
+     * 스테이지 DOM은 스테이지 시작 시 딱 1회만 생성하여
+     * CSS 3D 카드 회전(rotateY) 트랜지션과 이미지 레이아웃 고정성을 완벽히 보존합니다.
+     */
+    function mountStageDOM() {
       if (state.cleanedUp) return;
       stageEl.innerHTML = buildMemoryMarkup(hero, state);
+      bindEvents();
+      syncUI();
+    }
+
+    /**
+     * 카드 클릭·미리보기 종료·힌트·점수 변경 시 innerHTML 재할당 없이 인플레이스(In-Place)로만 갱신합니다.
+     */
+    function syncUI() {
+      if (state.cleanedUp) return;
+      var cfg = STAGE_CONFIGS[state.stage] || STAGE_CONFIGS[1];
+
+      var stagePillEl = queryRole('stage-pill');
+      if (stagePillEl) {
+        stagePillEl.textContent = '🃏 ' + cfg.label;
+      }
+
+      var hudPairsNumEl = queryRole('hud-pairs-num');
+      if (hudPairsNumEl) {
+        hudPairsNumEl.textContent = state.matchedPairs + '/' + state.totalPairs;
+      }
+
+      var hudScoreNumEl = queryRole('hud-score-num');
+      if (hudScoreNumEl) {
+        hudScoreNumEl.textContent = String(state.score);
+      }
+
+      var pairsPillEl = queryRole('pairs-pill');
+      if (pairsPillEl) {
+        pairsPillEl.textContent = '짝꿍 ' + state.matchedPairs + ' / ' + state.totalPairs;
+      }
+
+      var scorePillEl = queryRole('score-pill');
+      if (scorePillEl) {
+        scorePillEl.textContent = '점수 ' + state.score + '점';
+      }
+
       var bannerEl = queryRole('banner-text');
       if (bannerEl && state.bannerText) {
         bannerEl.textContent = state.bannerText;
       }
-      bindEvents();
+
+      var skipBtn = queryRole('skip-btn');
+      if (skipBtn) {
+        if (skipBtn.style) {
+          skipBtn.style.display = state.isPreviewing ? '' : 'none';
+        }
+        if (typeof skipBtn.setAttribute === 'function') {
+          skipBtn.setAttribute('aria-hidden', state.isPreviewing ? 'false' : 'true');
+        }
+      }
+
+      if (cachedCardEls.length !== state.cards.length) {
+        collectCardElements();
+      }
+
+      for (var i = 0; i < state.cards.length; i++) {
+        var card = state.cards[i];
+        var cardEl = cachedCardEls[i];
+        if (!cardEl && typeof stageEl.querySelector === 'function') {
+          cardEl = stageEl.querySelector('[data-card-index="' + card.index + '"]');
+        }
+        if (!cardEl) continue;
+
+        var showFace = state.isPreviewing || card.isFlipped || card.isMatched || card.isHinted;
+        var cls = 'poke-memory-card';
+        if (showFace) cls += ' is-flipped';
+        if (card.isMatched) cls += ' is-matched';
+        if (card.isHinted) cls += ' is-hinted';
+        if (card.isHero) cls += ' is-hero-card';
+
+        cardEl.className = cls;
+        if (typeof cardEl.setAttribute === 'function') {
+          cardEl.setAttribute('aria-label', showFace ? card.nameKr : '뒤집힌 포켓몬 카드');
+          cardEl.setAttribute('data-flipped', showFace ? 'true' : 'false');
+          cardEl.setAttribute('data-matched', card.isMatched ? 'true' : 'false');
+        }
+      }
     }
 
-    function startPreviewWindow() {
+    function startPreviewWindow(rebuildStageDom) {
       cancelTimer(previewTimerId);
       state.isPreviewing = true;
       state.bannerText = '👀 잘 보고 기억해봐요~! ✨';
-      render();
+      if (rebuildStageDom) {
+        mountStageDOM();
+      } else {
+        syncUI();
+      }
 
       var cfg = STAGE_CONFIGS[state.stage] || STAGE_CONFIGS[1];
       previewTimerId = addTimer(function () {
@@ -366,7 +481,7 @@
         if (state.isPreviewing && !state.finished) {
           state.isPreviewing = false;
           state.bannerText = '🃏 같은 포켓몬 카드 두 장을 찾아 뒤집어 보세요!';
-          render();
+          syncUI();
         }
       }, cfg.previewMs);
     }
@@ -381,7 +496,7 @@
       if (!state.isPreviewing) return false;
       state.isPreviewing = false;
       state.bannerText = '🃏 같은 포켓몬 카드 두 장을 찾아 뒤집어 보세요!';
-      render();
+      syncUI();
       return true;
     }
 
@@ -400,6 +515,7 @@
         }
       }
       state.flippedIndices = [];
+      syncUI();
     }
 
     /**
@@ -457,7 +573,7 @@
       state.hintsUsed += 1;
       state.bannerText = '⚡ 도감 레이더 작동! ' + target.nameKr + ' 짝꿍 위치가 반짝여요! ✨';
       safeHelpers.playSfx('collect', 5);
-      render();
+      syncUI();
 
       hintTimerId = addTimer(function () {
         hintTimerId = null;
@@ -467,7 +583,7 @@
         state.hintIndices = [];
         if (!state.finished) {
           state.bannerText = '🃏 방금 반짝인 카드를 기억해서 뒤집어 보세요!';
-          render();
+          syncUI();
         }
       }, HINT_FLASH_MS);
 
@@ -497,7 +613,7 @@
       state.cards = buildStageDeck(hero, 2);
 
       safeHelpers.playSfx('win');
-      startPreviewWindow();
+      startPreviewWindow(true);
       return true;
     }
 
@@ -510,7 +626,7 @@
       state.finished = true;
       state.isPreviewing = false;
       state.bannerText = '🎉 모든 포켓몬 카드 짝꿍을 다 찾았어요! 최고예요!';
-      render();
+      syncUI();
 
       var prevBest = safeHelpers.getHighScore('memory');
       safeHelpers.saveHighScore('memory', state.score);
@@ -559,7 +675,7 @@
       // 첫 번째 카드만 뒤집힌 상태
       if (state.flippedIndices.length === 1) {
         state.bannerText = '🔍 ' + card.nameKr + ' 카드를 찾았어요! 짝꿍은 어디 있을까?';
-        render();
+        syncUI();
         return {
           action: 'flip',
           card: { index: card.index, pokemonId: card.pokemonId, nameKr: card.nameKr, isHero: card.isHero },
@@ -606,12 +722,12 @@
 
         var isStageDone = state.matchedPairs >= state.totalPairs;
         state.stageCleared = isStageDone;
-        render();
+        syncUI();
 
         if (isStageDone) {
           if (state.stage < state.maxStage) {
             state.bannerText = '🌟 1스테이지 클리어! 더 신나는 2스테이지가 열려요!';
-            render();
+            syncUI();
             stageTransitionTimerId = addTimer(function () {
               stageTransitionTimerId = null;
               if (!state.finished && state.stage === 1) {
@@ -643,14 +759,14 @@
       state.mismatchPending = true;
       state.bannerText = '💖 아깝다~! ' + firstCard.nameKr + '랑 ' + secondCard.nameKr + ' 위치를 기억해 두자!';
       safeHelpers.playSfx('bounce', 1);
-      render();
+      syncUI();
 
       mismatchTimerId = addTimer(function () {
         mismatchTimerId = null;
         flushPendingMismatch();
         if (!state.finished) {
           state.bannerText = '🃏 다시 한 번 짝꿍 카드를 찾아 뒤집어 보세요!';
-          render();
+          syncUI();
         }
       }, MISMATCH_CLOSE_MS);
 
@@ -669,8 +785,8 @@
       };
     }
 
-    // 1스테이지 미리보기 시작
-    startPreviewWindow();
+    // 1스테이지 DOM 마운트 및 미리보기 시작
+    startPreviewWindow(true);
 
     var gameInstance = {
       skipPreview: skipPreview,
