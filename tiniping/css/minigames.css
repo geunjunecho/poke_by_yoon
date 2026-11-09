@@ -95,15 +95,19 @@
 .tp-minigame-overlay {
     position: fixed;
     inset: 0;
-    z-index: 22000;
+    width: 100vw;
+    height: var(--real-vh, 100vh);
+    z-index: 25000;
     display: none;
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    background: radial-gradient(circle at center, rgba(45, 27, 78, 0.88) 0%, rgba(18, 10, 38, 0.94) 100%);
+    background: radial-gradient(circle at center, rgba(45, 27, 78, 0.92) 0%, rgba(18, 10, 38, 0.96) 100%);
     backdrop-filter: blur(16px);
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.25s ease;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 #tp-minigame-overlay.open,
@@ -112,9 +116,18 @@
     opacity: 1;
 }
 
+/* 개별 게임 실행 중일 때: 포켓몬 오락실과 동일한 100% 전체화면 아케이드 모드 */
+#tp-minigame-overlay.is-playing,
+.tp-minigame-overlay.is-playing {
+    padding: 0;
+    align-items: stretch;
+    justify-content: stretch;
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+}
+
 .tp-minigame-shell {
     width: 100%;
-    max-width: 980px;
+    max-width: 1120px;
     max-height: 94vh;
     display: flex;
     flex-direction: column;
@@ -127,6 +140,23 @@
         inset 0 2px 12px rgba(255, 255, 255, 0.8);
     overflow: hidden;
     position: relative;
+}
+
+#tp-minigame-overlay.is-playing .tp-minigame-shell,
+.tp-minigame-overlay.is-playing .tp-minigame-shell {
+    max-width: none;
+    max-height: none;
+    width: 100vw;
+    height: 100%;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+}
+
+#tp-minigame-overlay.is-playing .tp-mg-header,
+.tp-minigame-overlay.is-playing .tp-mg-header {
+    display: none !important;
 }
 
 /* 상단 파트너 티니핑 헤더 */
@@ -412,65 +442,125 @@
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
 }
 
-/* ===== 5. 개별 게임 실행 상단 바 & 스테이지 ===== */
+/* ===== 5. 개별 게임 실행 상단 바 & 스테이지 (포켓몬 오락실과 동일한 전체화면 스테이지) ===== */
+#tp-minigame-overlay.is-playing .tp-minigame-stage,
+.tp-minigame-overlay.is-playing .tp-minigame-stage {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
 .tp-game-active-bar {
+    height: 58px;
+    padding: 8px 16px;
+    background: rgba(15, 23, 42, 0.94);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.15);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    padding: 0.65rem 1rem;
-    background: rgba(255, 255, 255, 0.85);
-    border-radius: 20px;
-    border: 2px solid #FFB6D3;
-    box-shadow: 0 4px 14px rgba(255, 105, 180, 0.12);
+    gap: 12px;
+    flex-shrink: 0;
+    z-index: 20;
+}
+
+.tp-game-active-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 .tp-game-back-btn,
-.tp-game-restart-btn {
-    padding: 0.5rem 1rem;
-    border-radius: 50px;
-    border: 2px solid #FF85B3;
-    background: #FFF;
-    color: #C2185B;
-    font-family: 'Jua', sans-serif;
+.tp-game-restart-btn,
+.tp-game-exit-btn {
+    min-height: 40px;
+    padding: 7px 14px;
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    font-family: 'Jua', 'Noto Sans KR', sans-serif;
     font-size: 0.95rem;
+    font-weight: 900;
+    color: #FFFFFF;
     cursor: pointer;
-    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.12s ease, filter 0.12s ease;
+    white-space: nowrap;
+}
+
+.tp-game-back-btn {
+    background: linear-gradient(180deg, #475569 0%, #1e293b 100%);
+    box-shadow: 0 3px 0 #0f172a;
+}
+
+.tp-game-restart-btn {
+    background: linear-gradient(180deg, #a855f7 0%, #7e22ce 100%);
+    box-shadow: 0 3px 0 #581c87;
+}
+
+.tp-game-exit-btn {
+    background: linear-gradient(180deg, #ff5e62 0%, #dc0a2d 100%);
+    box-shadow: 0 3px 0 #8b0000;
 }
 
 .tp-game-back-btn:hover,
-.tp-game-restart-btn:hover {
-    background: #FF69B4;
-    color: #FFF;
+.tp-game-restart-btn:hover,
+.tp-game-exit-btn:hover {
+    filter: brightness(1.08);
     transform: translateY(-1px);
+}
+
+.tp-game-back-btn:active,
+.tp-game-restart-btn:active,
+.tp-game-exit-btn:active {
+    transform: translateY(2px);
 }
 
 .tp-game-active-title {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-family: 'Jua', sans-serif;
-    font-size: 1.25rem;
-    color: #4A2040;
+    gap: 10px;
+    font-family: 'Jua', 'Noto Sans KR', sans-serif;
+    font-size: 1.2rem;
+    color: #FFE4F2;
+    min-width: 0;
+}
+
+.tp-game-active-title strong {
+    color: #FFD600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .tp-game-char-tag {
-    padding: 0.2rem 0.7rem;
-    border-radius: 50px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 2px solid #FFD600;
     color: #FFF;
-    font-size: 0.85rem;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    white-space: nowrap;
 }
 
 .tp-game-stage-body {
+    flex: 1;
+    min-height: 0;
     position: relative;
     width: 100%;
-    min-height: 430px;
-    background: linear-gradient(180deg, #FFF9FC 0%, #FDF2FF 60%, #F0F9FF 100%);
-    border-radius: 26px;
-    border: 3px solid #F9A8D4;
-    box-shadow: inset 0 4px 18px rgba(255, 105, 180, 0.12);
+    height: 100%;
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
     overflow: hidden;
     display: flex;
     flex-direction: column;

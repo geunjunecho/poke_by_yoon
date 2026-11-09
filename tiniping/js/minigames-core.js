@@ -625,6 +625,7 @@
             const overlay = this.ensureOverlay();
             if (!overlay) return this.charCtx;
 
+            overlay.classList.remove('is-playing');
             overlay.classList.add('open');
             this.renderHubContent();
             return this.charCtx;
@@ -635,6 +636,7 @@
             this.charCtx = this.buildCharContext(this.currentTp);
             const overlay = this.ensureOverlay();
             if (!overlay) return;
+            overlay.classList.remove('is-playing');
             overlay.classList.add('open');
             this.renderHubContent();
         },
@@ -644,6 +646,7 @@
             playSfx('pop');
             const overlay = (typeof document !== 'undefined' && document.getElementById('tp-minigame-overlay')) || this.overlayEl;
             if (overlay) {
+                overlay.classList.remove('is-playing');
                 overlay.classList.remove('open');
             }
         },
@@ -790,8 +793,10 @@
                 const overlay = this.ensureOverlay();
                 if (overlay) {
                     overlay.classList.add('open');
+                    overlay.classList.add('is-playing');
                     if (!overlay.querySelector('#tp-minigame-stage')) {
                         this.renderHubContent();
+                        overlay.classList.add('is-playing');
                     }
                     stageContainer = overlay.querySelector('#tp-minigame-stage');
                 }
@@ -807,16 +812,21 @@
             stageContainer.innerHTML = `
                 <div class="tp-game-active-bar">
                     <button type="button" class="tp-game-back-btn" id="tpGameBackToHubBtn">
-                        ◀ 오락실 목록으로
+                        ◀ 게임 고르기
                     </button>
                     <div class="tp-game-active-title">
                         <span>${gameIcon}</span>
                         <strong>${gameTitle}</strong>
                         <span class="tp-game-char-tag" style="background:${this.charCtx.color};">${this.charCtx.name}</span>
                     </div>
-                    <button type="button" class="tp-game-restart-btn" id="tpGameQuickRestartBtn">
-                        🔄 다시 시작
-                    </button>
+                    <div class="tp-game-active-actions">
+                        <button type="button" class="tp-game-restart-btn" id="tpGameQuickRestartBtn">
+                            🔄 다시 시작
+                        </button>
+                        <button type="button" class="tp-game-exit-btn" id="tpGameExitBtn">
+                            ✕ 닫기
+                        </button>
+                    </div>
                 </div>
                 <div class="tp-game-stage-body" id="tp-game-stage-body"></div>
             `;
@@ -834,6 +844,13 @@
                 restartBtn.addEventListener('click', () => {
                     playSfx('pop');
                     this.launchGame(id, customStageEl);
+                });
+            }
+
+            const exitBtn = stageContainer.querySelector('#tpGameExitBtn');
+            if (exitBtn) {
+                exitBtn.addEventListener('click', () => {
+                    this.closeHub();
                 });
             }
 

@@ -104,7 +104,7 @@
   inset: 0;
   width: 100vw;
   height: var(--real-vh, 100vh);
-  z-index: 5000;
+  z-index: 25000;
   background:
     radial-gradient(circle at 18% 18%, rgba(255, 214, 0, 0.16), transparent 45%),
     radial-gradient(circle at 82% 80%, rgba(78, 205, 196, 0.16), transparent 45%),
