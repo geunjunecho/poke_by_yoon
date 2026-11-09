@@ -312,10 +312,21 @@ test('2. runner 게임 마운트 후 jump(), duck(true), stepFrame() 및 cleanup
   stageEl._runnerGame.stepFrame();
   assert.ok(transformCalls > 0, 'computeRunTransform이 호출되어야 합니다');
 
-  // duck(true) 호출 시 isDucking === true 확인
+  // duck(true) 호출 시 isDucking === true 확인 및 duck(false) 즉시 해제 확인
   stageEl._runnerGame.duck(true);
   const afterDuck = stageEl._runnerGame.getState();
   assert.equal(afterDuck.isDucking, true, 'duck(true) 호출 후 isDucking === true 여야 합니다');
+  stageEl._runnerGame.duck(false);
+  assert.equal(stageEl._runnerGame.getState().isDucking, false, 'duck(false) 호출 즉시 숙이기가 해제되어야 합니다');
+
+  // 충돌 시 뒤로 팅팅 튕기는 넉백 바운스(knockbackTimer, knockbackX, knockbackBounceY) 동작 확인
+  stageEl._runnerGame.triggerObstacleHit();
+  stageEl._runnerGame.stepFrame();
+  const hitState = stageEl._runnerGame.getState();
+  assert.equal(hitState.lives, 2, '장애물 충돌 후 하트가 1 감소해야 합니다');
+  assert.ok(hitState.knockbackTimer > 0, '충돌 직후 knockbackTimer가 활성화되어야 합니다');
+  assert.ok(hitState.knockbackX < 0, `충돌 직후 뒤로 밀려나는 knockbackX < 0 이어야 합니다 (현재=${hitState.knockbackX})`);
+  assert.ok(hitState.knockbackBounceY < 0, `충돌 직후 위로 튀어오르는 knockbackBounceY < 0 이어야 합니다 (현재=${hitState.knockbackBounceY})`);
 
   // cleanup() 호출 후 리소스 해제 확인
   const keydownCountBefore = env.winListeners.get('keydown')?.size || 0;
@@ -451,6 +462,14 @@ test('4. P1/P2 퍼센트 좌표 동기화, 그림자, 우측 방향 플립 및 �
     1,
     'pointerdown 직후 이어지는 click 이벤트로 인해 2단 점프가 오발동하면 안 됩니다'
   );
+
+  // 숙이기 버튼: pointerdown 동안만 숙이고 pointerup 시 즉시 해제되어야 함
+  const duckBtn = stageEl.querySelector('.poke-runner-btn-duck');
+  duckBtn.dispatchEvent('pointerdown', { preventDefault() {} });
+  assert.equal(stageEl._runnerGame.getState().isDucking, true, '숙이기 버튼을 누르고 있을 때는 isDucking === true 여야 합니다');
+  duckBtn.dispatchEvent('pointerup', { preventDefault() {} });
+  duckBtn.dispatchEvent('click', { preventDefault() {} });
+  assert.equal(stageEl._runnerGame.getState().isDucking, false, '숙이기 버튼에서 손을 떼면 즉시 isDucking === false 가 되어야 합니다');
 
   cleanupRunner();
 
