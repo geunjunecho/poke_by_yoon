@@ -259,6 +259,48 @@ test('2. catch 게임에서 throwBallAtScale(0.9)(황금 구간) 호출 시 점�
   assert.equal(stageEl._catchGame, null, 'cleanup 호출 후 _catchGame 훅이 해제되어야 함');
 });
 
+test('2-1. catch 게임은 라운드 시작 시 battle 페이즈(HP 100)로 시작하며, 배틀 공격으로 HP를 0으로 만들어야 catch 페이즈로 전환되고 조준 판정과 링 속도가 라운드별로 강화된다', () => {
+  const stageEl = createMockStage();
+  const charCtx = createMockCharCtx();
+  const helpers = createMockHelpers();
+
+  const cleanup = globalThis.PokeGameCatch.mount(stageEl, charCtx, helpers);
+  const st0 = stageEl._catchGame.getState();
+
+  assert.equal(st0.phase, 'battle', '라운드 시작 시 battle 페이즈여야 함');
+  assert.equal(st0.hp, 100, '야생 포켓몬 초기 체력은 100이어야 함');
+  assert.equal(st0.maxHp, 100);
+
+  // 기존에 너무 쉽게 잡히던 큰 링(1.20)은 이제 빗맞음(caught=false)이어야 함
+  const earlyEval = globalThis.PokeGameCatch.evaluateRingScale(1.20, 1);
+  assert.equal(earlyEval.caught, false, '링이 아직 큰 상태(1.20)에서 던지면 포획 실패여야 함');
+  assert.equal(earlyEval.action, 'deflected');
+
+  // 라운드별 링 수축 속도가 1R보다 5R에서 더 빨라야 함
+  assert.equal(typeof globalThis.PokeGameCatch.getRingSpeedForRound, 'function');
+  assert.ok(
+    globalThis.PokeGameCatch.getRingSpeedForRound(5) > globalThis.PokeGameCatch.getRingSpeedForRound(1),
+    '5라운드 링 수축 속도가 1라운드보다 빨라야 함'
+  );
+
+  // battle 페이즈에서 메인 버튼 클릭 시 볼 투척이 아니라 배틀 공격이 수행되어야 함
+  const throwBtn = stageEl.querySelector('[data-role="throw-btn"]');
+  throwBtn.click();
+  const stAfterClick = stageEl._catchGame.getState();
+  assert.equal(stAfterClick.round, 1, '배틀 페이즈에서 첫 공격 클릭 시 바로 다음 라운드로 넘어가면 안 됨');
+  assert.ok(stAfterClick.hp < 100, '배틀 공격 후 야생 포켓몬 체력이 감소해야 함');
+
+  // 크리티컬 커서(0.5) 공격으로 체력을 완전히 깎으면 catch 페이즈로 전환되어야 함
+  while (stageEl._catchGame.getState().phase === 'battle') {
+    stageEl._catchGame.attackAtCursor(0.5);
+  }
+  const stCatch = stageEl._catchGame.getState();
+  assert.equal(stCatch.hp, 0, '배틀 제압 완료 시 체력이 0이어야 함');
+  assert.equal(stCatch.phase, 'catch', '체력이 0이 되면 catch 페이즈로 전환되어야 함');
+
+  cleanup();
+});
+
 test('3. seesaw 게임에서 현재 문제(mode: weight | height)의 정답 쪽을 선택했을 때 정답 판정 및 점수 증가가 정상 동작하고 cleanup()이 동작한다', () => {
   const stageEl = createMockStage();
   const charCtx = createMockCharCtx({ id: 25, nameKr: '피카츄', weight: 60, height: 4 });

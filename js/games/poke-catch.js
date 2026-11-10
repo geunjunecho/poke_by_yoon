@@ -69,16 +69,78 @@
   ];
 
   /**
+   * 라운드별 링 수축 속도 반환 (라운드가 올라갈수록 빨라짐)
+   */
+  function getRingSpeedForRound(roundIdx) {
+    var r = Math.max(1, Math.min(TOTAL_ROUNDS, Number(roundIdx) || 1));
+    return Number((0.022 + (r - 1) * 0.0045).toFixed(4));
+  }
+
+  /**
+   * 라운드별 배틀 타이밍 게이지 이동 속도 반환
+   */
+  function getBattleSpeedForRound(roundIdx) {
+    var r = Math.max(1, Math.min(TOTAL_ROUNDS, Number(roundIdx) || 1));
+    return Number((0.022 + (r - 1) * 0.0055).toFixed(4));
+  }
+
+  /**
+   * 배틀 페이즈 커서 위치(0.0 ~ 1.0, 중앙 0.5)에 따른 공격 판정
+   */
+  function evaluateBattleAttack(cursorPos, roundIdx, charInfo) {
+    var c = typeof cursorPos === 'number' && !isNaN(cursorPos) ? cursorPos : 0.5;
+    var r = Math.max(1, Math.min(TOTAL_ROUNDS, Number(roundIdx) || 1));
+    var dist = Math.abs(c - 0.5);
+    var critHalf = Math.max(0.08, 0.13 - (r - 1) * 0.01);
+    var hitHalf = Math.max(0.19, 0.27 - (r - 1) * 0.015);
+    var typeEmoji = (charInfo && charInfo.typeEmoji) || '⚡';
+    var typeNameKr = (charInfo && charInfo.typeNameKr) || '전기';
+
+    if (dist <= critHalf) {
+      var critDmg = r === 1 ? 100 : (r <= 3 ? 55 : 50);
+      return {
+        tier: 'critical',
+        damage: critDmg,
+        sparkText: typeEmoji + ' 크리티컬! -' + critDmg,
+        message: '💥 ' + typeEmoji + typeNameKr + ' 크리티컬 히트!! 체력이 크게 깎였어요!',
+        subMessage: '정확한 타이밍이에요! 포켓몬이 어지러워하면 볼을 던져요!'
+      };
+    }
+
+    if (dist <= hitHalf) {
+      var hitDmg = r === 1 ? 55 : (r <= 3 ? 40 : 35);
+      return {
+        tier: 'hit',
+        damage: hitDmg,
+        sparkText: '💥 명중! -' + hitDmg,
+        message: '⚡ ' + typeNameKr + ' 공격 명중! 야생 포켓몬의 힘이 빠지고 있어요!',
+        subMessage: '조금만 더 공격해서 체력을 0으로 만들어 주세요!'
+      };
+    }
+
+    var grazeDmg = 25;
+    return {
+      tier: 'graze',
+      damage: grazeDmg,
+      sparkText: '💨 스침 -' + grazeDmg,
+      message: '💨 살짝 스쳤어요! 게이지 가운데 노란 칸을 노려보세요!',
+      subMessage: '가운데 ⚡크리티컬 구간에 맞춰 누르면 단번에 힘을 뺄 수 있어요!'
+    };
+  }
+
+  /**
    * 링 스케일 값에 따른 판정 계산
-   * - 황금 링 구간 (0.75 <= ringScale <= 1.05): +100점
-   * - 초록 링 구간 (0.55 <= ringScale <= 1.30): +70점
-   * - 노란 링 구간 (그 외 구간): +30점
+   * - 황금 링 구간 (0.78 <= ringScale <= 0.98): +100점
+   * - 초록 링 구간 (0.58 <= ringScale <= 라운드별 상한 1.08~1.02): +70점
+   * - 노란 링 구간 (그 외 구간): +30점 (빗맞음 튕김)
    */
   function evaluateRingScale(scale, roundIdx) {
     var s = typeof scale === 'number' && !isNaN(scale) ? scale : 1.5;
-    var isMasterRound = roundIdx === TOTAL_ROUNDS;
+    var r = Math.max(1, Math.min(TOTAL_ROUNDS, Number(roundIdx) || 1));
+    var isMasterRound = r === TOTAL_ROUNDS;
+    var greenMax = Number((1.08 - (r - 1) * 0.015).toFixed(3));
 
-    if (s >= 0.75 && s <= 1.05) {
+    if (s >= 0.78 && s <= 0.98) {
       return {
         tier: 'excellent',
         zone: 'gold',
@@ -95,7 +157,7 @@
       };
     }
 
-    if (s >= 0.55 && s <= 1.30) {
+    if (s >= 0.58 && s <= greenMax) {
       return {
         tier: 'nice',
         zone: 'green',
@@ -112,24 +174,19 @@
       };
     }
 
-    var caughtByMaster = Boolean(isMasterRound);
     return {
       tier: 'good',
       zone: 'yellow',
       points: 30,
-      shakes: caughtByMaster ? 1 : 0,
-      caught: caughtByMaster,
-      action: caughtByMaster ? 'captured' : 'deflected',
+      shakes: 0,
+      caught: false,
+      action: 'deflected',
       rainbowBurst: false,
       ringColor: '#FFEE58',
       ringGlow: 'rgba(255, 238, 88, 0.75)',
-      hintText: '💛 초록색이 될 때까지 기다려요!',
-      message: caughtByMaster
-        ? '🟣 마스터볼 발동! 볼이 열리며 딱 잡혔어요! (+30점)'
-        : '💥 틱! 포켓몬에 부딪혀 볼이 땅에 떨어졌어요! (+30점)',
-      subMessage: caughtByMaster
-        ? '🟣 마스터볼이 도와줘서 찰칵 성공했어요!'
-        : '초록색·황금색 링일 때 던지면 몬스터볼이 열리며 포켓몬이 잡혀요!'
+      hintText: '💛 동그라미가 더 작아질 때까지 기다려요!',
+      message: '💥 틱! 포켓몬에 부딪혀 볼이 땅에 떨어졌어요! (+30점)',
+      subMessage: '동그라미가 포켓몬 몸 크기로 줄어들어 초록·황금색일 때 던져야 잡혀요!'
     };
   }
 
@@ -314,19 +371,19 @@
           'touch-action: manipulation;' +
         '}' +
         '.catch-zone-hint {' +
-          'margin-bottom: clamp(4px, 1vh, 10px); padding: 5px 16px; border-radius: 999px; flex-shrink: 0;' +
+          'margin-bottom: clamp(2px, 0.6vh, 6px); padding: 3px 14px; border-radius: 999px; flex-shrink: 0;' +
           'background: rgba(15, 23, 42, 0.76); border: 2px solid rgba(255,255,255,0.35);' +
-          'color: #FFF; font-size: clamp(13px, 2vw, 15px); font-weight: 800;' +
+          'color: #FFF; font-size: clamp(12px, 1.8vw, 14px); font-weight: 800;' +
           'text-align: center; transition: background 0.2s, transform 0.2s;' +
           'box-shadow: 0 4px 12px rgba(0,0,0,0.22);' +
         '}' +
         '.catch-target-container {' +
-          'position: relative; width: clamp(168px, 28vh, 220px); height: clamp(164px, 27vh, 214px);' +
+          'position: relative; width: clamp(136px, 21vh, 188px); height: clamp(132px, 20vh, 182px);' +
           'display: flex; align-items: center; justify-content: center; flex-shrink: 0;' +
         '}' +
         '.catch-pedestal {' +
-          'position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);' +
-          'width: 174px; height: 46px; border-radius: 50%; z-index: 1; pointer-events: none;' +
+          'position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);' +
+          'width: clamp(136px, 20vh, 168px); height: clamp(34px, 5vh, 44px); border-radius: 50%; z-index: 1; pointer-events: none;' +
           'background: radial-gradient(ellipse at 50% 38%, #bef264 0%, #84cc16 58%, #4d7c0f 100%);' +
           'border: 3.5px solid #ecfccb;' +
           'box-shadow: 0 8px 0 #365314, 0 14px 24px rgba(0, 0, 0, 0.38), inset 0 4px 10px rgba(255, 255, 255, 0.65);' +
@@ -336,18 +393,18 @@
           'border: 2px dashed rgba(255, 255, 255, 0.55);' +
         '}' +
         '.catch-guide-ring {' +
-          'position: absolute; width: 146px; height: 146px; border-radius: 50%; z-index: 3;' +
+          'position: absolute; width: clamp(116px, 17.5vh, 142px); height: clamp(116px, 17.5vh, 142px); border-radius: 50%; z-index: 3;' +
           'border: 3.5px dashed rgba(255, 255, 255, 0.92); pointer-events: none;' +
           'box-shadow: inset 0 0 14px rgba(255,255,255,0.48), 0 0 10px rgba(0,0,0,0.2);' +
         '}' +
         '.catch-target-ring {' +
-          'position: absolute; width: 146px; height: 146px; border-radius: 50%; z-index: 3;' +
+          'position: absolute; width: clamp(116px, 17.5vh, 142px); height: clamp(116px, 17.5vh, 142px); border-radius: 50%; z-index: 3;' +
           'border: 6px solid #FFEE58; pointer-events: none; box-sizing: border-box;' +
           'box-shadow: 0 0 20px rgba(255, 238, 88, 0.88);' +
           'transition: border-color 0.08s ease, box-shadow 0.08s ease;' +
         '}' +
         '.catch-pokemon-sprite {' +
-          'width: 132px; height: 132px; object-fit: contain; z-index: 2;' +
+          'width: clamp(104px, 16vh, 128px); height: clamp(104px, 16vh, 128px); object-fit: contain; z-index: 2;' +
           'filter: drop-shadow(0 12px 10px rgba(0,0,0,0.38));' +
           'transition: opacity 0.2s ease, transform 0.15s ease;' +
         '}' +
@@ -520,24 +577,105 @@
         '}' +
         '.catch-rainbow-burst.is-bursting { opacity: 1; transform: scale(1.28); }' +
         '.catch-feedback-banner {' +
-          'margin-top: 8px; min-height: 54px; width: 94%; max-width: 500px;' +
-          'background: rgba(255, 255, 255, 0.96); border: 2.5px solid #bbf7d0; border-radius: 16px; padding: 6px 14px;' +
+          'margin-top: 4px; min-height: 48px; width: 94%; max-width: 500px;' +
+          'background: rgba(255, 255, 255, 0.96); border: 2.5px solid #bbf7d0; border-radius: 16px; padding: 5px 12px;' +
           'display: flex; flex-direction: column; align-items: center; justify-content: center;' +
           'box-shadow: 0 6px 14px rgba(0,0,0,0.16); text-align: center;' +
         '}' +
-        '.catch-feedback-main { font-size: 16px; font-weight: 900; color: #1B5E20; }' +
-        '.catch-feedback-sub { font-size: 12px; font-weight: 700; color: #546E7A; margin-top: 2px; }' +
+        '.catch-feedback-main { font-size: clamp(13px, 2vw, 15.5px); font-weight: 900; color: #1B5E20; word-break: keep-all; }' +
+        '.catch-feedback-sub { font-size: clamp(11px, 1.6vw, 12px); font-weight: 700; color: #546E7A; margin-top: 2px; word-break: keep-all; }' +
+        '.catch-hp-bar-wrap {' +
+          'width: 92%; max-width: 390px; background: rgba(15, 23, 42, 0.86);' +
+          'border: 2.5px solid #e2e8f0; border-radius: 14px; padding: 5px 10px;' +
+          'margin-bottom: clamp(3px, 0.8vh, 6px); flex-shrink: 0;' +
+          'box-shadow: 0 5px 12px rgba(0,0,0,0.28); z-index: 4;' +
+        '}' +
+        '.catch-hp-top {' +
+          'display: flex; align-items: center; justify-content: space-between; gap: 6px;' +
+          'font-size: 12px; font-weight: 900; color: #f8fafc; margin-bottom: 4px;' +
+        '}' +
+        '.catch-phase-badge {' +
+          'padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 900;' +
+          'background: linear-gradient(180deg, #f97316 0%, #ea580c 100%); color: #fff;' +
+          'border: 1.5px solid #fed7aa;' +
+        '}' +
+        '.catch-phase-badge.is-catch-phase {' +
+          'background: linear-gradient(180deg, #10b981 0%, #059669 100%); border-color: #a7f3d0;' +
+        '}' +
+        '.catch-hp-track {' +
+          'width: 100%; height: 12px; border-radius: 999px; background: #1e293b;' +
+          'border: 1.5px solid #475569; overflow: hidden; position: relative;' +
+        '}' +
+        '.catch-hp-fill {' +
+          'height: 100%; width: 100%; border-radius: 999px;' +
+          'background: linear-gradient(90deg, #22c55e 0%, #4ade80 100%);' +
+          'transition: width 0.22s ease, background 0.22s ease;' +
+        '}' +
+        '.catch-hp-fill.is-mid { background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%); }' +
+        '.catch-hp-fill.is-low { background: linear-gradient(90deg, #ef4444 0%, #f87171 100%); }' +
+        '.catch-dizzy-stars {' +
+          'position: absolute; top: 4px; left: 50%; transform: translateX(-50%);' +
+          'font-size: 22px; font-weight: 900; z-index: 6; pointer-events: none;' +
+          'opacity: 0; transition: opacity 0.2s ease;' +
+          'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45));' +
+        '}' +
+        '.catch-dizzy-stars.is-active {' +
+          'opacity: 1; animation: catchDizzySpin 1.1s ease-in-out infinite;' +
+        '}' +
+        '@keyframes catchDizzySpin {' +
+          '0%, 100% { transform: translateX(-50%) translateY(0) scale(1); }' +
+          '50% { transform: translateX(-50%) translateY(-5px) scale(1.12); }' +
+        '}' +
+        '.catch-pokemon-sprite.is-battle-hit {' +
+          'animation: catchBattleRecoil 0.42s ease-out !important;' +
+        '}' +
+        '@keyframes catchBattleRecoil {' +
+          '0% { transform: translate3d(0, 0, 0) scale(1); filter: brightness(2.6) saturate(1.8); }' +
+          '25% { transform: translate3d(-14px, -6px, 0) rotate(-10deg) scale(0.92); filter: brightness(2.2) drop-shadow(0 0 18px #facc15); }' +
+          '55% { transform: translate3d(12px, 2px, 0) rotate(8deg) scale(1.04); }' +
+          '100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }' +
+        '}' +
+        '.catch-battle-gauge {' +
+          'width: 92%; max-width: 390px; margin-top: 4px; padding: 6px 10px;' +
+          'background: rgba(15, 23, 42, 0.88); border: 2.5px solid #fbbf24; border-radius: 14px;' +
+          'box-shadow: 0 6px 14px rgba(0,0,0,0.28); z-index: 4; flex-shrink: 0;' +
+        '}' +
+        '.catch-battle-gauge.is-hidden { display: none; }' +
+        '.catch-battle-gauge-label {' +
+          'font-size: 11.5px; font-weight: 900; color: #fef08a; text-align: center; margin-bottom: 4px;' +
+        '}' +
+        '.catch-battle-track {' +
+          'position: relative; width: 100%; height: 18px; border-radius: 999px; overflow: hidden;' +
+          'background: linear-gradient(90deg, #475569 0%, #475569 23%, #22c55e 23%, #22c55e 38%, #facc15 38%, #f59e0b 62%, #22c55e 62%, #22c55e 77%, #475569 77%, #475569 100%);' +
+          'border: 2px solid #f8fafc; box-shadow: inset 0 2px 4px rgba(0,0,0,0.45);' +
+        '}' +
+        '.catch-battle-cursor {' +
+          'position: absolute; top: -2px; bottom: -2px; width: 12px; left: 50%;' +
+          'transform: translateX(-50%); border-radius: 6px; background: #ffffff;' +
+          'border: 2.5px solid #dc2626; box-shadow: 0 0 10px #fef08a, 0 0 4px #000;' +
+        '}' +
+        '.catch-target-ring.is-battle-phase, .catch-guide-ring.is-battle-phase {' +
+          'opacity: 0.18;' +
+        '}' +
+        '.catch-flying-ball.is-battle-phase {' +
+          'opacity: 0.35; transform: translate3d(0, 134px, 0) scale(0.92); animation: none;' +
+        '}' +
         '.catch-controls {' +
-          'display: flex; justify-content: center; align-items: center; z-index: 3; margin-top: 6px;' +
+          'display: flex; justify-content: center; align-items: center; z-index: 3; margin-top: 4px;' +
         '}' +
         '.catch-throw-btn {' +
-          'width: 100%; max-width: 460px; min-height: 60px; border: 3px solid #fecaca; border-radius: 999px;' +
+          'width: 100%; max-width: 460px; min-height: clamp(50px, 7.5vh, 60px); border: 3px solid #fecaca; border-radius: 999px;' +
           'background: linear-gradient(180deg, #ff6b6b 0%, #ef4444 48%, #dc2626 100%); color: #FFFFFF;' +
-          'font-size: 20px; font-weight: 900; letter-spacing: -0.3px; cursor: pointer;' +
+          'font-size: clamp(16px, 2.4vw, 20px); font-weight: 900; letter-spacing: -0.3px; cursor: pointer;' +
           'box-shadow: 0 6px 0 #991b1b, 0 10px 20px rgba(0,0,0,0.28), inset 0 2px 0 rgba(255,255,255,0.45);' +
-          'transition: transform 0.1s ease, filter 0.15s ease;' +
+          'transition: transform 0.1s ease, filter 0.15s ease; white-space: nowrap;' +
           'display: flex; align-items: center; justify-content: center; gap: 10px;' +
           'touch-action: manipulation;' +
+        '}' +
+        '.catch-throw-btn.is-battle-mode {' +
+          'border-color: #fde68a;' +
+          'background: linear-gradient(180deg, #f59e0b 0%, #ea580c 52%, #c2410c 100%);' +
+          'box-shadow: 0 6px 0 #7c2d12, 0 10px 20px rgba(0,0,0,0.28), inset 0 2px 0 rgba(255,255,255,0.45);' +
         '}' +
         '.catch-throw-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #991b1b; }' +
       '</style>' +
@@ -549,27 +687,43 @@
             '<span class="catch-score-pill" data-role="score-pill">점수 0점</span>' +
           '</div>' +
         '</div>' +
-        '<div class="catch-meadow-stage" data-role="meadow-stage" title="화면을 터치해도 볼을 던질 수 있어요!">' +
-          '<div class="catch-zone-hint" data-role="zone-hint">💚 동그라미가 초록색·황금색일 때 던져요!</div>' +
+        '<div class="catch-meadow-stage" data-role="meadow-stage" title="화면을 터치해 배틀 공격 및 몬스터볼 투척을 할 수 있어요!">' +
+          '<div class="catch-hp-bar-wrap" data-role="hp-bar-wrap">' +
+            '<div class="catch-hp-top">' +
+              '<span data-role="phase-badge" class="catch-phase-badge">⚔️ STEP 1 배틀로 힘 빼기</span>' +
+              '<span data-role="hp-text">야생 체력 100%</span>' +
+            '</div>' +
+            '<div class="catch-hp-track">' +
+              '<div class="catch-hp-fill" data-role="hp-fill" style="width: 100%;"></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="catch-zone-hint" data-role="zone-hint">⚡ 게이지가 가운데 황금 칸에 올 때 공격해요!</div>' +
           '<div class="catch-target-container">' +
             '<div class="catch-pedestal" data-role="catch-pedestal"></div>' +
-            '<div class="catch-guide-ring"></div>' +
-            '<div class="catch-target-ring" data-role="target-ring"></div>' +
+            '<div class="catch-guide-ring is-battle-phase" data-role="guide-ring"></div>' +
+            '<div class="catch-target-ring is-battle-phase" data-role="target-ring"></div>' +
             '<div class="catch-capture-beam" data-role="capture-beam"></div>' +
+            '<div class="catch-dizzy-stars" data-role="dizzy-stars">💫 ⭐ 💫</div>' +
             '<img class="catch-pokemon-sprite" data-role="pokemon-sprite" src="' + charInfo.runnerSpriteUrl + '" alt="' + charInfo.nameKr + '" width="132" height="132" draggable="false" />' +
             '<div class="catch-impact-spark" data-role="impact-spark">💥 틱!</div>' +
-            '<div class="catch-flying-ball" data-role="flying-ball" data-ball-emoji="' + initialBall.emoji + '" style="--ball-top: ' + initialBall.topColor + '; --ball-bottom: ' + initialBall.bottomColor + '; --ball-accent: ' + initialBall.accentColor + ';">' + buildFlyingBallInnerMarkup(initialBall) + '</div>' +
+            '<div class="catch-flying-ball is-battle-phase" data-role="flying-ball" data-ball-emoji="' + initialBall.emoji + '" style="--ball-top: ' + initialBall.topColor + '; --ball-bottom: ' + initialBall.bottomColor + '; --ball-accent: ' + initialBall.accentColor + ';">' + buildFlyingBallInnerMarkup(initialBall) + '</div>' +
             '<div class="catch-rainbow-burst" data-role="rainbow-burst">🌈✨🌟✨🌈</div>' +
           '</div>' +
+          '<div class="catch-battle-gauge" data-role="battle-gauge">' +
+            '<div class="catch-battle-gauge-label" data-role="battle-gauge-label">⚡ 타이밍 어택 게이지 (가운데 황금 칸 = 크리티컬!)</div>' +
+            '<div class="catch-battle-track">' +
+              '<div class="catch-battle-cursor" data-role="battle-cursor" style="left: 50%;"></div>' +
+            '</div>' +
+          '</div>' +
           '<div class="catch-feedback-banner" data-role="feedback-banner">' +
-            '<div class="catch-feedback-main" data-role="feedback-main">야생의 ' + charInfo.nameKr + ' 친구가 나타났어요!</div>' +
-            '<div class="catch-feedback-sub" data-role="feedback-sub">' + initialBall.desc + '</div>' +
+            '<div class="catch-feedback-main" data-role="feedback-main">야생의 ' + charInfo.nameKr + ' 등장! 먼저 배틀로 힘을 빼주세요!</div>' +
+            '<div class="catch-feedback-sub" data-role="feedback-sub">체력을 0%로 만들면 ' + initialBall.name + '을 던질 수 있어요!</div>' +
           '</div>' +
         '</div>' +
         '<div class="catch-controls">' +
-          '<button type="button" class="catch-throw-btn" data-role="throw-btn">' +
-            '<span data-role="throw-btn-Icon">' + initialBall.emoji + '</span>' +
-            '<span data-role="throw-btn-text">[🔴 지금이야! 볼 던지기!]</span>' +
+          '<button type="button" class="catch-throw-btn is-battle-mode" data-role="throw-btn">' +
+            '<span data-role="throw-btn-Icon">' + charInfo.typeEmoji + '</span>' +
+            '<span data-role="throw-btn-text">[' + charInfo.typeEmoji + ' 타이밍 맞춰 ' + charInfo.typeNameKr + ' 공격!]</span>' +
           '</button>' +
         '</div>' +
       '</div>'
@@ -590,6 +744,12 @@
       completedRounds: 0,
       maxRounds: TOTAL_ROUNDS,
       score: 0,
+      phase: 'battle',
+      hp: 100,
+      maxHp: 100,
+      battleCursor: 0.5,
+      battleDirection: 1,
+      pokemonOffsetX: 0,
       ringScale: RING_MAX,
       ringDirection: -1,
       tick: 0,
@@ -638,8 +798,10 @@
     var elBallBadge = queryRole('ball-badge');
     var elScorePill = queryRole('score-pill');
     var elZoneHint = queryRole('zone-hint');
+    var elGuideRing = queryRole('guide-ring');
     var elTargetRing = queryRole('target-ring');
     var elCaptureBeam = queryRole('capture-beam');
+    var elDizzyStars = queryRole('dizzy-stars');
     var elPokemonSprite = queryRole('pokemon-sprite');
     var elImpactSpark = queryRole('impact-spark');
     var elFlyingBall = queryRole('flying-ball');
@@ -648,6 +810,11 @@
     var elFlyingBallBottom = queryRole('flying-ball-bottom');
     var elFlyingBallBtn = queryRole('flying-ball-btn');
     var elRainbowBurst = queryRole('rainbow-burst');
+    var elPhaseBadge = queryRole('phase-badge');
+    var elHpText = queryRole('hp-text');
+    var elHpFill = queryRole('hp-fill');
+    var elBattleGauge = queryRole('battle-gauge');
+    var elBattleCursor = queryRole('battle-cursor');
     var elFeedbackMain = queryRole('feedback-main');
     var elFeedbackSub = queryRole('feedback-sub');
     var elThrowBtn = queryRole('throw-btn');
@@ -681,6 +848,67 @@
       }
     }
 
+    function updatePhaseUI() {
+      var isBattle = state.phase === 'battle';
+      var hpPct = Math.max(0, Math.min(100, Math.round((state.hp / state.maxHp) * 100)));
+      var ball = state.currentBall;
+
+      if (elPhaseBadge) {
+        elPhaseBadge.textContent = isBattle ? '⚔️ STEP 1 배틀로 힘 빼기' : '🔴 STEP 2 포획 찬스!';
+        elPhaseBadge.className = isBattle ? 'catch-phase-badge' : 'catch-phase-badge is-catch-phase';
+      }
+      if (elHpText) {
+        elHpText.textContent = isBattle
+          ? ('야생 체력 ' + hpPct + '%')
+          : '💫 헤롱헤롱! (체력 0%)';
+      }
+      if (elHpFill) {
+        if (elHpFill.style) {
+          elHpFill.style.width = hpPct + '%';
+        }
+        var fillCls = 'catch-hp-fill';
+        if (hpPct <= 25) fillCls += ' is-low';
+        else if (hpPct <= 55) fillCls += ' is-mid';
+        elHpFill.className = fillCls;
+      }
+      if (elDizzyStars) {
+        elDizzyStars.className = isBattle ? 'catch-dizzy-stars' : 'catch-dizzy-stars is-active';
+      }
+      if (elBattleGauge) {
+        elBattleGauge.className = isBattle ? 'catch-battle-gauge' : 'catch-battle-gauge is-hidden';
+      }
+      if (elGuideRing) {
+        elGuideRing.className = isBattle ? 'catch-guide-ring is-battle-phase' : 'catch-guide-ring';
+      }
+      if (elTargetRing) {
+        elTargetRing.className = isBattle ? 'catch-target-ring is-battle-phase' : 'catch-target-ring';
+      }
+      if (elFlyingBall && !state.uiLocked) {
+        elFlyingBall.className = isBattle ? 'catch-flying-ball is-battle-phase' : 'catch-flying-ball';
+      }
+      if (elThrowBtn) {
+        elThrowBtn.className = isBattle ? 'catch-throw-btn is-battle-mode' : 'catch-throw-btn';
+      }
+      if (elThrowBtnIcon) {
+        elThrowBtnIcon.textContent = isBattle ? charInfo.typeEmoji : ball.emoji;
+      }
+      if (elThrowBtnText) {
+        elThrowBtnText.textContent = isBattle
+          ? ('[' + charInfo.typeEmoji + ' 타이밍 맞춰 ' + charInfo.typeNameKr + ' 공격!]')
+          : ('[' + ball.emoji + ' 지금이야! ' + ball.name + ' 던지기!]');
+      }
+      if (elZoneHint && isBattle && !state.uiLocked) {
+        elZoneHint.textContent = '⚡ 게이지가 가운데 황금 칸에 올 때 공격해요!';
+      }
+    }
+
+    function updateBattleCursorVisual() {
+      if (elBattleCursor && elBattleCursor.style) {
+        var pct = Math.max(4, Math.min(96, state.battleCursor * 100));
+        elBattleCursor.style.left = pct.toFixed(1) + '%';
+      }
+    }
+
     function updateRingVisual(scale) {
       var preview = evaluateRingScale(scale, state.round);
       if (elTargetRing && elTargetRing.style) {
@@ -688,7 +916,7 @@
         elTargetRing.style.borderColor = preview.ringColor;
         elTargetRing.style.boxShadow = '0 0 20px ' + preview.ringGlow;
       }
-      if (elZoneHint && !state.uiLocked) {
+      if (elZoneHint && !state.uiLocked && state.phase === 'catch') {
         elZoneHint.textContent = preview.hintText;
       }
     }
@@ -701,12 +929,7 @@
       if (elBallBadge) {
         elBallBadge.textContent = ball.label;
       }
-      if (elThrowBtnIcon) {
-        elThrowBtnIcon.textContent = ball.emoji;
-      }
-      if (elThrowBtnText) {
-        elThrowBtnText.textContent = '[' + ball.emoji + ' 지금이야! 볼 던지기!]';
-      }
+      updatePhaseUI();
       if (typeof stageEl.querySelectorAll === 'function') {
         var slots = stageEl.querySelectorAll('[data-ball-slot]');
         if (slots && slots.length) {
@@ -733,17 +956,87 @@
 
       var excellentCount = state.history.filter(function (h) { return h.tier === 'excellent'; }).length;
       var summaryText =
-        charInfo.nameKr + ' 친구와 5번의 몬스터볼 캐치를 모두 마쳤어요! (엑설런트 ' + excellentCount + '회)';
+        charInfo.nameKr + ' 친구와 5번의 배틀 & 몬스터볼 캐치를 모두 마쳤어요! (엑설런트 ' + excellentCount + '회)';
 
       safeHelpers.showResultOverlay(stageEl, {
         gameId: 'catch',
-        title: '🎉 ' + charInfo.nameKr + ' 캐치 대성공!',
+        title: '🎉 ' + charInfo.nameKr + ' 배틀 & 캐치 완료!',
         score: state.score,
         highScore: Math.max(prevHigh, state.score),
         maxScore: TOTAL_ROUNDS * 100,
         summary: summaryText,
         badges: BALL_UPGRADES.map(function (b) { return b.emoji + ' ' + b.name; })
       });
+    }
+
+    /**
+     * STEP 1 배틀 페이즈 공격 수행
+     */
+    function attackAtCursor(explicitCursor) {
+      if (state.cleanedUp || state.finished) {
+        return null;
+      }
+      var cursorVal = (typeof explicitCursor === 'number' && !isNaN(explicitCursor))
+        ? explicitCursor
+        : state.battleCursor;
+
+      var atk = evaluateBattleAttack(cursorVal, state.round, charInfo);
+      state.hp = Math.max(0, state.hp - atk.damage);
+
+      if (atk.tier === 'critical') {
+        safeHelpers.playSfx('excellent', 3);
+      } else if (atk.tier === 'hit') {
+        safeHelpers.playSfx('hit', 2);
+      } else {
+        safeHelpers.playSfx('tap', 1);
+      }
+
+      if (elPokemonSprite) {
+        elPokemonSprite.className = 'catch-pokemon-sprite is-battle-hit';
+      }
+      if (elImpactSpark) {
+        elImpactSpark.textContent = atk.sparkText;
+        elImpactSpark.className = 'catch-impact-spark is-active';
+      }
+
+      if (state.hp <= 0) {
+        state.hp = 0;
+        state.phase = 'catch';
+        state.ringScale = RING_MAX;
+        safeHelpers.playCry();
+        if (elFeedbackMain) {
+          elFeedbackMain.textContent = '💫 ' + charInfo.nameKr + ' 친구가 어지러워해요! 지금 포획 찬스!';
+        }
+        if (elFeedbackSub) {
+          elFeedbackSub.textContent = '동그라미가 작아져서 초록·황금색일 때 ' + state.currentBall.name + '을 던져요!';
+        }
+        updateRingVisual(state.ringScale);
+      } else {
+        if (elFeedbackMain) {
+          elFeedbackMain.textContent = atk.message;
+        }
+        if (elFeedbackSub) {
+          elFeedbackSub.textContent = atk.subMessage + ' (남은 체력 ' + state.hp + '%)';
+        }
+      }
+
+      updateHudUI();
+
+      addTimer(function () {
+        if (!state.uiLocked && elPokemonSprite) {
+          elPokemonSprite.className = 'catch-pokemon-sprite';
+        }
+        if (!state.uiLocked && elImpactSpark) {
+          elImpactSpark.className = 'catch-impact-spark';
+        }
+      }, 380);
+
+      return {
+        tier: atk.tier,
+        damage: atk.damage,
+        remainingHp: state.hp,
+        phase: state.phase
+      };
     }
 
     /**
@@ -754,6 +1047,10 @@
       if (state.cleanedUp || state.finished) {
         return state.lastResult;
       }
+
+      // 직접 호출 시에도 현재 라운드 포획 단계로 동기 전환
+      state.hp = 0;
+      state.phase = 'catch';
 
       var usedScale = (typeof explicitScale === 'number' && !isNaN(explicitScale))
         ? explicitScale
@@ -792,6 +1089,10 @@
       } else {
         state.round = state.completedRounds + 1;
         state.currentBall = getBallForRound(state.round);
+        // 다음 라운드 시작 시 다시 배틀 페이즈(HP 100)로 초기화
+        state.phase = 'battle';
+        state.hp = 100;
+        state.battleCursor = 0.5;
       }
 
       // 효과음 재생
@@ -832,12 +1133,13 @@
           elFlyingBall.className = 'catch-flying-ball is-active is-catch-fail is-deflected';
         }
         if (elPokemonSprite) {
-          elPokemonSprite.className = 'catch-pokemon-sprite is-deflecting';
+          elPokemonSprite.className = 'catch-pokemon-sprite is-deflected-recoil is-deflecting';
         }
         if (elCaptureBeam) {
           elCaptureBeam.className = 'catch-capture-beam';
         }
         if (elImpactSpark) {
+          elImpactSpark.textContent = '💥 틱!';
           elImpactSpark.className = 'catch-impact-spark is-active';
         }
       }
@@ -852,15 +1154,13 @@
       if (state.finished) {
         finishGame();
       } else {
-        // 다음 라운드 볼 준비 연출
+        // 다음 라운드 배틀 & 볼 준비 연출
         var nextBall = state.currentBall;
         addTimer(function () {
           state.uiLocked = false;
           state.ringScale = RING_MAX;
           updateFlyingBallVisual(nextBall);
-          if (elFlyingBall) {
-            elFlyingBall.className = 'catch-flying-ball';
-          }
+          updateHudUI();
           if (elPokemonSprite) {
             elPokemonSprite.className = 'catch-pokemon-sprite';
           }
@@ -874,10 +1174,10 @@
             elRainbowBurst.className = 'catch-rainbow-burst';
           }
           if (elFeedbackMain) {
-            elFeedbackMain.textContent = nextBall.label + ' 준비 완료!';
+            elFeedbackMain.textContent = nextBall.label + ' 라운드! 먼저 배틀로 힘을 빼요!';
           }
           if (elFeedbackSub) {
-            elFeedbackSub.textContent = nextBall.desc;
+            elFeedbackSub.textContent = '야생 포켓몬이 더 빨라졌어요! 게이지 중앙에 맞춰 공격해요!';
           }
           updateRingVisual(state.ringScale);
         }, 900);
@@ -902,25 +1202,48 @@
       if (state.cleanedUp || state.finished || state.uiLocked) {
         return;
       }
-      throwBallAtScale(state.ringScale);
+      if (state.phase === 'battle') {
+        attackAtCursor(state.battleCursor);
+      } else {
+        throwBallAtScale(state.ringScale);
+      }
     }
 
-    // 애니메이션 루프: 타깃 링 수축(1.8 -> 0.4) 및 포켓몬 통통 점프
+    // 애니메이션 루프: 배틀 게이지 왕복 / 타깃 링 수축(1.8 -> 0.4) 및 포켓몬 좌우 회피 점프
     function stepAnimation() {
       if (state.cleanedUp) return;
 
       state.tick += 1;
 
       if (!state.uiLocked && !state.finished) {
-        state.ringScale -= 0.018;
-        if (state.ringScale < RING_MIN) {
-          state.ringScale = RING_MAX;
+        if (state.phase === 'battle') {
+          var bSpeed = getBattleSpeedForRound(state.round);
+          state.battleCursor += bSpeed * state.battleDirection;
+          if (state.battleCursor >= 0.96) {
+            state.battleCursor = 0.96;
+            state.battleDirection = -1;
+          } else if (state.battleCursor <= 0.04) {
+            state.battleCursor = 0.04;
+            state.battleDirection = 1;
+          }
+          updateBattleCursorVisual();
+        } else {
+          var rSpeed = getRingSpeedForRound(state.round);
+          state.ringScale -= rSpeed;
+          if (state.ringScale < RING_MIN) {
+            state.ringScale = RING_MAX;
+          }
+          updateRingVisual(state.ringScale);
         }
-        updateRingVisual(state.ringScale);
       }
 
       if (elPokemonSprite && elPokemonSprite.style && !state.uiLocked) {
-        elPokemonSprite.style.transform = safeHelpers.computeRunTransform('run', state.tick);
+        var swayAmp = 12 + (state.round - 1) * 7;
+        var swayFreq = 0.055 + (state.round - 1) * 0.012;
+        state.pokemonOffsetX = Math.sin(state.tick * swayFreq) * swayAmp;
+        var baseRun = safeHelpers.computeRunTransform('run', state.tick);
+        elPokemonSprite.style.transform =
+          'translateX(' + state.pokemonOffsetX.toFixed(1) + 'px) ' + baseRun;
       }
 
       if (typeof requestAnimationFrame === 'function') {
@@ -951,6 +1274,7 @@
     }
 
     // 초기 비주얼 업데이트 및 루프 시작
+    updateBattleCursorVisual();
     updateRingVisual(state.ringScale);
     updateHudUI();
     updateFlyingBallVisual(state.currentBall);
@@ -962,12 +1286,18 @@
     var gameInstance = {
       throwBall: throwBallAtScale,
       throwBallAtScale: throwBallAtScale,
+      attackAtCursor: attackAtCursor,
       getState: function () {
         return {
           round: state.round,
           completedRounds: state.completedRounds,
           maxRounds: state.maxRounds,
           score: state.score,
+          phase: state.phase,
+          hp: state.hp,
+          maxHp: state.maxHp,
+          battleCursor: state.battleCursor,
+          pokemonOffsetX: state.pokemonOffsetX,
           ringScale: state.ringScale,
           currentBall: state.currentBall,
           lastResult: state.lastResult,
@@ -1003,11 +1333,14 @@
   var gameDef = {
     id: 'catch',
     title: '흔들흔들! 몬스터볼 캐치',
-    subtitle: '동그라미가 초록색일 때 몬스터볼을 던져요!',
+    subtitle: '먼저 배틀로 힘을 빼고 동그라미가 초록·황금색일 때 던져요!',
     icon: '🔴',
     badgeColor: '#FFCA28',
     BALL_UPGRADES: BALL_UPGRADES,
     evaluateRingScale: evaluateRingScale,
+    evaluateBattleAttack: evaluateBattleAttack,
+    getRingSpeedForRound: getRingSpeedForRound,
+    getBattleSpeedForRound: getBattleSpeedForRound,
     mount: mountCatchGame
   };
 
