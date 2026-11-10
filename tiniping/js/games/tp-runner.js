@@ -33,7 +33,7 @@
   function buildRunnerStyles() {
     return [
       '.tp-runner-wrap {',
-      '  position: relative; max-width: 960px; width: 100%; height: 100%; min-height: 360px; margin: 0 auto;',
+      '  position: relative; max-width: 960px; width: 100%; height: 100%; min-height: 0; margin: 0 auto;',
       '  display: flex; flex-direction: column; justify-content: space-between; gap: 0;',
       '  background: #8AD4FF;',
       '  border-radius: 20px; border: 4px solid #181818; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);',
@@ -42,19 +42,20 @@
       '}',
       '.tp-runner-hud {',
       '  position: relative; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 8px;',
-      '  padding: 10px 16px; background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(8px);',
+      '  padding: clamp(6px, 1.2vh, 10px) clamp(10px, 2vw, 16px); background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(8px);',
       '  border: none; border-bottom: 3px solid #181818; border-radius: 0; box-shadow: none; flex-shrink: 0;',
       '}',
-      '.tp-runner-hearts { font-size: 1.35rem; letter-spacing: 2px; min-width: 90px; }',
+      '.tp-runner-hearts { font-size: clamp(1.1rem, 2.2vh, 1.35rem); letter-spacing: 2px; min-width: 76px; }',
       '.tp-runner-guide-badge {',
-      '  padding: 5px 12px; border-radius: 999px; font-weight: 800; font-size: 0.95rem;',
+      '  padding: 4px 12px; border-radius: 999px; font-weight: 800; font-size: clamp(0.8rem, 1.6vh, 0.95rem);',
       '  background: linear-gradient(135deg, #FFF0F6, #F3E5F5); color: #D81B60;',
       '  border: 2px solid #181818; transition: transform 0.2s ease;',
       '}',
-      '.tp-runner-score-box { text-align: right; font-weight: 800; color: #AD1457; font-size: 1rem; }',
-      '.tp-runner-score-box small { display: block; font-size: 0.75rem; color: #8E24AA; font-weight: 700; }',
+      '@media (max-width: 540px) { .tp-runner-guide-badge { display: none; } }',
+      '.tp-runner-score-box { text-align: right; font-weight: 800; color: #AD1457; font-size: clamp(0.88rem, 1.8vh, 1rem); }',
+      '.tp-runner-score-box small { display: block; font-size: clamp(0.68rem, 1.4vh, 0.75rem); color: #8E24AA; font-weight: 700; }',
       '.tp-runner-viewport {',
-      '  position: relative; flex: 1; width: 100%; height: auto; min-height: 220px; overflow: hidden;',
+      '  position: relative; flex: 1; width: 100%; height: auto; min-height: 140px; overflow: hidden;',
       '  border: none; border-radius: 0; background: #8AD4FF; box-shadow: none;',
       '}',
       '.tp-runner-canvas {',
@@ -84,9 +85,9 @@
       '  width: 68px; height: 68px; border-radius: 50%; border: 3px solid #181818;',
       '  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35); overflow: hidden;',
       '  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.5rem; color: #FFF;',
-      '  background: #FF69B4; position: relative; z-index: 2;',
+      '  background: #FFFFFF; position: relative; z-index: 2;',
       '}',
-      '.tp-runner-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }',
+      '.tp-runner-avatar img { width: 100%; height: 100%; object-fit: contain; display: block; background: #FFFFFF; }',
       '.tp-runner-avatar .tp-runner-fallback { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }',
       '.tp-runner-bubble {',
       '  position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%);',
@@ -95,23 +96,23 @@
       '  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.22); z-index: 8;',
       '}',
       '.tp-runner-controls {',
-      '  position: relative; z-index: 5; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;',
-      '  padding: 10px 16px 14px; background: rgba(255, 255, 255, 0.96); border-top: 3px solid #181818; flex-shrink: 0;',
+      '  position: relative; z-index: 5; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(8px, 1.6vw, 14px);',
+      '  padding: clamp(6px, 1.2vh, 10px) clamp(10px, 2vw, 16px) clamp(8px, 1.5vh, 14px); background: rgba(255, 255, 255, 0.96); border-top: 3px solid #181818; flex-shrink: 0;',
       '}',
       '.tp-runner-btn {',
       '  display: flex; flex-direction: column; align-items: center; justify-content: center;',
-      '  padding: 14px 10px; border-radius: 16px; border: 3px solid #181818; cursor: pointer;',
-      '  font-family: inherit; font-weight: 900; font-size: 1.18rem; transition: transform 0.08s ease, box-shadow 0.08s ease;',
-      '  box-shadow: 0 6px 0 #181818; touch-action: none; user-select: none; -webkit-user-select: none;',
+      '  padding: clamp(8px, 1.4vh, 14px) 10px; border-radius: 16px; border: 3px solid #181818; cursor: pointer;',
+      '  font-family: inherit; font-weight: 900; font-size: clamp(0.96rem, 2vh, 1.18rem); transition: transform 0.08s ease, box-shadow 0.08s ease;',
+      '  box-shadow: 0 5px 0 #181818; touch-action: none; user-select: none; -webkit-user-select: none;',
       '}',
-      '.tp-runner-btn:active, .tp-runner-btn.is-active { transform: translateY(4px); box-shadow: 0 2px 0 #181818; }',
+      '.tp-runner-btn:active, .tp-runner-btn.is-active { transform: translateY(3px); box-shadow: 0 2px 0 #181818; }',
       '.tp-runner-btn-jump {',
       '  background: linear-gradient(180deg, #FF80AB 0%, #EC407A 100%); color: #FFFFFF;',
       '}',
       '.tp-runner-btn-duck {',
       '  background: linear-gradient(180deg, #BA68C8 0%, #8E24AA 100%); color: #FFFFFF;',
       '}',
-      '.tp-runner-btn small { font-size: 0.78rem; font-weight: 700; opacity: 0.95; margin-top: 2px; }'
+      '.tp-runner-btn small { font-size: clamp(0.68rem, 1.3vh, 0.78rem); font-weight: 700; opacity: 0.95; margin-top: 2px; }'
     ].join('\n');
   }
 
@@ -613,11 +614,14 @@
         var cw = Number(viewportEl && viewportEl.clientWidth) || 0;
         var ch = Number(viewportEl && viewportEl.clientHeight) || 0;
         if (cw > 0 && ch > 0) {
-          var targetH = Math.max(260, Math.min(450, Math.round(CANVAS_W * (ch / cw))));
-          if (targetH !== CANVAS_H) {
+          var targetW = cw < 540 ? 440 : 640;
+          var targetH = Math.max(230, Math.min(1150, Math.round(targetW * (ch / cw))));
+          if (targetW !== CANVAS_W || targetH !== CANVAS_H) {
             var prevGroundY = GROUND_Y;
+            CANVAS_W = targetW;
             CANVAS_H = targetH;
             GROUND_Y = CANVAS_H - GROUND_DEPTH;
+            HERO_X = Math.round(CANVAS_W * 0.171875);
             var deltaGroundY = GROUND_Y - prevGroundY;
             if (canvasEl) {
               canvasEl.width = CANVAS_W;

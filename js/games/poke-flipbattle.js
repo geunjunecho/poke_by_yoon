@@ -8,9 +8,17 @@
   var GRID_COLS = 4;
   var GRID_ROWS = 4;
   var TOTAL_TILES = GRID_COLS * GRID_ROWS; // 16장
+  var TOTAL_ROUNDS = 5;
   var GAME_DURATION_SEC = 25;
-  var RIVAL_INTERVAL_MS = 1100;
+  var NEXT_ROUND_DURATION_SEC = 15;
+  var RIVAL_INTERVAL_MS = 1200;
+  var RIVAL_INTERVALS_BY_ROUND = [1200, 980, 800, 650, 520];
   var RAINBOW_SPAWN_MS = 5000;
+
+  function getRivalIntervalForRound(roundNum) {
+    var idx = Math.max(0, Math.min(RIVAL_INTERVALS_BY_ROUND.length - 1, (Number(roundNum) || 1) - 1));
+    return RIVAL_INTERVALS_BY_ROUND[idx];
+  }
 
   var RIVAL_META = {
     id: 52,
@@ -175,6 +183,23 @@
       );
     }).join('');
 
+    var roundSlotsHtml = [];
+    for (var rIdx = 1; rIdx <= TOTAL_ROUNDS; rIdx++) {
+      var hist = state.roundHistory && state.roundHistory[rIdx - 1];
+      var slotCls = 'poke-flipbattle-round-slot';
+      var slotIcon = rIdx + 'R';
+      if (hist) {
+        slotCls += hist.won ? ' is-won' : ' is-lost';
+        slotIcon = rIdx + 'R ' + (hist.won ? '🏆' : '💦');
+      } else if (rIdx === state.round && !state.finished) {
+        slotCls += ' is-current';
+        slotIcon = rIdx + 'R 🔥';
+      }
+      roundSlotsHtml.push(
+        '<span class="' + slotCls + '" data-round-slot="' + rIdx + '">' + slotIcon + '</span>'
+      );
+    }
+
     return (
       '<div class="poke-flipbattle-root" style="--hero-color: ' + hero.typeColor + ';">' +
         '<div class="poke-flipbattle-hud">' +
@@ -190,9 +215,14 @@
             '<span class="poke-flipbattle-timer-pill sr-only" data-role="timer-pill">⏱️ 남은 시간 ' + state.timeLeft + '초</span>' +
           '</div>' +
           '<div class="poke-flipbattle-hud-ribbon-group">' +
+            '<span class="poke-flipbattle-round-wins-pill" data-role="round-wins-pill">🏆 5판 중 ' + state.roundWins + '승 (' + state.roundWins + '승 ' + state.roundLosses + '패)</span>' +
+            '<span class="poke-flipbattle-speed-pill" data-role="rival-speed-pill">😼 로켓단 속도 Lv.' + state.round + '</span>' +
             '<span class="poke-flipbattle-score-pill" data-role="score-pill">점수 ' + state.score + '점</span>' +
             '<div class="poke-flipbattle-corner-ribbon">카드 뒤집기</div>' +
           '</div>' +
+        '</div>' +
+        '<div class="poke-flipbattle-series-bar" data-role="series-bar">' +
+          roundSlotsHtml.join('') +
         '</div>' +
         '<div class="poke-flipbattle-subhud">' +
           '<div class="poke-flipbattle-banner" data-role="banner-text">' + state.bannerText + '</div>' +
@@ -225,6 +255,13 @@
 
     var state = {
       gameId: 'flipbattle',
+      round: 1,
+      maxRounds: TOTAL_ROUNDS,
+      completedRounds: 0,
+      roundWins: 0,
+      roundLosses: 0,
+      roundHistory: [],
+      rivalIntervalMs: getRivalIntervalForRound(1),
       timeLeft: GAME_DURATION_SEC,
       maxTime: GAME_DURATION_SEC,
       score: 0,
@@ -239,11 +276,12 @@
       cleanedUp: false,
       outcome: null,
       isVictory: false,
-      bannerText: '🖐️ 로켓단 카드를 터치하거나 손가락으로 쓱~ 문질러 뒤집어요!'
+      bannerText: '🖐️ 1라운드 시작! 로켓단 카드를 터치하거나 쓱~ 문질러 뒤집어요!'
     };
 
     var intervals = [];
     var timeouts = [];
+    var rivalIntervalId = null;
     var cachedTileEls = [];
     var cachedBadgeEls = [];
 
@@ -253,6 +291,18 @@
       }, ms);
       intervals.push(id);
       return id;
+    }
+
+    function restartRivalTimer() {
+      if (rivalIntervalId !== null) {
+        clearInterval(rivalIntervalId);
+        var idx = intervals.indexOf(rivalIntervalId);
+        if (idx !== -1) intervals.splice(idx, 1);
+        rivalIntervalId = null;
+      }
+      if (!state.cleanedUp && !state.finished) {
+        rivalIntervalId = addInterval(function () { rivalFlip(); }, state.rivalIntervalMs);
+      }
     }
 
     function addTimeout(fn, ms) {
@@ -416,6 +466,38 @@
       var scoreEl = queryRole('score-pill');
       if (scoreEl) {
         scoreEl.textContent = '점수 ' + state.score + '점';
+      }
+
+      var winsEl = queryRole('round-wins-pill');
+      if (winsEl) {
+        winsEl.textContent = '🏆 5판 중 ' + state.roundWins + '승 (' + state.roundWins + '승 ' + state.roundLosses + '패)';
+      }
+
+      var speedEl = queryRole('rival-speed-pill');
+      if (speedEl) {
+        speedEl.textContent = '😼 로켓단 속도 Lv.' + state.round;
+      }
+
+      if (typeof stageEl.querySelectorAll === 'function') {
+        var slotEls = stageEl.querySelectorAll('[data-round-slot]');
+        if (slotEls && slotEls.length) {
+          for (var sIdx = 0; sIdx < slotEls.length; sIdx++) {
+            var slotEl = slotEls[sIdx];
+            var rNum = Number(slotEl.getAttribute('data-round-slot')) || (sIdx + 1);
+            var hist = state.roundHistory[rNum - 1];
+            var sCls = 'poke-flipbattle-round-slot';
+            var sTxt = rNum + 'R';
+            if (hist) {
+              sCls += hist.won ? ' is-won' : ' is-lost';
+              sTxt = rNum + 'R ' + (hist.won ? '🏆' : '💦');
+            } else if (rNum === state.round && !state.finished) {
+              sCls += ' is-current';
+              sTxt = rNum + 'R 🔥';
+            }
+            slotEl.className = sCls;
+            slotEl.textContent = sTxt;
+          }
+        }
       }
 
       var myCountEl = queryRole('my-count-label');
@@ -667,6 +749,69 @@
     }
 
     /**
+     * 현재 라운드 종료 및 다음 라운드(1R -> 5R, 로켓단 속도 가속) 전환
+     */
+    function completeRound() {
+      if (state.cleanedUp || state.finished) {
+        return finishGame();
+      }
+
+      if (state.round >= TOTAL_ROUNDS) {
+        return finishGame();
+      }
+
+      var finishedRound = state.round;
+      var counts = countOwners(state.tiles);
+      var wonRound = counts.playerCount > counts.rivalCount;
+      var roundBonus = wonRound ? 100 : 50;
+
+      state.completedRounds += 1;
+      if (wonRound) {
+        state.roundWins += 1;
+      } else {
+        state.roundLosses += 1;
+      }
+      state.score += roundBonus;
+
+      var roundEntry = {
+        round: finishedRound,
+        won: wonRound,
+        playerCount: counts.playerCount,
+        rivalCount: counts.rivalCount,
+        bonusPoints: roundBonus,
+        rivalIntervalMs: state.rivalIntervalMs
+      };
+      state.roundHistory.push(roundEntry);
+
+      state.round = finishedRound + 1;
+      state.rivalIntervalMs = getRivalIntervalForRound(state.round);
+      state.timeLeft = NEXT_ROUND_DURATION_SEC;
+      state.maxTime = NEXT_ROUND_DURATION_SEC;
+      state.combo = 0;
+      state.rainbowIndex = -1;
+      state.tiles = createInitialTiles();
+
+      state.bannerText = (wonRound ? '🏆 ' + finishedRound + '라운드 승리! (+100점) ' : '💪 ' + finishedRound + '라운드 아깝다! (+50점) ') +
+        '🔥 ' + state.round + '라운드 시작! 로켓단 속도가 Lv.' + state.round + '로 빨라졌어요! (현재 ' + state.roundWins + '승 ' + state.roundLosses + '패)';
+
+      safeHelpers.playSfx(wonRound ? 'win' : 'collect', state.round);
+      restartRivalTimer();
+      syncUI();
+
+      return {
+        finished: false,
+        completedRound: finishedRound,
+        wonRound: wonRound,
+        bonusPoints: roundBonus,
+        round: state.round,
+        roundWins: state.roundWins,
+        roundLosses: state.roundLosses,
+        rivalIntervalMs: state.rivalIntervalMs,
+        score: state.score
+      };
+    }
+
+    /**
      * 1초 타이머 진행
      */
     function stepSecond() {
@@ -677,7 +822,7 @@
       }
       syncUI();
       if (state.timeLeft <= 0) {
-        finishGame();
+        completeRound();
       }
       return state.timeLeft;
     }
@@ -691,7 +836,9 @@
           finished: true,
           isVictory: state.isVictory,
           outcome: state.outcome,
-          score: state.score
+          score: state.score,
+          roundWins: state.roundWins,
+          roundLosses: state.roundLosses
         };
       }
 
@@ -699,15 +846,32 @@
       state.finished = true;
 
       var counts = countOwners(state.tiles);
-      var isVictory = counts.playerCount > counts.rivalCount;
-      var endBonus = isVictory ? 100 : 50;
+      var currentRoundWin = counts.playerCount > counts.rivalCount;
+      var endBonus = currentRoundWin ? 100 : 50;
       state.score += endBonus;
-      state.isVictory = isVictory;
-      state.outcome = isVictory ? 'win' : 'encourage';
+      state.completedRounds += 1;
+      if (currentRoundWin) {
+        state.roundWins += 1;
+      } else {
+        state.roundLosses += 1;
+      }
+      state.roundHistory.push({
+        round: state.round,
+        won: currentRoundWin,
+        playerCount: counts.playerCount,
+        rivalCount: counts.rivalCount,
+        bonusPoints: endBonus,
+        rivalIntervalMs: state.rivalIntervalMs
+      });
 
-      var resultMessage = isVictory
-        ? '🎉 대승리! 로켓단을 물리쳤어요! (승리 보너스 +100점)'
-        : '😊 아깝다! 그래도 정말 빨랐어요! (+50점 격려 보너스)';
+      var isSeriesVictory = state.roundWins > state.roundLosses || (state.completedRounds === 1 && currentRoundWin);
+      state.isVictory = isSeriesVictory;
+      state.outcome = isSeriesVictory ? 'win' : 'encourage';
+
+      var seriesRecordText = TOTAL_ROUNDS + '판 중 ' + state.roundWins + '번 승리! (' + state.roundWins + '승 ' + state.roundLosses + '패)';
+      var resultMessage = isSeriesVictory
+        ? '🎉 대승리! ' + seriesRecordText + ' 로켓단을 물리쳤어요! (승리 보너스 +' + endBonus + '점)'
+        : '😊 아깝다! ' + seriesRecordText + ' 그래도 정말 빨랐어요! (+' + endBonus + '점 격려 보너스)';
 
       state.bannerText = resultMessage;
       syncUI();
@@ -719,20 +883,25 @@
 
       safeHelpers.showResultOverlay(stageEl, {
         gameId: 'flipbattle',
-        title: isVictory ? '⚡ 판 뒤집기 대승리!' : '⚡ 판 뒤집기 대결 완료!',
+        title: isSeriesVictory ? '⚡ 판 뒤집기 ' + state.roundWins + '승 대승리!' : '⚡ 판 뒤집기 5판 대결 완료!',
         score: state.score,
         highScore: Math.max(prevBest, state.score),
-        stars: isVictory ? 3 : 2,
+        stars: isSeriesVictory ? 3 : 2,
         message: resultMessage,
-        summary: resultMessage + ' (내 포켓몬 ' + counts.playerCount + '장 vs 로켓단 ' + counts.rivalCount + '장)'
+        summary: resultMessage + ' (마지막 판: 내 포켓몬 ' + counts.playerCount + '장 vs 로켓단 ' + counts.rivalCount + '장)'
       });
 
       return {
         finished: true,
-        isVictory: isVictory,
+        isVictory: isSeriesVictory,
         outcome: state.outcome,
         bonusPoints: endBonus,
         score: state.score,
+        round: state.round,
+        maxRounds: state.maxRounds,
+        roundWins: state.roundWins,
+        roundLosses: state.roundLosses,
+        roundHistory: state.roundHistory.slice(),
         playerCount: counts.playerCount,
         rivalCount: counts.rivalCount,
         message: resultMessage
@@ -742,7 +911,7 @@
     // 초기 1회 보드 DOM 마운트 및 주기 타이머 가동
     mountBoardDOM();
     addInterval(stepSecond, 1000);
-    addInterval(function () { rivalFlip(); }, RIVAL_INTERVAL_MS);
+    restartRivalTimer();
     addInterval(function () { spawnRainbowBall(); }, RAINBOW_SPAWN_MS);
 
     var gameInstance = {
@@ -751,11 +920,20 @@
       triggerRainbowBurst: triggerRainbowBurst,
       spawnRainbowBall: spawnRainbowBall,
       stepSecond: stepSecond,
+      completeRound: completeRound,
+      nextRound: completeRound,
       finishGame: finishGame,
       getState: function () {
         var counts = countOwners(state.tiles);
         return {
           gameId: state.gameId,
+          round: state.round,
+          maxRounds: state.maxRounds,
+          completedRounds: state.completedRounds,
+          roundWins: state.roundWins,
+          roundLosses: state.roundLosses,
+          roundHistory: state.roundHistory.slice(),
+          rivalIntervalMs: state.rivalIntervalMs,
           timeLeft: state.timeLeft,
           maxTime: state.maxTime,
           score: state.score,
@@ -796,11 +974,13 @@
   var gameDef = {
     id: 'flipbattle',
     title: '후다닥! 판 뒤집기 대결!',
-    subtitle: '로켓단보다 먼저 카드를 내 포켓몬으로 뒤집어요!',
+    subtitle: '5판 3선승! 점점 빨라지는 로켓단을 이겨봐요!',
     icon: '⚡',
     badgeColor: '#FF7043',
     themeColor: '#FF7043',
     RIVAL_META: RIVAL_META,
+    RIVAL_INTERVALS_BY_ROUND: RIVAL_INTERVALS_BY_ROUND,
+    getRivalIntervalForRound: getRivalIntervalForRound,
     getCrossIndices: getCrossIndices,
     mount: mountFlipBattleGame
   };

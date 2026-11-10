@@ -113,7 +113,7 @@
     style.id = 'poke-runner-styles';
     style.textContent = [
       '.poke-runner-wrap {',
-      '  position: relative; max-width: 960px; width: 100%; height: 100%; min-height: 360px; margin: 0 auto;',
+      '  position: relative; max-width: 960px; width: 100%; height: 100%; min-height: 0; margin: 0 auto;',
       '  display: flex; flex-direction: column; justify-content: space-between;',
       '  background: #8AD4FF;',
       '  border-radius: 20px; border: 4px solid #181818; box-shadow: 0 12px 32px rgba(0,0,0,0.5);',
@@ -122,21 +122,21 @@
       '}',
       '.poke-runner-hud {',
       '  position: relative; z-index: 5; display: flex; align-items: center; justify-content: space-between;',
-      '  padding: 10px 16px; background: rgba(255,255,255,0.94); backdrop-filter: blur(8px);',
-      '  border-bottom: 3px solid #181818; font-weight: 900; gap: 8px; flex-wrap: wrap;',
+      '  padding: clamp(6px, 1.2vh, 10px) clamp(10px, 2vw, 16px); background: rgba(255,255,255,0.94); backdrop-filter: blur(8px);',
+      '  border-bottom: 3px solid #181818; font-weight: 900; gap: 8px; flex-wrap: wrap; flex-shrink: 0;',
       '}',
-      '.poke-runner-hearts { font-size: 1.4rem; letter-spacing: 3px; }',
+      '.poke-runner-hearts { font-size: clamp(1.1rem, 2.2vh, 1.4rem); letter-spacing: 2px; }',
       '.poke-runner-score-box {',
-      '  display: flex; align-items: center; gap: 10px; font-size: 1.05rem; color: #1b3a4b;',
+      '  display: flex; align-items: center; gap: 8px; font-size: clamp(0.88rem, 1.8vh, 1.05rem); color: #1b3a4b;',
       '}',
       '.poke-runner-score-pill {',
-      '  background: #fff3e0; border: 2px solid #181818; border-radius: 999px; padding: 4px 14px; color: #e65100;',
+      '  background: #fff3e0; border: 2px solid #181818; border-radius: 999px; padding: 3px 12px; color: #e65100;',
       '}',
       '.poke-runner-best-pill {',
-      '  background: #ede7f6; border: 2px solid #181818; border-radius: 999px; padding: 4px 12px; color: #4527a0; font-size: 0.92rem;',
+      '  background: #ede7f6; border: 2px solid #181818; border-radius: 999px; padding: 3px 10px; color: #4527a0; font-size: clamp(0.8rem, 1.6vh, 0.92rem);',
       '}',
       '.poke-runner-stage-area {',
-      '  position: relative; flex: 1; width: 100%; min-height: 220px; overflow: hidden;',
+      '  position: relative; flex: 1; width: 100%; min-height: 140px; overflow: hidden;',
       '}',
       '.poke-runner-canvas {',
       '  position: absolute; inset: 0; width: 100%; height: 100%; display: block;',
@@ -164,20 +164,20 @@
       '}',
       '.poke-runner-bubble.visible { opacity: 1; }',
       '.poke-runner-controls {',
-      '  position: relative; z-index: 5; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;',
-      '  padding: 10px 16px 14px; background: rgba(255,255,255,0.96); border-top: 3px solid #181818;',
+      '  position: relative; z-index: 5; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(8px, 1.6vw, 14px);',
+      '  padding: clamp(6px, 1.2vh, 10px) clamp(10px, 2vw, 16px) clamp(8px, 1.5vh, 14px); background: rgba(255,255,255,0.96); border-top: 3px solid #181818; flex-shrink: 0;',
       '}',
       '.poke-runner-btn {',
-      '  appearance: none; border: 3px solid #181818; border-radius: 16px; padding: 14px 10px;',
-      '  font-size: 1.18rem; font-weight: 900; color: #fff; cursor: pointer;',
+      '  appearance: none; border: 3px solid #181818; border-radius: 16px; padding: clamp(8px, 1.4vh, 14px) 10px;',
+      '  font-size: clamp(0.96rem, 2vh, 1.18rem); font-weight: 900; color: #fff; cursor: pointer;',
       '  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;',
-      '  box-shadow: 0 6px 0 #181818; transition: transform 0.08s ease;',
+      '  box-shadow: 0 5px 0 #181818; transition: transform 0.08s ease;',
       '  touch-action: none; user-select: none; -webkit-user-select: none;',
       '}',
-      '.poke-runner-btn:active, .poke-runner-btn.active { transform: translateY(4px); box-shadow: 0 2px 0 #181818; }',
+      '.poke-runner-btn:active, .poke-runner-btn.active { transform: translateY(3px); box-shadow: 0 2px 0 #181818; }',
       '.poke-runner-btn-jump { background: linear-gradient(180deg, #ff7043 0%, #f4511e 100%); }',
       '.poke-runner-btn-duck { background: linear-gradient(180deg, #29b6f6 0%, #0288d1 100%); }',
-      '.poke-runner-btn-sub { font-size: 0.78rem; font-weight: 700; opacity: 0.95; }'
+      '.poke-runner-btn-sub { font-size: clamp(0.68rem, 1.3vh, 0.78rem); font-weight: 700; opacity: 0.95; }'
     ].join('\n');
     document.head.appendChild(style);
   }
@@ -657,11 +657,15 @@
       var cw = Number(stageArea && stageArea.clientWidth) || 0;
       var ch = Number(stageArea && stageArea.clientHeight) || 0;
       if (cw > 0 && ch > 0) {
-        var targetH = Math.max(280, Math.min(480, Math.round(W * (ch / cw))));
-        if (targetH !== H) {
+        var targetW = cw < 540 ? 480 : 720;
+        var targetH = Math.max(240, Math.min(1150, Math.round(targetW * (ch / cw))));
+        if (targetW !== W || targetH !== H) {
           var prevGroundY = GROUND_Y;
+          W = targetW;
           H = targetH;
           GROUND_Y = H - GROUND_DEPTH;
+          PLAYER_X = Math.round(W * 0.145833);
+          player.x = PLAYER_X;
           var deltaGroundY = GROUND_Y - prevGroundY;
           canvas.width = Math.round(W * dpr);
           canvas.height = Math.round(H * dpr);
@@ -684,8 +688,16 @@
         renderScaleX = 1;
         renderScaleY = 1;
       }
+      HERO_LEFT_PCT = (PLAYER_X / W) * 100;
       HERO_BOTTOM_PCT = ((H - GROUND_Y) / H) * 100;
+      heroEl.style.left = HERO_LEFT_PCT.toFixed(4) + '%';
       heroEl.style.bottom = HERO_BOTTOM_PCT.toFixed(4) + '%';
+      var heroSizePx = Math.round(Math.max(56, Math.min(108, 82 * renderScaleY)));
+      heroEl.style.width = heroSizePx + 'px';
+      heroEl.style.height = heroSizePx + 'px';
+      heroImg.style.width = heroSizePx + 'px';
+      heroImg.style.height = heroSizePx + 'px';
+      shadowEl.style.width = Math.round(heroSizePx * 0.72) + 'px';
     }
 
     function syncHeroTransform() {

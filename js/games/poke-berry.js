@@ -42,7 +42,7 @@
     style.id = 'poke-berry-styles';
     style.textContent = [
       '.poke-berry-wrap {',
-      '  position: relative; max-width: 960px; width: 100%; height: 100%; min-height: 360px; margin: 0 auto;',
+      '  position: relative; max-width: 960px; width: 100%; height: 100%; min-height: 0; margin: 0 auto;',
       '  display: flex; flex-direction: column; justify-content: space-between;',
       '  background: #48B8F8;',
       '  border-radius: 20px; border: 4px solid #181818; box-shadow: 0 12px 32px rgba(0,0,0,0.5);',
@@ -50,27 +50,27 @@
       '  font-family: "Noto Sans KR", "Outfit", sans-serif;',
       '}',
       '.poke-berry-hud {',
-      '  position: relative; z-index: 5; display: flex; flex-direction: column; gap: 6px;',
-      '  padding: 8px 16px; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px);',
-      '  border-bottom: 3px solid #181818; font-weight: 900;',
+      '  position: relative; z-index: 5; display: flex; flex-direction: column; gap: 5px;',
+      '  padding: clamp(6px, 1.1vh, 8px) clamp(10px, 2vw, 16px); background: rgba(255,255,255,0.92); backdrop-filter: blur(8px);',
+      '  border-bottom: 3px solid #181818; font-weight: 900; flex-shrink: 0;',
       '}',
       '.poke-berry-hud-top {',
       '  display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;',
       '}',
-      '.poke-berry-hearts { font-size: 1.35rem; letter-spacing: 3px; }',
-      '.poke-berry-score-group { display: flex; align-items: center; gap: 8px; }',
+      '.poke-berry-hearts { font-size: clamp(1.1rem, 2.2vh, 1.35rem); letter-spacing: 2px; }',
+      '.poke-berry-score-group { display: flex; align-items: center; gap: 8px; font-size: clamp(0.86rem, 1.7vh, 1rem); }',
       '.poke-berry-score-pill {',
-      '  background: #e8f5e9; border: 2px solid #181818; border-radius: 999px; padding: 3px 14px; color: #1b5e20;',
+      '  background: #e8f5e9; border: 2px solid #181818; border-radius: 999px; padding: 3px 12px; color: #1b5e20;',
       '}',
       '.poke-berry-name-pill {',
-      '  background: #fff3e0; border: 2px solid #181818; border-radius: 999px; padding: 3px 12px; color: #e65100; font-size: 0.92rem;',
+      '  background: #fff3e0; border: 2px solid #181818; border-radius: 999px; padding: 3px 10px; color: #e65100; font-size: clamp(0.8rem, 1.6vh, 0.92rem);',
       '}',
       '.poke-berry-gauge-row {',
-      '  display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: #1b5e20;',
+      '  display: flex; align-items: center; gap: 8px; font-size: clamp(0.78rem, 1.5vh, 0.9rem); color: #1b5e20;',
       '}',
       '.poke-berry-gauge-label { white-space: nowrap; font-weight: 900; }',
       '.poke-berry-gauge-track {',
-      '  flex: 1; height: 14px; background: #e0e0e0; border-radius: 999px; overflow: hidden;',
+      '  flex: 1; height: clamp(10px, 1.8vh, 14px); background: #e0e0e0; border-radius: 999px; overflow: hidden;',
       '  border: 2px solid #181818;',
       '}',
       '.poke-berry-gauge-fill {',
@@ -78,7 +78,7 @@
       '  border-radius: 999px; transition: width 0.2s ease;',
       '}',
       '.poke-berry-stage-area {',
-      '  position: relative; flex: 1; width: 100%; min-height: 220px; overflow: hidden; touch-action: none; cursor: grab;',
+      '  position: relative; flex: 1; width: 100%; min-height: 140px; overflow: hidden; touch-action: none; cursor: grab;',
       '}',
       '.poke-berry-stage-area:active { cursor: grabbing; }',
       '.poke-berry-canvas {',
@@ -114,25 +114,25 @@
       '  image-rendering: pixelated; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.36)); transition: transform 0.08s ease;',
       '}',
       '.poke-berry-evo-banner {',
-      '  position: absolute; top: 18px; left: 50%; transform: translateX(-50%); z-index: 6;',
+      '  position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 6;',
       '  max-width: 92%; text-align: center; background: linear-gradient(90deg, #fff8e1, #ffe082, #fff8e1);',
-      '  border: 3px solid #181818; border-radius: 16px; padding: 8px 16px;',
-      '  font-weight: 900; font-size: 0.94rem; color: #bf360c;',
+      '  border: 3px solid #181818; border-radius: 16px; padding: 6px 14px;',
+      '  font-weight: 900; font-size: clamp(0.8rem, 1.6vh, 0.94rem); color: #bf360c;',
       '  box-shadow: 0 6px 0 rgba(0,0,0,0.28); opacity: 0; pointer-events: none;',
       '  transition: opacity 0.2s ease;',
       '}',
       '.poke-berry-evo-banner.visible { opacity: 1; }',
       '.poke-berry-controls {',
-      '  position: relative; z-index: 5; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;',
-      '  padding: 10px 16px 14px; background: rgba(255,255,255,0.95); border-top: 3px solid #181818;',
+      '  position: relative; z-index: 5; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(8px, 1.6vw, 14px);',
+      '  padding: clamp(6px, 1.2vh, 10px) clamp(10px, 2vw, 16px) clamp(8px, 1.5vh, 14px); background: rgba(255,255,255,0.95); border-top: 3px solid #181818; flex-shrink: 0;',
       '}',
       '.poke-berry-btn {',
-      '  appearance: none; border: 3px solid #181818; border-radius: 16px; padding: 14px 10px;',
-      '  font-size: 1.18rem; font-weight: 900; color: #fff; cursor: pointer;',
+      '  appearance: none; border: 3px solid #181818; border-radius: 16px; padding: clamp(9px, 1.6vh, 14px) 10px;',
+      '  font-size: clamp(0.96rem, 2vh, 1.18rem); font-weight: 900; color: #fff; cursor: pointer;',
       '  display: flex; align-items: center; justify-content: center; gap: 6px;',
-      '  box-shadow: 0 6px 0 #181818; touch-action: manipulation;',
+      '  box-shadow: 0 5px 0 #181818; touch-action: manipulation;',
       '}',
-      '.poke-berry-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #181818; }',
+      '.poke-berry-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #181818; }',
       '.poke-berry-btn-left { background: linear-gradient(180deg, #66bb6a 0%, #388e3c 100%); }',
       '.poke-berry-btn-right { background: linear-gradient(180deg, #42a5f5 0%, #1976d2 100%); }'
     ].join('\n');
@@ -417,10 +417,13 @@
       resolveStageSprite(initialStage, '');
 
     var W = 720;
+    var GROUND_DEPTH = 52;
     var H = 320;
-    var GROUND_Y = 268;
+    var GROUND_Y = H - GROUND_DEPTH;
     var HERO_BOTTOM_PCT = ((H - GROUND_Y) / H) * 100;
     var MOVE_STEP = 48;
+    var renderScaleX = 1;
+    var renderScaleY = 1;
 
     var dpr = Math.min(2, (typeof window !== 'undefined' && window.devicePixelRatio) || 1);
 
@@ -585,7 +588,41 @@
         Math.min(100, Math.round((clampedGauge / EVOLUTION_TARGET) * 100)) + '%';
     }
 
+    function syncViewportMetrics() {
+      var cw = Number(stageArea && stageArea.clientWidth) || 0;
+      var ch = Number(stageArea && stageArea.clientHeight) || 0;
+      if (cw > 0 && ch > 0) {
+        var targetW = cw < 540 ? 480 : 720;
+        var targetH = Math.max(250, Math.min(1150, Math.round(targetW * (ch / cw))));
+        if (targetW !== W || targetH !== H) {
+          var prevW = W;
+          W = targetW;
+          H = targetH;
+          GROUND_Y = H - GROUND_DEPTH;
+          player.y = GROUND_Y - 28;
+          player.x = Math.max(44, Math.min(W - 44, (player.x / Math.max(1, prevW)) * W));
+          player.targetX = Math.max(44, Math.min(W - 44, (player.targetX / Math.max(1, prevW)) * W));
+          canvas.width = Math.round(W * dpr);
+          canvas.height = Math.round(H * dpr);
+        }
+        renderScaleX = Number((cw / W).toFixed(4));
+        renderScaleY = Number((ch / H).toFixed(4));
+      } else {
+        renderScaleX = 1;
+        renderScaleY = 1;
+      }
+      HERO_BOTTOM_PCT = ((H - GROUND_Y) / H) * 100;
+      heroEl.style.bottom = HERO_BOTTOM_PCT.toFixed(4) + '%';
+      var heroSizePx = Math.round(Math.max(58, Math.min(108, 84 * renderScaleY)));
+      heroEl.style.width = heroSizePx + 'px';
+      heroEl.style.height = heroSizePx + 'px';
+      heroImg.style.width = heroSizePx + 'px';
+      heroImg.style.height = heroSizePx + 'px';
+      shadowEl.style.width = Math.round(heroSizePx * 0.72) + 'px';
+    }
+
     function syncHeroDom() {
+      syncViewportMetrics();
       var pct = Math.max(7, Math.min(93, (player.x / W) * 100));
       heroEl.style.left = pct.toFixed(2) + '%';
 
@@ -875,9 +912,10 @@
 
       // 6. 배경 픽셀 나무 & 우측 아치형 골 도어 + 장식용 부유 잔디섬
       for (var t = 0; t < orchardTrees.length; t++) {
-        drawPixelTree(gCtx, orchardTrees[t].x, GROUND_Y - 12, orchardTrees[t].scale);
+        var treeX = Math.round((orchardTrees[t].x / 720) * W);
+        drawPixelTree(gCtx, treeX, GROUND_Y - 12, orchardTrees[t].scale);
       }
-      drawPixelFloatingIsland(gCtx, 54, 88, 52, 38);
+      drawPixelFloatingIsland(gCtx, 54, Math.max(46, GROUND_Y - 180), 52, 38);
       drawPixelGoalDoor(gCtx, W - 78, GROUND_Y - 12);
 
       // 7. 상단 천장 픽셀 가시열

@@ -329,3 +329,55 @@ test('3. flipbattle 게임에서 flipTile(), triggerRainbowBurst() 십자 뒤집
   cleanup();
   assert.equal(stageEl._flipBattleGame, null, 'cleanup 호출 후 _flipBattleGame 훅이 해제되어야 함');
 });
+
+test('4. flipbattle 5판 시리즈에서 라운드가 진행될수록 로켓단 속도가 빨라지고 5판 중 승리 횟수가 집계된다', () => {
+  const stageEl = createMockStage();
+  const charCtx = createMockCharCtx();
+  const helpers = createMockHelpers();
+
+  const cleanup = globalThis.PokeGameFlipBattle.mount(stageEl, charCtx, helpers);
+  const game = stageEl._flipBattleGame;
+
+  assert.equal(game.getState().round, 1);
+  assert.equal(game.getState().maxRounds, 5);
+  assert.equal(game.getState().rivalIntervalMs, 1200, '1라운드 로켓단 주기는 1200ms여야 함');
+
+  // 1R 승리 만들기 (0번 로켓단 타일 뒤집기 -> 9 vs 7)
+  game.flipTile(0);
+  const r1 = game.completeRound();
+  assert.equal(r1.wonRound, true);
+  assert.equal(r1.roundWins, 1);
+  assert.equal(game.getState().round, 2);
+  assert.equal(game.getState().rivalIntervalMs, 980, '2라운드 로켓단 주기는 980ms로 빨라져야 함');
+
+  // 2R 패배 만들기 (내 타일 8번을 로켓단이 뒤집기 -> 7 vs 9)
+  game.rivalFlip(8);
+  const r2 = game.completeRound();
+  assert.equal(r2.wonRound, false);
+  assert.equal(r2.roundWins, 1);
+  assert.equal(r2.roundLosses, 1);
+  assert.equal(game.getState().round, 3);
+  assert.equal(game.getState().rivalIntervalMs, 800, '3라운드 로켓단 주기는 800ms로 빨라져야 함');
+
+  // 3R 승리
+  game.flipTile(0);
+  game.completeRound();
+  assert.equal(game.getState().round, 4);
+  assert.equal(game.getState().rivalIntervalMs, 650, '4라운드 로켓단 주기는 650ms로 빨라져야 함');
+
+  // 4R 승리
+  game.flipTile(0);
+  game.completeRound();
+  assert.equal(game.getState().round, 5);
+  assert.equal(game.getState().rivalIntervalMs, 520, '5라운드 로켓단 주기는 520ms(최고속)여야 함');
+
+  // 5R 승리 후 최종 결과 확인 (총 4승 1패)
+  game.flipTile(0);
+  const finalRes = game.completeRound();
+  assert.equal(finalRes.finished, true);
+  assert.equal(finalRes.roundWins, 4);
+  assert.equal(finalRes.roundLosses, 1);
+  assert.ok(finalRes.message.includes('5판 중 4번 승리!'), '최종 메시지에 5판 중 승리 횟수가 표시되어야 함');
+
+  cleanup();
+});

@@ -8,10 +8,18 @@
   var GAME_ID = 'flipbattle';
   var TOTAL_TILES = 16;
   var GRID_SIZE = 4;
+  var TOTAL_ROUNDS = 5;
   var INITIAL_TIME_SEC = 25;
-  var VILLAIN_INTERVAL_MS = 1150;
+  var NEXT_ROUND_TIME_SEC = 15;
+  var VILLAIN_INTERVAL_MS = 1200;
+  var VILLAIN_INTERVALS_BY_ROUND = [1200, 980, 800, 650, 520];
   var WAND_SPAWN_INTERVAL_MS = 4200;
   var SOLFEGE_NAMES = ['도', '레', '미', '파', '솔', '라', '시', '높은 도'];
+
+  function getVillainIntervalForRound(roundNum) {
+    var idx = Math.max(0, Math.min(VILLAIN_INTERVALS_BY_ROUND.length - 1, (Number(roundNum) || 1) - 1));
+    return VILLAIN_INTERVALS_BY_ROUND[idx];
+  }
 
   var ALARM_CLOCK_SVG =
     '<svg class="tp-arcade-clock-svg" viewBox="0 0 64 64" width="46" height="46" aria-hidden="true">' +
@@ -91,6 +99,34 @@
       '  font-weight: 900; font-size: 19px; padding: 10px 24px 12px 26px; border-radius: 0 0 0 32px;',
       '  box-shadow: -2px 4px 12px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.45);',
       '  text-shadow: 0 2px 4px rgba(0,0,0,0.25); margin-right: -16px; margin-top: -6px; white-space: nowrap;',
+      '}',
+      '.tp-flipbattle-round-wins-pill {',
+      '  background: linear-gradient(180deg, #10B981 0%, #059669 100%); color: #FFFFFF;',
+      '  border: 2px solid #A7F3D0; border-radius: 999px; padding: 4px 11px; font-size: 12.5px; font-weight: 900;',
+      '  white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.28);',
+      '}',
+      '.tp-flipbattle-speed-pill {',
+      '  background: linear-gradient(180deg, #EC4899 0%, #BE185D 100%); color: #FFFFFF;',
+      '  border: 2px solid #FBCFE8; border-radius: 999px; padding: 4px 11px; font-size: 12.5px; font-weight: 900;',
+      '  white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.28);',
+      '}',
+      '.tp-flipbattle-series-bar {',
+      '  display: flex; align-items: center; justify-content: center; gap: 8px; padding: 2px 8px; flex-shrink: 0;',
+      '}',
+      '.tp-flipbattle-round-slot {',
+      '  display: inline-flex; align-items: center; justify-content: center; min-width: 58px; padding: 3px 10px;',
+      '  border-radius: 999px; font-size: 12px; font-weight: 900; background: rgba(15, 23, 42, 0.48);',
+      '  border: 1.5px solid rgba(255,255,255,0.22); color: #CBD5E1; transition: transform 0.2s, background 0.2s;',
+      '}',
+      '.tp-flipbattle-round-slot.is-current {',
+      '  background: linear-gradient(180deg, #FEF08A 0%, #F59E0B 100%); border-color: #FFFFFF; color: #1E293B;',
+      '  transform: scale(1.08); box-shadow: 0 0 12px rgba(251,191,36,0.75);',
+      '}',
+      '.tp-flipbattle-round-slot.is-won {',
+      '  background: linear-gradient(180deg, #34D399 0%, #059669 100%); border-color: #D1FAE5; color: #FFFFFF;',
+      '}',
+      '.tp-flipbattle-round-slot.is-lost {',
+      '  background: linear-gradient(180deg, #F87171 0%, #DC2626 100%); border-color: #FECACA; color: #FFFFFF;',
       '}',
       '.tp-flipbattle-subrow {',
       '  display: flex; align-items: center; justify-content: space-between; gap: 10px;',
@@ -209,10 +245,12 @@
   var gameDef = {
     id: GAME_ID,
     title: '샤랄라! 마법 판 뒤집기!',
-    subtitle: '악동핑보다 먼저 카드를 내 티니핑 빛깔로 뒤집어요!',
+    subtitle: '5판 3선승! 점점 빨라지는 심술핑을 이겨봐요!',
     icon: '⚡',
-    badge: '스피드 판 뒤집기',
+    badge: '5판 스피드 대결',
     badgeColor: '#EC4899',
+    VILLAIN_INTERVALS_BY_ROUND: VILLAIN_INTERVALS_BY_ROUND,
+    getVillainIntervalForRound: getVillainIntervalForRound,
 
     mount: function (stageEl, charCtx, helpers) {
       if (!stageEl) {
@@ -247,6 +285,13 @@
       }, helpers || {});
 
       var state = {
+        round: 1,
+        maxRounds: TOTAL_ROUNDS,
+        completedRounds: 0,
+        roundWins: 0,
+        roundLosses: 0,
+        roundHistory: [],
+        villainIntervalMs: getVillainIntervalForRound(1),
         score: 0,
         highScore: Number(h.getHighScore(GAME_ID)) || 0,
         timeLeft: INITIAL_TIME_SEC,
@@ -257,7 +302,7 @@
         magicWandCount: 0,
         isPointerDown: false,
         isGameOver: false,
-        bannerMessage: '⚡ 심술핑 카드를 터치하거나 손가락으로 쓱~ 문질러 뒤집어요!'
+        bannerMessage: '⚡ 1라운드 시작! 심술핑 카드를 터치하거나 쓱~ 문질러 뒤집어요!'
       };
 
       // 4x4 (16장) 초기 보드 생성: 8장 hero, 8장 villain (체커보드 교차 배치로 0번은 villain)
@@ -281,6 +326,15 @@
       var wandTimerId = null;
       var docPointerUpHandler = null;
 
+      var roundSlotsHtml = [];
+      for (var rIdx = 1; rIdx <= TOTAL_ROUNDS; rIdx++) {
+        roundSlotsHtml.push(
+          '<span class="tp-flipbattle-round-slot' + (rIdx === 1 ? ' is-current' : '') + '" data-round-slot="' + rIdx + '">' +
+            rIdx + 'R' + (rIdx === 1 ? ' 🔥' : '') +
+          '</span>'
+        );
+      }
+
       stageEl.innerHTML = [
         '<div class="tp-flipbattle-wrap" data-role="wrap" style="--hero-color: ' + (ctx.color || '#EC4899') + ';">',
         '  <div class="tp-flipbattle-hud">',
@@ -295,11 +349,14 @@
         '        <div class="tp-flipbattle-timer-pill sr-only" data-role="timer">⏰ 25초</div>',
         '      </div>',
         '      <div class="tp-flipbattle-hud-right">',
+        '        <div class="tp-flipbattle-round-wins-pill" data-role="round-wins-pill">🏆 5판 중 0승 (0승 0패)</div>',
+        '        <div class="tp-flipbattle-speed-pill" data-role="villain-speed-pill">😈 심술핑 속도 Lv.1</div>',
         '        <div class="tp-flipbattle-score-pill" data-role="score">💖 0점</div>',
         '        <button type="button" class="tp-flipbattle-finish-btn" data-role="finish-btn">🏁 결과</button>',
         '        <div class="tp-flipbattle-corner-ribbon">카드 뒤집기</div>',
         '      </div>',
         '    </div>',
+        '    <div class="tp-flipbattle-series-bar" data-role="series-bar">' + roundSlotsHtml.join('') + '</div>',
         '    <div class="tp-flipbattle-subrow">',
         '      <div class="tp-flipbattle-banner" data-role="banner">' + state.bannerMessage + '</div>',
         '      <div class="tp-flipbattle-tug">',
@@ -321,6 +378,8 @@
       var timerEl = stageEl.querySelector ? stageEl.querySelector('[data-role="timer"]') : null;
       var hudHeroNumEl = stageEl.querySelector ? stageEl.querySelector('[data-role="hud-hero-num"]') : null;
       var hudTimerNumEl = stageEl.querySelector ? stageEl.querySelector('[data-role="hud-timer-num"]') : null;
+      var roundWinsPillEl = stageEl.querySelector ? stageEl.querySelector('[data-role="round-wins-pill"]') : null;
+      var villainSpeedPillEl = stageEl.querySelector ? stageEl.querySelector('[data-role="villain-speed-pill"]') : null;
       var scoreEl = stageEl.querySelector ? stageEl.querySelector('[data-role="score"]') : null;
       var heroLabelEl = stageEl.querySelector ? stageEl.querySelector('[data-role="hero-label"]') : null;
       var villainLabelEl = stageEl.querySelector ? stageEl.querySelector('[data-role="villain-label"]') : null;
@@ -350,6 +409,33 @@
         }
         if (hudHeroNumEl) {
           hudHeroNumEl.textContent = String(state.heroCount);
+        }
+        if (roundWinsPillEl) {
+          roundWinsPillEl.textContent = '🏆 5판 중 ' + state.roundWins + '승 (' + state.roundWins + '승 ' + state.roundLosses + '패)';
+        }
+        if (villainSpeedPillEl) {
+          villainSpeedPillEl.textContent = '😈 심술핑 속도 Lv.' + state.round;
+        }
+        if (stageEl.querySelectorAll) {
+          var rSlots = stageEl.querySelectorAll('[data-round-slot]');
+          if (rSlots && rSlots.length) {
+            for (var sIdx = 0; sIdx < rSlots.length; sIdx++) {
+              var slotEl = rSlots[sIdx];
+              var rNum = Number(slotEl.getAttribute('data-round-slot')) || (sIdx + 1);
+              var hist = state.roundHistory[rNum - 1];
+              var sCls = 'tp-flipbattle-round-slot';
+              var sTxt = rNum + 'R';
+              if (hist) {
+                sCls += hist.won ? ' is-won' : ' is-lost';
+                sTxt = rNum + 'R ' + (hist.won ? '🏆' : '💦');
+              } else if (rNum === state.round && !state.isGameOver) {
+                sCls += ' is-current';
+                sTxt = rNum + 'R 🔥';
+              }
+              slotEl.className = sCls;
+              slotEl.textContent = sTxt;
+            }
+          }
         }
         if (scoreEl) {
           scoreEl.textContent = '💖 ' + state.score + '점';
@@ -620,6 +706,85 @@
         return idx;
       }
 
+      function restartVillainTimer() {
+        if (villainTimerId) {
+          clearInterval(villainTimerId);
+          villainTimerId = null;
+        }
+        if (!state.isGameOver) {
+          villainTimerId = setInterval(function () {
+            villainFlip();
+          }, state.villainIntervalMs);
+        }
+      }
+
+      function resetTilesForNextRound() {
+        for (var i = 0; i < tiles.length; i++) {
+          var r = Math.floor(i / GRID_SIZE);
+          var c = i % GRID_SIZE;
+          var isHeroStart = (r + c) % 2 === 1;
+          tiles[i].owner = isHeroStart ? 'hero' : 'villain';
+          tiles[i].hasMagicWand = i === 5;
+          tiles[i].justFlipped = false;
+          updateSingleTileDom(tiles[i]);
+        }
+      }
+
+      function completeRound() {
+        if (state.isGameOver) return null;
+        if (state.round >= TOTAL_ROUNDS) {
+          finishGame('time_up');
+          return null;
+        }
+
+        recountTiles();
+        var finishedRound = state.round;
+        var wonRound = state.heroCount > state.villainCount;
+        var roundBonus = wonRound ? 100 : 50;
+
+        state.completedRounds += 1;
+        if (wonRound) {
+          state.roundWins += 1;
+        } else {
+          state.roundLosses += 1;
+        }
+        state.score += roundBonus;
+
+        state.roundHistory.push({
+          round: finishedRound,
+          won: wonRound,
+          heroCount: state.heroCount,
+          villainCount: state.villainCount,
+          bonusPoints: roundBonus,
+          villainIntervalMs: state.villainIntervalMs
+        });
+
+        state.round = finishedRound + 1;
+        state.villainIntervalMs = getVillainIntervalForRound(state.round);
+        state.timeLeft = NEXT_ROUND_TIME_SEC;
+        state.comboCount = 0;
+        resetTilesForNextRound();
+
+        state.bannerMessage = (wonRound ? '🏆 ' + finishedRound + '라운드 승리! (+100점) ' : '💖 ' + finishedRound + '라운드 아깝다! (+50점) ') +
+          '🔥 ' + state.round + '라운드 시작! 심술핑 속도가 Lv.' + state.round + '로 빨라졌어요! (현재 ' + state.roundWins + '승 ' + state.roundLosses + '패)';
+
+        h.playSfx('sparkle');
+        restartVillainTimer();
+        updateHud();
+
+        return {
+          finished: false,
+          completedRound: finishedRound,
+          wonRound: wonRound,
+          bonusPoints: roundBonus,
+          round: state.round,
+          roundWins: state.roundWins,
+          roundLosses: state.roundLosses,
+          villainIntervalMs: state.villainIntervalMs,
+          score: state.score
+        };
+      }
+
       function stepSecond() {
         if (state.isGameOver) return state.timeLeft;
         state.timeLeft = Math.max(0, state.timeLeft - 1);
@@ -628,7 +793,7 @@
         }
         updateHud();
         if (state.timeLeft <= 0) {
-          finishGame('time_up');
+          completeRound();
         }
         return state.timeLeft;
       }
@@ -655,13 +820,30 @@
         stopAllTimers();
         recountTiles();
 
-        var isHeroWin = state.heroCount > state.villainCount;
-        var bonusScore = isHeroWin ? 100 : 50;
+        var isCurrentHeroWin = state.heroCount > state.villainCount;
+        var bonusScore = isCurrentHeroWin ? 100 : 50;
         state.score += bonusScore;
+        state.completedRounds += 1;
+        if (isCurrentHeroWin) {
+          state.roundWins += 1;
+        } else {
+          state.roundLosses += 1;
+        }
+        state.roundHistory.push({
+          round: state.round,
+          won: isCurrentHeroWin,
+          heroCount: state.heroCount,
+          villainCount: state.villainCount,
+          bonusPoints: bonusScore,
+          villainIntervalMs: state.villainIntervalMs
+        });
+
+        var isHeroWin = state.roundWins > state.roundLosses || (state.completedRounds === 1 && isCurrentHeroWin);
+        var seriesRecordText = TOTAL_ROUNDS + '판 중 ' + state.roundWins + '번 승리! (' + state.roundWins + '승 ' + state.roundLosses + '패)';
 
         var resultMessage = isHeroWin
-          ? '🎉 샤랄라 대승리! 마법 판을 사랑으로 가득 채웠어요~ 츄! (+100점 승리 보너스)'
-          : '💖 우와~ 손가락이 번개처럼 빨랐어요! 참 잘했어요~ (+50점 격려 보너스)';
+          ? '🎉 샤랄라 대승리! ' + seriesRecordText + ' 마법 판을 사랑으로 가득 채웠어요~ 츄! (+' + bonusScore + '점 보너스)'
+          : '💖 우와~ ' + seriesRecordText + ' 손가락이 번개처럼 빨랐어요! 참 잘했어요~ (+' + bonusScore + '점 격려 보너스)';
 
         state.bannerMessage = resultMessage;
         updateHud();
@@ -674,7 +856,7 @@
 
         h.showResultOverlay(stageEl, {
           gameId: GAME_ID,
-          title: isHeroWin ? '샤랄라 마법 판 뒤집기 대승리! ⚡💖' : '샤랄라 마법 판 뒤집기 완료! 💖',
+          title: isHeroWin ? '샤랄라 마법 판 뒤집기 ' + state.roundWins + '승 대승리! ⚡💖' : '샤랄라 마법 판 뒤집기 5판 완료! 💖',
           score: state.score,
           highScore: state.highScore,
           stars: isHeroWin ? 3 : 2,
@@ -724,9 +906,7 @@
 
       renderBoard();
 
-      villainTimerId = setInterval(function () {
-        villainFlip();
-      }, VILLAIN_INTERVAL_MS);
+      restartVillainTimer();
 
       secondTimerId = setInterval(function () {
         stepSecond();
@@ -742,6 +922,8 @@
         triggerMagicWand: triggerMagicWand,
         spawnMagicWand: spawnMagicWand,
         stepSecond: stepSecond,
+        completeRound: completeRound,
+        nextRound: completeRound,
         finishGame: finishGame,
         getState: function () {
           recountTiles();
@@ -753,6 +935,13 @@
             }
           }
           return {
+            round: state.round,
+            maxRounds: state.maxRounds,
+            completedRounds: state.completedRounds,
+            roundWins: state.roundWins,
+            roundLosses: state.roundLosses,
+            roundHistory: state.roundHistory.slice(),
+            villainIntervalMs: state.villainIntervalMs,
             score: state.score,
             highScore: state.highScore,
             timeLeft: state.timeLeft,

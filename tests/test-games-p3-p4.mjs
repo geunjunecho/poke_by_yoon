@@ -193,11 +193,22 @@ test('2. catch 게임에서 throwBallAtScale(0.9)(황금 구간) 호출 시 점�
   assert.equal(initialState.score, 0);
   assert.equal(initialState.currentBall.name, '몬스터볼');
 
-  // 1R: 황금 구간(0.9) 투척 -> +100점, 라운드 2(슈퍼볼)로 진행
+  // 1R: 황금 구간(0.9) 투척 -> +100점, 볼이 열리며 포획 성공(captured), 라운드 2(슈퍼볼)로 진행
   const res1 = stageEl._catchGame.throwBallAtScale(0.9);
   assert.equal(res1.tier, 'excellent');
   assert.equal(res1.points, 100);
+  assert.equal(res1.caught, true, '황금 구간 투척 시 볼이 열리며 포획 성공(caught=true)이어야 함');
+  assert.equal(res1.action, 'captured');
   assert.ok(res1.message.includes('엑설런트 캐치'));
+  assert.ok(
+    stageEl.querySelector('[data-role="flying-ball"]').className.includes('is-catch-success') &&
+      stageEl.querySelector('[data-role="flying-ball"]').className.includes('is-opening'),
+    '포획 성공 시 몬스터볼에 열림/포획 애니메이션 클래스가 부여되어야 함'
+  );
+  assert.ok(
+    stageEl.querySelector('[data-role="pokemon-sprite"]').className.includes('is-captured'),
+    '포획 성공 시 포켓몬이 볼 안으로 빨려 들어가는 클래스가 부여되어야 함'
+  );
 
   const stateAfter1 = stageEl._catchGame.getState();
   assert.equal(stateAfter1.score, 100, '황금 구간 투척 후 점수가 100점이어야 함');
@@ -205,14 +216,28 @@ test('2. catch 게임에서 throwBallAtScale(0.9)(황금 구간) 호출 시 점�
   assert.equal(stateAfter1.completedRounds, 1);
   assert.equal(stateAfter1.currentBall.name, '슈퍼볼', '2라운드는 슈퍼볼이어야 함');
 
-  // 2R: 초록 구간(0.6) 투척 -> +70점, 라운드 3(하이퍼볼)
-  stageEl._catchGame.throwBallAtScale(0.6);
+  // 2R: 초록 구간(0.6) 투척 -> +70점, 포획 성공(captured), 라운드 3(하이퍼볼)
+  const res2 = stageEl._catchGame.throwBallAtScale(0.6);
+  assert.equal(res2.caught, true);
+  assert.equal(res2.action, 'captured');
   assert.equal(stageEl._catchGame.getState().score, 170);
   assert.equal(stageEl._catchGame.getState().round, 3);
   assert.equal(stageEl._catchGame.getState().currentBall.name, '하이퍼볼');
 
-  // 3R: 노란 구간(1.6) 투척 -> +30점, 라운드 4(러브볼)
-  stageEl._catchGame.throwBallAtScale(1.6);
+  // 3R: 노란 구간(1.6) 투척 -> +30점, 포켓몬에 틱 부딪히고 땅에 떨어짐(deflected), 라운드 4(러브볼)
+  const res3 = stageEl._catchGame.throwBallAtScale(1.6);
+  assert.equal(res3.caught, false, '노란 구간(빗맞음) 투척 시 포획 실패(caught=false)여야 함');
+  assert.equal(res3.action, 'deflected', '실패 시 포켓몬에 부딪혀 튕겨 떨어지는 deflected 액션이어야 함');
+  assert.ok(res3.message.includes('부딪혀 볼이 땅에 떨어졌어요'));
+  assert.ok(
+    stageEl.querySelector('[data-role="flying-ball"]').className.includes('is-catch-fail') &&
+      stageEl.querySelector('[data-role="flying-ball"]').className.includes('is-deflected'),
+    '포획 실패 시 몬스터볼에 튕겨 떨어지는 애니메이션 클래스가 부여되어야 함'
+  );
+  assert.ok(
+    stageEl.querySelector('[data-role="pokemon-sprite"]').className.includes('is-deflecting'),
+    '포획 실패 시 포켓몬이 볼을 틱 쳐내는 클래스가 부여되어야 함'
+  );
   assert.equal(stageEl._catchGame.getState().score, 200);
   assert.equal(stageEl._catchGame.getState().round, 4);
   assert.equal(stageEl._catchGame.getState().currentBall.name, '러브볼');
@@ -273,18 +298,26 @@ test('3. seesaw 게임에서 현재 문제(mode: weight | height)의 정답 쪽�
   assert.equal(res2.points, 120, '연속 정답 시 보너스 포함 120점이 증가해야 함');
   assert.equal(stageEl._seesawGame.getState().score, 220);
 
-  // 3R: 오답 선택 시 격려 점수 +30점 확인
+  // 3R: 다중 포켓몬 합산 대결(Lv.3) 검증 및 오답 선택 시 격려 점수 +30점 확인
   const st3 = stageEl._seesawGame.getState();
+  assert.equal(st3.difficultyLevel, 3, '3라운드는 Lv.3 합산 대결이어야 함');
+  assert.ok(st3.leftCount > 1 || st3.rightCount > 1, '3라운드부터는 다중 포켓몬(×2마리 이상) 합산 대결이 등장해야 함');
+  assert.equal(st3.leftValue, st3.leftUnitValue * st3.leftCount, '왼쪽 총합이 1마리 수치 × 마릿수와 일치해야 함');
+  assert.equal(st3.rightValue, st3.rightUnitValue * st3.rightCount, '오른쪽 총합이 1마리 수치 × 마릿수와 일치해야 함');
   const wrongSide3 = st3.leftValue > st3.rightValue ? 'right' : 'left';
   const res3 = stageEl._seesawGame.answerSide(wrongSide3);
   assert.equal(res3.isCorrect, false);
   assert.equal(res3.points, 30, '틀려도 격려 점수 30점이 부여되어야 함');
   assert.equal(stageEl._seesawGame.getState().score, 250);
 
-  // 4R & 5R 완료 확인
+  // 4R & 5R(챔피언 결정전 Lv.5) 완료 확인
   const st4 = stageEl._seesawGame.getState();
+  assert.equal(st4.difficultyLevel, 4);
+  assert.ok(st4.leftCount > 1 || st4.rightCount > 1);
   stageEl._seesawGame.answerSide(st4.correctSide);
   const st5 = stageEl._seesawGame.getState();
+  assert.equal(st5.difficultyLevel, 5);
+  assert.ok(st5.leftCount > 1 || st5.rightCount > 1);
   stageEl._seesawGame.answerSide(st5.correctSide);
 
   const finalState = stageEl._seesawGame.getState();

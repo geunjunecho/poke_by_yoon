@@ -84,12 +84,14 @@
         zone: 'gold',
         points: 100,
         shakes: 1,
+        caught: true,
+        action: 'captured',
         rainbowBurst: true,
         ringColor: '#FFD54F',
         ringGlow: 'rgba(255, 213, 79, 0.85)',
         hintText: '🌟 황금 찬스! 지금 던져요!!',
-        message: '✨ 엑설런트 캐치!! (+100점)',
-        subMessage: isMasterRound ? '🟣 마스터볼 보너스 대성공!! 완벽해요!' : '🌈 무지개 별폭발! 단번에 찰칵 잡았어요!'
+        message: '✨ 엑설런트 캐치!! 볼이 열리며 딱 잡혔어요! (+100점)',
+        subMessage: isMasterRound ? '🟣 마스터볼 보너스 대성공!! 완벽해요!' : '🌈 무지개 별폭발! 볼이 활짝 열리고 단번에 찰칵 잡았어요!'
       };
     }
 
@@ -99,26 +101,35 @@
         zone: 'green',
         points: 70,
         shakes: 3,
+        caught: true,
+        action: 'captured',
         rainbowBurst: false,
         ringColor: '#66BB6A',
         ringGlow: 'rgba(102, 187, 106, 0.8)',
         hintText: '💚 초록 링! 지금 던져요!',
-        message: '👍 나이스 캐치! (+70점)',
-        subMessage: isMasterRound ? '🟣 마스터볼 대성공! 흔들흔들 찰칵!' : '흔들... 흔들... 흔들... 찰칵! 캐치 성공!'
+        message: '👍 나이스 캐치! 볼이 열리며 포켓몬이 쏙! (+70점)',
+        subMessage: isMasterRound ? '🟣 마스터볼 대성공! 흔들흔들 찰칵!' : '볼이 열려 포켓몬이 들어간 뒤 흔들... 흔들... 찰칵!'
       };
     }
 
+    var caughtByMaster = Boolean(isMasterRound);
     return {
       tier: 'good',
       zone: 'yellow',
       points: 30,
-      shakes: 1,
+      shakes: caughtByMaster ? 1 : 0,
+      caught: caughtByMaster,
+      action: caughtByMaster ? 'captured' : 'deflected',
       rainbowBurst: false,
       ringColor: '#FFEE58',
       ringGlow: 'rgba(255, 238, 88, 0.75)',
       hintText: '💛 초록색이 될 때까지 기다려요!',
-      message: '😊 아깝다! 조금 더 초록색일 때 던져보자! (+30점)',
-      subMessage: isMasterRound ? '🟣 마스터볼이 도와줘서 찰칵 성공했어요!' : '괜찮아요! 다음 볼로 더 잘 던질 수 있어요!'
+      message: caughtByMaster
+        ? '🟣 마스터볼 발동! 볼이 열리며 딱 잡혔어요! (+30점)'
+        : '💥 틱! 포켓몬에 부딪혀 볼이 땅에 떨어졌어요! (+30점)',
+      subMessage: caughtByMaster
+        ? '🟣 마스터볼이 도와줘서 찰칵 성공했어요!'
+        : '초록색·황금색 링일 때 던지면 몬스터볼이 열리며 포켓몬이 잡혀요!'
     };
   }
 
@@ -198,6 +209,7 @@
     var b = ball || BALL_UPGRADES[0];
     return (
       '<span class="sr-only" data-role="flying-ball-emoji">' + b.emoji + '</span>' +
+      '<div class="catch-ball-core" data-role="flying-ball-core"></div>' +
       '<div class="catch-ball-3d" data-ball-id="' + b.id + '">' +
         '<div class="catch-ball-3d-top" data-role="flying-ball-top" style="background: ' + b.topColor + ';"></div>' +
         '<div class="catch-ball-3d-bottom" data-role="flying-ball-bottom" style="background: ' + b.bottomColor + ';"></div>' +
@@ -223,13 +235,13 @@
     return (
       '<style>' +
         '.poke-catch-root {' +
-          'position: relative; width: 100%; max-width: 900px; height: 100%; min-height: 360px;' +
+          'position: relative; width: 100%; max-width: 920px; height: 100%; min-height: 0;' +
           'margin: 0 auto;' +
-          'display: flex; flex-direction: column; justify-content: space-between;' +
+          'display: flex; flex-direction: column; justify-content: space-between; gap: clamp(4px, 1vh, 8px);' +
           'background: ' +
             'radial-gradient(circle at 50% 18%, rgba(255, 253, 231, 0.72) 0%, rgba(255, 253, 231, 0) 46%),' +
             'linear-gradient(180deg, #38bdf8 0%, #bae6fd 38%, #86efac 39%, #22c55e 68%, #15803d 100%);' +
-          'border-radius: 18px; overflow: hidden; padding: 12px 16px; box-sizing: border-box;' +
+          'border-radius: 18px; overflow: hidden; padding: clamp(8px, 1.5vh, 12px) clamp(10px, 2vw, 16px); box-sizing: border-box;' +
           'font-family: "Noto Sans KR", "Outfit", sans-serif; user-select: none;' +
           'color: #1B3B1A;' +
           'box-shadow: 0 12px 32px rgba(0, 0, 0, 0.38), inset 0 2px 0 rgba(255, 255, 255, 0.55);' +
@@ -256,61 +268,61 @@
           'overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;' +
         '}' +
         '.catch-hud {' +
-          'display: flex; align-items: center; justify-content: space-between; gap: 10px;' +
+          'display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0;' +
           'background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(241, 245, 249, 0.94) 100%);' +
-          'border: 3px solid #cbd5e1; border-radius: 18px; padding: 8px 14px;' +
-          'box-shadow: 0 6px 0 rgba(15, 23, 42, 0.16), 0 10px 20px rgba(0,0,0,0.16); z-index: 3; flex-wrap: wrap;' +
+          'border: 3px solid #cbd5e1; border-radius: 16px; padding: clamp(5px, 1vh, 8px) 12px;' +
+          'box-shadow: 0 5px 0 rgba(15, 23, 42, 0.16), 0 8px 16px rgba(0,0,0,0.16); z-index: 3; flex-wrap: wrap;' +
         '}' +
         '.catch-ball-slots {' +
-          'display: flex; align-items: center; gap: 6px;' +
+          'display: flex; align-items: center; gap: 5px;' +
           'background: linear-gradient(180deg, #1e293b 0%, #334155 100%);' +
-          'padding: 5px 8px; border-radius: 14px; border: 2px solid #475569;' +
+          'padding: 4px 7px; border-radius: 12px; border: 2px solid #475569;' +
           'box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.48);' +
         '}' +
         '.catch-ball-slot {' +
           'display: flex; flex-direction: column; align-items: center; justify-content: center;' +
-          'width: 42px; height: 44px; border-radius: 10px; background: rgba(255, 255, 255, 0.12);' +
+          'width: clamp(36px, 5vw, 42px); height: clamp(38px, 5vh, 44px); border-radius: 10px; background: rgba(255, 255, 255, 0.12);' +
           'border: 2px solid rgba(255, 255, 255, 0.18); transition: transform 0.2s, border-color 0.2s, background 0.2s;' +
           'font-size: 11px; font-weight: 900; color: #cbd5e1;' +
         '}' +
-        '.catch-ball-slot .slot-emoji { font-size: 16px; line-height: 1.1; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.35)); }' +
+        '.catch-ball-slot .slot-emoji { font-size: 15px; line-height: 1.1; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.35)); }' +
         '.catch-ball-slot.is-current {' +
-          'background: linear-gradient(180deg, #fffbeb 0%, #fde68a 100%); border-color: #f59e0b; transform: scale(1.1); color: #b45309;' +
+          'background: linear-gradient(180deg, #fffbeb 0%, #fde68a 100%); border-color: #f59e0b; transform: scale(1.08); color: #b45309;' +
           'box-shadow: 0 0 12px rgba(251, 191, 36, 0.8), 0 3px 0 #b45309;' +
         '}' +
         '.catch-ball-slot.is-done {' +
           'background: linear-gradient(180deg, #dcfce7 0%, #86efac 100%); border-color: #22c55e; color: #166534;' +
         '}' +
         '.catch-score-box {' +
-          'display: flex; align-items: center; gap: 10px; font-weight: 900;' +
+          'display: flex; align-items: center; gap: 8px; font-weight: 900;' +
         '}' +
         '.catch-current-ball-badge {' +
-          'background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 100%); color: #c2410c; border: 2.5px solid #fb923c;' +
-          'border-radius: 999px; padding: 5px 12px; font-size: 13px; font-weight: 900;' +
+          'background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 100%); color: #c2410c; border: 2px solid #fb923c;' +
+          'border-radius: 999px; padding: 4px 10px; font-size: 12.5px; font-weight: 900;' +
           'box-shadow: 0 3px 0 rgba(194, 65, 12, 0.2);' +
         '}' +
         '.catch-score-pill {' +
           'background: linear-gradient(180deg, #166534 0%, #14532d 100%); color: #ffffff; border-radius: 999px;' +
-          'border: 3px solid #86efac; padding: 4px 16px; font-size: 32px; line-height: 1.05; font-weight: 900;' +
-          'letter-spacing: -0.5px; -webkit-text-stroke: 1.2px #14532d;' +
+          'border: 2.5px solid #86efac; padding: 3px 14px; font-size: clamp(20px, 3.2vw, 28px); line-height: 1.05; font-weight: 900;' +
+          'letter-spacing: -0.5px; -webkit-text-stroke: 1px #14532d;' +
           'text-shadow: 0 2px 0 #14532d, 0 4px 8px rgba(0,0,0,0.35);' +
           'box-shadow: 0 4px 0 #052e16, inset 0 2px 4px rgba(255,255,255,0.35);' +
         '}' +
         '.catch-meadow-stage {' +
-          'position: relative; flex: 1; display: flex; flex-direction: column;' +
+          'position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column;' +
           'align-items: center; justify-content: center; cursor: pointer; z-index: 2;' +
-          'min-height: 210px; touch-action: manipulation;' +
+          'touch-action: manipulation;' +
         '}' +
         '.catch-zone-hint {' +
-          'margin-bottom: 10px; padding: 6px 18px; border-radius: 999px;' +
+          'margin-bottom: clamp(4px, 1vh, 10px); padding: 5px 16px; border-radius: 999px; flex-shrink: 0;' +
           'background: rgba(15, 23, 42, 0.76); border: 2px solid rgba(255,255,255,0.35);' +
-          'color: #FFF; font-size: 15px; font-weight: 800;' +
+          'color: #FFF; font-size: clamp(13px, 2vw, 15px); font-weight: 800;' +
           'text-align: center; transition: background 0.2s, transform 0.2s;' +
           'box-shadow: 0 4px 12px rgba(0,0,0,0.22);' +
         '}' +
         '.catch-target-container {' +
-          'position: relative; width: 220px; height: 214px;' +
-          'display: flex; align-items: center; justify-content: center;' +
+          'position: relative; width: clamp(168px, 28vh, 220px); height: clamp(164px, 27vh, 214px);' +
+          'display: flex; align-items: center; justify-content: center; flex-shrink: 0;' +
         '}' +
         '.catch-pedestal {' +
           'position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);' +
@@ -339,37 +351,87 @@
           'filter: drop-shadow(0 12px 10px rgba(0,0,0,0.38));' +
           'transition: opacity 0.2s ease, transform 0.15s ease;' +
         '}' +
-        '.catch-pokemon-sprite.is-captured { opacity: 0.12; transform: scale(0.28) !important; }' +
+        '.catch-pokemon-sprite.is-captured {' +
+          'animation: catchPokemonSuckIn 0.88s cubic-bezier(0.3, 0.05, 0.2, 1) forwards !important;' +
+        '}' +
+        '.catch-pokemon-sprite.is-deflecting {' +
+          'animation: catchPokemonDeflect 0.68s ease-out !important;' +
+        '}' +
+        '.catch-capture-beam {' +
+          'position: absolute; width: 158px; height: 158px; border-radius: 50%; z-index: 3; pointer-events: none;' +
+          'background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(251,113,133,0.72) 42%, rgba(250,204,21,0.35) 68%, transparent 78%);' +
+          'opacity: 0; transform: scale(0.3);' +
+        '}' +
+        '.catch-capture-beam.is-active {' +
+          'animation: catchBeamFlash 0.88s ease-out forwards;' +
+        '}' +
+        '.catch-impact-spark {' +
+          'position: absolute; top: 34px; right: 20px; z-index: 6; pointer-events: none;' +
+          'background: linear-gradient(180deg, #FEF08A 0%, #F97316 100%); color: #7C2D12;' +
+          'border: 2.5px solid #FFFFFF; border-radius: 999px; padding: 3px 10px;' +
+          'font-size: 13px; font-weight: 900; box-shadow: 0 4px 12px rgba(0,0,0,0.35);' +
+          'opacity: 0; transform: scale(0.4);' +
+        '}' +
+        '.catch-impact-spark.is-active {' +
+          'animation: catchImpactPop 0.72s ease-out forwards;' +
+        '}' +
         '.catch-flying-ball {' +
           '--ball-top: #EF5350; --ball-bottom: #FFFFFF; --ball-accent: #EF5350;' +
-          'position: absolute; z-index: 4; width: 58px; height: 58px; border-radius: 50%;' +
-          'border: 3.5px solid #1e293b; box-sizing: border-box; overflow: hidden;' +
-          'background: linear-gradient(180deg, var(--ball-top) 0%, var(--ball-top) 48%, #1e293b 48%, #1e293b 52%, var(--ball-bottom) 52%, var(--ball-bottom) 100%);' +
-          'box-shadow: 0 8px 16px rgba(0,0,0,0.42), inset -4px -6px 10px rgba(0,0,0,0.28), inset 3px 4px 8px rgba(255,255,255,0.45);' +
+          'position: absolute; z-index: 5; width: 60px; height: 60px; border-radius: 50%;' +
+          'box-sizing: border-box; overflow: visible;' +
           'display: flex; align-items: center; justify-content: center;' +
-          'opacity: 0; transform: translateY(64px) scale(0.55); pointer-events: none;' +
-          'transition: transform 0.26s cubic-bezier(0.2, 0.9, 0.3, 1.2), opacity 0.2s;' +
+          'opacity: 0.96; transform: translate3d(0, 126px, 0) scale(1.18); pointer-events: none;' +
+          'animation: catchBallReadyBob 1.35s ease-in-out infinite;' +
         '}' +
-        '.catch-flying-ball.is-active { opacity: 1; transform: translateY(0px) scale(1.12); }' +
-        '.catch-flying-ball.is-shaking {' +
-          'animation: catchBallShake 0.26s ease-in-out infinite alternate;' +
+        '.catch-flying-ball.is-active.is-catch-success {' +
+          'opacity: 1;' +
+          'animation: catchBallThrowCapture 0.88s cubic-bezier(0.22, 0.8, 0.26, 1) forwards;' +
+        '}' +
+        '.catch-flying-ball.is-active.is-catch-fail {' +
+          'opacity: 1;' +
+          'animation: catchBallThrowDeflect 0.82s cubic-bezier(0.25, 0.7, 0.35, 1) forwards;' +
+        '}' +
+        '.catch-ball-core {' +
+          'position: absolute; inset: 4px; border-radius: 50%; z-index: 1; pointer-events: none;' +
+          'background: radial-gradient(circle, #FFFFFF 0%, #FDE047 38%, #FB7185 72%, transparent 100%);' +
+          'box-shadow: 0 0 26px rgba(255, 255, 255, 0.95), 0 0 42px rgba(251, 113, 133, 0.85);' +
+          'opacity: 0; transform: scale(0.4);' +
+        '}' +
+        '.catch-flying-ball.is-opening .catch-ball-core {' +
+          'animation: catchCoreGlow 0.88s ease-out forwards;' +
         '}' +
         '.catch-ball-3d {' +
-          'position: relative; width: 100%; height: 100%; border-radius: 50%;' +
-          'overflow: hidden; box-sizing: border-box;' +
+          'position: relative; width: 100%; height: 100%; border-radius: 50%; z-index: 2;' +
+          'overflow: visible; box-sizing: border-box;' +
+          'filter: drop-shadow(0 8px 14px rgba(0,0,0,0.42));' +
         '}' +
         '.catch-ball-3d-top {' +
           'width: 100%; height: 50%; background: var(--ball-top, #EF5350);' +
+          'border-radius: 60px 60px 0 0; border: 3.5px solid #1e293b; border-bottom: 2px solid #1e293b;' +
+          'box-sizing: border-box; transform-origin: 15% 100%;' +
+          'box-shadow: inset 3px 4px 8px rgba(255,255,255,0.45);' +
           'transition: background 0.2s ease;' +
         '}' +
         '.catch-ball-3d-bottom {' +
           'width: 100%; height: 50%; background: var(--ball-bottom, #FFFFFF);' +
+          'border-radius: 0 0 60px 60px; border: 3.5px solid #1e293b; border-top: 2px solid #1e293b;' +
+          'box-sizing: border-box; transform-origin: 15% 0%;' +
+          'box-shadow: inset -4px -6px 10px rgba(0,0,0,0.25);' +
           'transition: background 0.2s ease;' +
         '}' +
+        '.catch-flying-ball.is-opening .catch-ball-3d-top {' +
+          'animation: catchLidTopOpen 0.88s ease-in-out forwards;' +
+        '}' +
+        '.catch-flying-ball.is-opening .catch-ball-3d-bottom {' +
+          'animation: catchLidBottomOpen 0.88s ease-in-out forwards;' +
+        '}' +
         '.catch-ball-3d-belt {' +
-          'position: absolute; top: 50%; left: 0; right: 0; height: 7px;' +
-          'background: #1E293B; transform: translateY(-50%);' +
+          'position: absolute; top: 50%; left: 2px; right: 2px; height: 7px;' +
+          'background: #1E293B; transform: translateY(-50%); z-index: 3;' +
           'display: flex; align-items: center; justify-content: center;' +
+        '}' +
+        '.catch-flying-ball.is-opening .catch-ball-3d-belt {' +
+          'animation: catchBeltHideOnOpen 0.88s ease-in-out forwards;' +
         '}' +
         '.catch-ball-3d-btn {' +
           'width: 18px; height: 18px; border-radius: 50%;' +
@@ -379,13 +441,76 @@
           'box-sizing: border-box;' +
         '}' +
         '.catch-ball-3d-shine {' +
-          'position: absolute; top: 6px; left: 9px; width: 16px; height: 9px;' +
+          'position: absolute; top: 7px; left: 10px; width: 15px; height: 8px; z-index: 4;' +
           'border-radius: 50%; background: rgba(255, 255, 255, 0.78);' +
           'transform: rotate(-28deg); pointer-events: none;' +
         '}' +
-        '@keyframes catchBallShake {' +
-          '0% { transform: translateY(0px) rotate(-18deg) scale(1.12); }' +
-          '100% { transform: translateY(0px) rotate(18deg) scale(1.12); }' +
+        '@keyframes catchBallReadyBob {' +
+          '0%, 100% { transform: translate3d(0, 126px, 0) scale(1.18); }' +
+          '50% { transform: translate3d(0, 119px, 0) scale(1.22); }' +
+        '}' +
+        '@keyframes catchBallThrowCapture {' +
+          '0% { transform: translate3d(0, 126px, 0) scale(1.24) rotate(0deg); }' +
+          '18% { transform: translate3d(0, -48px, 0) scale(0.92) rotate(360deg); }' +
+          '28% { transform: translate3d(0, -14px, 0) scale(1.14) rotate(360deg); }' +
+          '54% { transform: translate3d(0, -14px, 0) scale(1.18) rotate(360deg); }' +
+          '64% { transform: translate3d(0, 18px, 0) scale(1.08) rotate(360deg); }' +
+          '73% { transform: translate3d(-9px, 18px, 0) scale(1.08) rotate(340deg); }' +
+          '82% { transform: translate3d(9px, 18px, 0) scale(1.08) rotate(380deg); }' +
+          '91% { transform: translate3d(-5px, 18px, 0) scale(1.08) rotate(350deg); }' +
+          '100% { transform: translate3d(0, 18px, 0) scale(1.12) rotate(360deg); }' +
+        '}' +
+        '@keyframes catchLidTopOpen {' +
+          '0%, 22% { transform: translateY(0) rotate(0deg); }' +
+          '30%, 52% { transform: translateY(-16px) rotate(-38deg); }' +
+          '60%, 100% { transform: translateY(0) rotate(0deg); }' +
+        '}' +
+        '@keyframes catchLidBottomOpen {' +
+          '0%, 22% { transform: translateY(0) rotate(0deg); }' +
+          '30%, 52% { transform: translateY(12px) rotate(24deg); }' +
+          '60%, 100% { transform: translateY(0) rotate(0deg); }' +
+        '}' +
+        '@keyframes catchBeltHideOnOpen {' +
+          '0%, 22% { opacity: 1; }' +
+          '28%, 52% { opacity: 0.25; transform: translateY(-50%) scale(0.85); }' +
+          '60%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }' +
+        '}' +
+        '@keyframes catchCoreGlow {' +
+          '0%, 22% { opacity: 0; transform: scale(0.3); }' +
+          '30%, 52% { opacity: 1; transform: scale(1.45); }' +
+          '62%, 100% { opacity: 0; transform: scale(0.2); }' +
+        '}' +
+        '@keyframes catchBeamFlash {' +
+          '0%, 20% { opacity: 0; transform: scale(0.35); }' +
+          '30% { opacity: 0.96; transform: scale(1.22); }' +
+          '52% { opacity: 0.85; transform: scale(0.45); }' +
+          '62%, 100% { opacity: 0; transform: scale(0.15); }' +
+        '}' +
+        '@keyframes catchPokemonSuckIn {' +
+          '0%, 20% { opacity: 1; transform: translateY(0) scale(1); filter: brightness(1) drop-shadow(0 12px 10px rgba(0,0,0,0.38)); }' +
+          '28% { opacity: 1; transform: translateY(-8px) scale(1.08); filter: brightness(2.5) saturate(1.8) drop-shadow(0 0 22px #FFFFFF); }' +
+          '54%, 100% { opacity: 0; transform: translateY(-16px) scale(0.06) rotate(220deg); filter: brightness(3) drop-shadow(0 0 24px #FDE047); }' +
+        '}' +
+        '@keyframes catchBallThrowDeflect {' +
+          '0% { transform: translate3d(0, 126px, 0) scale(1.24) rotate(0deg); opacity: 1; }' +
+          '20% { transform: translate3d(0, -34px, 0) scale(0.96) rotate(280deg); opacity: 1; }' +
+          '30% { transform: translate3d(6px, -6px, 0) scale(1.05) rotate(370deg); opacity: 1; }' +
+          '54% { transform: translate3d(52px, 58px, 0) scale(0.88) rotate(540deg); opacity: 1; }' +
+          '70% { transform: translate3d(68px, 40px, 0) scale(0.84) rotate(630deg); opacity: 0.96; }' +
+          '86% { transform: translate3d(82px, 62px, 0) scale(0.80) rotate(705deg); opacity: 0.92; }' +
+          '100% { transform: translate3d(90px, 64px, 0) scale(0.78) rotate(750deg); opacity: 0.84; }' +
+        '}' +
+        '@keyframes catchPokemonDeflect {' +
+          '0%, 22% { transform: translate3d(0, 0, 0) scale(1); }' +
+          '32% { transform: translate3d(-12px, -5px, 0) rotate(-9deg) scale(1.05); filter: brightness(1.35) drop-shadow(0 12px 10px rgba(0,0,0,0.38)); }' +
+          '56% { transform: translate3d(6px, 0, 0) rotate(4deg) scale(0.98); }' +
+          '100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }' +
+        '}' +
+        '@keyframes catchImpactPop {' +
+          '0%, 22% { opacity: 0; transform: scale(0.3) translateY(8px); }' +
+          '32% { opacity: 1; transform: scale(1.15) translateY(-4px); }' +
+          '65% { opacity: 1; transform: scale(1) translateY(-8px); }' +
+          '100% { opacity: 0; transform: scale(0.7) translateY(-14px); }' +
         '}' +
         '.catch-rainbow-burst {' +
           'position: absolute; inset: -16px; pointer-events: none; z-index: 5;' +
@@ -430,7 +555,9 @@
             '<div class="catch-pedestal" data-role="catch-pedestal"></div>' +
             '<div class="catch-guide-ring"></div>' +
             '<div class="catch-target-ring" data-role="target-ring"></div>' +
+            '<div class="catch-capture-beam" data-role="capture-beam"></div>' +
             '<img class="catch-pokemon-sprite" data-role="pokemon-sprite" src="' + charInfo.runnerSpriteUrl + '" alt="' + charInfo.nameKr + '" width="132" height="132" draggable="false" />' +
+            '<div class="catch-impact-spark" data-role="impact-spark">💥 틱!</div>' +
             '<div class="catch-flying-ball" data-role="flying-ball" data-ball-emoji="' + initialBall.emoji + '" style="--ball-top: ' + initialBall.topColor + '; --ball-bottom: ' + initialBall.bottomColor + '; --ball-accent: ' + initialBall.accentColor + ';">' + buildFlyingBallInnerMarkup(initialBall) + '</div>' +
             '<div class="catch-rainbow-burst" data-role="rainbow-burst">🌈✨🌟✨🌈</div>' +
           '</div>' +
@@ -512,7 +639,9 @@
     var elScorePill = queryRole('score-pill');
     var elZoneHint = queryRole('zone-hint');
     var elTargetRing = queryRole('target-ring');
+    var elCaptureBeam = queryRole('capture-beam');
     var elPokemonSprite = queryRole('pokemon-sprite');
+    var elImpactSpark = queryRole('impact-spark');
     var elFlyingBall = queryRole('flying-ball');
     var elFlyingBallEmoji = queryRole('flying-ball-emoji');
     var elFlyingBallTop = queryRole('flying-ball-top');
@@ -645,6 +774,8 @@
         zone: judgment.zone,
         points: judgment.points,
         shakes: judgment.shakes,
+        caught: Boolean(judgment.caught),
+        action: judgment.action || (judgment.caught ? 'captured' : 'deflected'),
         rainbowBurst: judgment.rainbowBurst,
         message: judgment.message,
         subMessage: judgment.subMessage,
@@ -683,11 +814,32 @@
       if (elFeedbackSub) {
         elFeedbackSub.textContent = judgment.subMessage;
       }
-      if (elFlyingBall) {
-        elFlyingBall.className = 'catch-flying-ball is-active is-shaking';
-      }
-      if (elPokemonSprite) {
-        elPokemonSprite.className = 'catch-pokemon-sprite is-captured';
+      if (judgment.caught) {
+        if (elFlyingBall) {
+          elFlyingBall.className = 'catch-flying-ball is-active is-catch-success is-opening is-shaking';
+        }
+        if (elPokemonSprite) {
+          elPokemonSprite.className = 'catch-pokemon-sprite is-captured';
+        }
+        if (elCaptureBeam) {
+          elCaptureBeam.className = 'catch-capture-beam is-active';
+        }
+        if (elImpactSpark) {
+          elImpactSpark.className = 'catch-impact-spark';
+        }
+      } else {
+        if (elFlyingBall) {
+          elFlyingBall.className = 'catch-flying-ball is-active is-catch-fail is-deflected';
+        }
+        if (elPokemonSprite) {
+          elPokemonSprite.className = 'catch-pokemon-sprite is-deflecting';
+        }
+        if (elCaptureBeam) {
+          elCaptureBeam.className = 'catch-capture-beam';
+        }
+        if (elImpactSpark) {
+          elImpactSpark.className = 'catch-impact-spark is-active';
+        }
       }
       if (elRainbowBurst) {
         elRainbowBurst.className = judgment.rainbowBurst
@@ -712,6 +864,12 @@
           if (elPokemonSprite) {
             elPokemonSprite.className = 'catch-pokemon-sprite';
           }
+          if (elCaptureBeam) {
+            elCaptureBeam.className = 'catch-capture-beam';
+          }
+          if (elImpactSpark) {
+            elImpactSpark.className = 'catch-impact-spark';
+          }
           if (elRainbowBurst) {
             elRainbowBurst.className = 'catch-rainbow-burst';
           }
@@ -722,7 +880,7 @@
             elFeedbackSub.textContent = nextBall.desc;
           }
           updateRingVisual(state.ringScale);
-        }, 750);
+        }, 900);
       }
 
       return resultRecord;
