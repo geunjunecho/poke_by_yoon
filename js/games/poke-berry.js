@@ -452,8 +452,8 @@
 
     var dpr = Math.min(2, (typeof window !== 'undefined' && window.devicePixelRatio) || 1);
 
-    var lives = 3;
-    var maxLives = 3;
+    var lives = 5;
+    var maxLives = 5;
     var score = 0;
     var highScore = helpers.getHighScore('berry');
     var evoGauge = 0;
@@ -777,13 +777,13 @@
       evoGauge += gaugeAdd;
       player.chompTimer = 16;
 
+      // 열쇠(special)·사탕·열매 획득 시에는 울음소리가 아닌 경쾌한 차임벨 효과음(collect)을 재생하고, 울음소리는 진화할 때만 재생!
       if (kind === 'special') {
-        helpers.playCry();
-        helpers.playSfx('powerup', 2);
+        helpers.playSfx('collect', 4);
       } else if (kind === 'candy') {
-        helpers.playSfx('powerup', 3);
+        helpers.playSfx('collect', 6);
       } else {
-        helpers.playSfx('coin', 1);
+        helpers.playSfx('collect', 1);
       }
 
       popups.push({
@@ -1086,8 +1086,28 @@
           continue;
         }
 
-        if (it.y > H + 30) {
+        if (it.y > GROUND_Y + 12) {
+          var missedKind = it.kind;
+          var missedX = it.x;
           items.splice(i, 1);
+          // 폭탄이 아닌 열매·열쇠·사탕을 놓쳐 바닥에 떨어뜨리면 하트 1개 감소
+          if (missedKind !== 'bomb') {
+            lives = Math.max(0, lives - 1);
+            helpers.playSfx('hit');
+            popups.push({
+              x: Math.max(54, Math.min(W - 54, missedX)),
+              y: GROUND_Y - 22,
+              text: '열매 놓침! 💔',
+              color: '#FF8A80',
+              life: 36
+            });
+            updateHud();
+            syncHeroDom();
+            if (lives <= 0) {
+              handleGameOver();
+              break;
+            }
+          }
         }
       }
 
@@ -1120,7 +1140,7 @@
     }
 
     function resetGame() {
-      lives = 3;
+      lives = 5;
       score = 0;
       evoGauge = 0;
       evolutionCount = 0;

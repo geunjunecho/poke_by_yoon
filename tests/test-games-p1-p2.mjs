@@ -425,7 +425,10 @@ test('3. berry 게임 마운트 후 열매 수집 시 점수 증가, 여유로�
   };
 
   const helpers = {
-    playSfx() {},
+    sfxCalls: [],
+    playSfx(type, noteIdx) {
+      this.sfxCalls.push({ type, noteIdx });
+    },
     playCry() {
       cryCalls += 1;
     },
@@ -443,8 +446,10 @@ test('3. berry 게임 마운트 후 열매 수집 시 점수 증가, 여유로�
   assert.equal(typeof cleanup, 'function');
   assert.ok(stageEl._berryGame, 'stageEl._berryGame 테스트 훅이 노출되어야 합니다');
 
-  // 초기 진화 목표 게이지(20) 및 기본 단계 크기/공식 일러스트 통일 확인
+  // 초기 하트 5개 세팅, 진화 목표 게이지(20) 및 기본 단계 크기/공식 일러스트 통일 확인
   const initBerryState = stageEl._berryGame.getState();
+  assert.equal(initBerryState.lives, 5, '열매 받아먹기 기본 하트는 5개여야 합니다');
+  assert.equal(initBerryState.maxLives, 5, '열매 받아먹기 최대 하트는 5개여야 합니다');
   assert.equal(initBerryState.evolutionTarget, 20, '진화 목표 게이지는 20이어야 합니다');
   assert.equal(initBerryState.heroScale, 0.88, '기본 단계(진화 전) 캐릭터 스케일은 0.88이어야 합니다');
   assert.ok(
@@ -469,16 +474,18 @@ test('3. berry 게임 마운트 후 열매 수집 시 점수 증가, 여유로�
   assert.equal(state.evoGauge, 2, '일반 열매 2개 수집 시 진화 게이지가 2 증가해야 합니다');
   assert.equal(state.nameKr, '이상해씨');
 
-  // 내 속성 스페셜 구슬(+30점, 게이지 +2) 4회 수집 -> 총 게이지 2 + 8 = 10 (아직 진화하지 않아야 함!)
+  // 내 속성 스페셜 열쇠(+30점, 게이지 +2) 4회 수집 -> 총 게이지 2 + 8 = 10 (열쇠 획득 시에는 울음소리 대신 효과음만 재생되어야 함!)
+  const sfxCountBeforeSpecial = helpers.sfxCalls.length;
   for (let i = 0; i < 4; i++) {
     stageEl._berryGame.collectItem('special');
   }
   state = stageEl._berryGame.getState();
   assert.equal(state.evoGauge, 10, '게이지 10에서는 아직 진화하지 않고 게이지가 유지되어야 합니다');
   assert.equal(state.stageIndex, 0, '게이지 10에서는 아직 1단계(이상해씨)여야 합니다');
-  assert.ok(cryCalls >= 4, '스페셜 구슬 수집 시 포켓몬 울음소리가 재생되어야 합니다');
+  assert.equal(cryCalls, 0, '열쇠(special) 획득 시에는 포켓몬 울음소리가 나지 않아야 합니다');
+  assert.ok(helpers.sfxCalls.length >= sfxCountBeforeSpecial + 4, '열쇠 획득 시 다른 효과음이 재생되어야 합니다');
 
-  // 무지개 사탕(+50점, 게이지 +2) 5회 추가 수집 -> 게이지 10 + 10 = 20 도달 -> evolutionChain[1]('이상해풀')로 진화!
+  // 무지개 사탕(+50점, 게이지 +2) 5회 추가 수집 -> 게이지 10 + 10 = 20 도달 -> evolutionChain[1]('이상해풀')로 진화하며 이때만 울음소리 재생!
   for (let i = 0; i < 5; i++) {
     stageEl._berryGame.collectItem('candy');
   }
@@ -488,6 +495,7 @@ test('3. berry 게임 마운트 후 열매 수집 시 점수 증가, 여유로�
   assert.equal(state.currentStage.nameKr, '이상해풀', '다음 진화 단계인 이상해풀로 변신해야 합니다');
   assert.equal(state.nameKr, '이상해풀');
   assert.equal(state.pokemonId, 2);
+  assert.equal(cryCalls, 1, '진화할 때만 포켓몬 울음소리가 재생되어야 합니다');
   assert.ok(
     state.spriteUrl.includes('official-artwork/2.png'),
     '1차 진화 후에도 동일한 공식 일러스트 규격(official-artwork/2.png)을 사용해야 합니다'
@@ -502,6 +510,29 @@ test('3. berry 게임 마운트 후 열매 수집 시 점수 증가, 여유로�
     '진화 축하 배너 문구가 올바르게 생성되어야 합니다'
   );
   assert.ok(rewardCalls >= 1, '진화 달성 시 helpers.rewardCharacter()가 호출되어야 합니다');
+
+  // 열매를 받아먹지 못하고 바닥으로 놓쳤을 때 하트 1개 감소 (5 -> 4), 폭탄은 놓쳐도 하트 유지 확인
+  stageEl._berryGame.spawnFallingItem('berry');
+  const fallingBerry = stageEl._berryGame.getState().items[0];
+  fallingBerry.x = 52; // 주인공(중앙)과 멀리 떨어진 위치
+  fallingBerry.y = 290; // 바닥 아래로 떨어지기 직전
+  stageEl._berryGame.stepFrame();
+  assert.equal(
+    stageEl._berryGame.getState().lives,
+    4,
+    '열매를 받지 못하고 놓쳤을 때 하트가 1개 감소해야 합니다 (5 -> 4)'
+  );
+
+  stageEl._berryGame.spawnFallingItem('bomb');
+  const fallingBomb = stageEl._berryGame.getState().items[stageEl._berryGame.getState().items.length - 1];
+  fallingBomb.x = 52;
+  fallingBomb.y = 290;
+  stageEl._berryGame.stepFrame();
+  assert.equal(
+    stageEl._berryGame.getState().lives,
+    4,
+    '폭탄은 피해야 하는 장애물이므로 바닥에 떨어져도 하트가 감소하지 않아야 합니다'
+  );
 
   // cleanup() 동작 확인
   cleanup();
