@@ -246,37 +246,65 @@
     }
   }
 
+  // 전경 공중 장애물 (숙이기 전용 레이어): 천장부터 머리 높이까지 내려오는 상단 마법 차단 게이트 (점프 불가, 아래 터널로만 통과)
   function drawAirHazardObstacle(ctx, obs, groundY, tick) {
     var bw = Math.round(obs.width || 50);
     var bh = Math.round(obs.height || 40);
     var bx = Math.round(obs.x - bw * 0.5);
-    var hoverBob = Math.round(Math.sin((tick || 0) * 0.15) * 2);
+    var hoverBob = Math.round(Math.sin((tick || 0) * 0.15) * 1.5);
     var by = Math.round(obs.y - bh * 0.5 + hoverBob);
     var bottomEdge = by + bh;
+    var pillarTop = 0;
+    var pillarH = Math.max(0, by - pillarTop);
 
-    // 아래쪽 숙이기 안전 통과 터널 영역 하이라이트
+    // 1. 천장(y=0)부터 게이트 본체(by)까지 상공을 완전히 가로막는 이중 마법 기둥 & 배리어 필드 (점프로 절대 넘을 수 없음을 직관화)
+    if (pillarH > 0) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(142, 36, 170, 0.28)';
+      ctx.fillRect(bx + 8, pillarTop, bw - 16, pillarH);
+
+      for (var ly = by - 16; ly >= 8; ly -= 22) {
+        ctx.fillStyle = '#4A148C';
+        ctx.fillRect(bx + 10, ly - 1, bw - 20, 5);
+        ctx.fillStyle = '#EA80FC';
+        ctx.fillRect(bx + 10, ly, bw - 20, 3);
+      }
+
+      ctx.fillStyle = '#181818';
+      ctx.fillRect(bx + 3, pillarTop, 11, pillarH);
+      ctx.fillRect(bx + bw - 14, pillarTop, 11, pillarH);
+      ctx.fillStyle = '#8E24AA';
+      ctx.fillRect(bx + 5, pillarTop, 7, pillarH);
+      ctx.fillRect(bx + bw - 12, pillarTop, 7, pillarH);
+      ctx.fillStyle = '#EA80FC';
+      ctx.fillRect(bx + 7, pillarTop, 3, pillarH);
+      ctx.fillRect(bx + bw - 10, pillarTop, 3, pillarH);
+      ctx.restore();
+    }
+
+    // 2. 아래쪽 숙이기 안전 통과 터널 영역 하이라이트
     ctx.save();
-    ctx.fillStyle = 'rgba(142, 36, 170, 0.14)';
+    ctx.fillStyle = 'rgba(142, 36, 170, 0.13)';
     ctx.fillRect(bx + 4, bottomEdge, bw - 8, groundY - bottomEdge);
     ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
     ctx.fillRect(bx + 6, groundY - 2, bw - 12, 4);
     ctx.restore();
 
-    // 상단 플로팅 마법 날개/로터 장식 (천장까지 이어지는 긴 선 대신 깔끔한 공중 부유 배리어 형태)
-    ctx.fillStyle = '#181818';
-    ctx.fillRect(bx + Math.floor(bw * 0.5) - 5, by - 7, 10, 7);
-    ctx.fillStyle = '#EA80FC';
-    ctx.fillRect(bx + 6, by - 10, bw - 12, 4);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(bx + 10, by - 9, bw - 20, 2);
-
+    // 3. 게이트 하단 헤드 블록 본체
     ctx.fillStyle = '#181818';
     ctx.fillRect(bx, by, bw, bh - 10);
 
     ctx.fillStyle = '#8E24AA';
     ctx.fillRect(bx + 3, by + 3, bw - 6, bh - 16);
     ctx.fillStyle = '#EA80FC';
-    ctx.fillRect(bx + 5, by + 5, bw - 10, 5);
+    ctx.fillRect(bx + 5, by + 5, bw - 10, 4);
+
+    // 게이트 중앙 아래 방향 픽셀 화살표(▼) 표시 (숙이기 유도)
+    var midX = bx + Math.floor(bw * 0.5);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(midX - 6, by + 9, 12, 2);
+    ctx.fillRect(midX - 4, by + 11, 8, 2);
+    ctx.fillRect(midX - 2, by + 13, 4, 2);
 
     ctx.fillStyle = '#FFE840';
     ctx.fillRect(bx + 5, by + bh - 20, bw - 10, 6);
@@ -799,8 +827,17 @@
         var isAir = forcedKind ? forcedKind === 'air' : Math.random() < 0.42;
         var pool = isAir ? AIR_OBSTACLES : GROUND_OBSTACLES;
         var chosen = pool[Math.floor(Math.random() * pool.length)];
+        var spawnX = CANVAS_W + 40;
+
+        // 새로 생성되는 장애물과 겹치거나 너무 가까운 기존 아이템(145px 이내)은 제거하여 장애물에 아이템이 걸리지 않게 보장
+        for (var i = items.length - 1; i >= 0; i--) {
+          if (Math.abs(items[i].x - spawnX) < 145) {
+            items.splice(i, 1);
+          }
+        }
+
         obstacles.push({
-          x: CANVAS_W + 40,
+          x: spawnX,
           y: isAir ? (GROUND_Y - 53) : (GROUND_Y - 22),
           width: isAir ? 52 : 46,
           height: isAir ? 42 : 38,
@@ -813,17 +850,35 @@
         });
       }
 
-      function spawnItem() {
+      function spawnItem(forcedType) {
+        var spawnX = CANVAS_W + 30;
+
+        // 주변 145px 이내에 장애물이 있으면 아이템 스폰을 보류하여 장애물과 아이템이 절대 겹치지 않도록 처리
+        if (!forcedType) {
+          for (var i = 0; i < obstacles.length; i++) {
+            if (Math.abs(obstacles[i].x - spawnX) < 145) {
+              nextItemTick = tick + 18;
+              return;
+            }
+          }
+          for (var j = 0; j < items.length; j++) {
+            if (Math.abs(items[j].x - spawnX) < 84) {
+              nextItemTick = tick + 16;
+              return;
+            }
+          }
+        }
+
         var roll = Math.random();
         var itemType = 'sweet';
         var icon = SWEET_ICONS[Math.floor(Math.random() * SWEET_ICONS.length)];
         var pts = 15;
 
-        if (roll < 0.14) {
+        if (forcedType === 'crown' || (!forcedType && roll < 0.14)) {
           itemType = 'crown';
           icon = '👑';
           pts = 50;
-        } else if (roll < 0.55) {
+        } else if (forcedType === 'season' || (!forcedType && roll < 0.55)) {
           itemType = 'season';
           icon = ctxChar.seasonEmoji || '🔑';
           pts = 20;
@@ -837,7 +892,7 @@
             ? (GROUND_Y - 98) // 1단 점프 메인 레인
             : (GROUND_Y - 34); // 지상 달리기 레인
         items.push({
-          x: CANVAS_W + 30,
+          x: spawnX,
           y: itemY,
           radius: 20,
           type: itemType,
@@ -1021,9 +1076,9 @@
                 handleObstacleHit(obs);
               }
             } else if (obs.kind === 'air') {
+              // 공중(숙이기) 마법 게이트 장애물은 반드시 납작 숙이기(isDucking && 지상 근처)로만 통과 가능! (점프하거나 서 있으면 충돌)
               var duckedUnder = player.isDucking && Math.abs(player.y) < 25;
-              var jumpedAboveAir = player.y <= -64;
-              if (!duckedUnder && !jumpedAboveAir) {
+              if (!duckedUnder) {
                 handleObstacleHit(obs);
               }
             }

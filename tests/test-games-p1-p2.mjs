@@ -328,6 +328,53 @@ test('2. runner 게임 마운트 후 jump(), duck(true), stepFrame() 및 cleanup
   assert.ok(hitState.knockbackX < 0, `충돌 직후 뒤로 밀려나는 knockbackX < 0 이어야 합니다 (현재=${hitState.knockbackX})`);
   assert.ok(hitState.knockbackBounceY < 0, `충돌 직후 위로 튀어오르는 knockbackBounceY < 0 이어야 합니다 (현재=${hitState.knockbackBounceY})`);
 
+  // 공중(air) 장애물 판정 검증: 숙이지 않고 점프로 뛰어넘으려 하면 반드시 충돌해야 하고, 납작 숙이기(duck(true))로만 통과 가능해야 함
+  stageEl._runnerGame.reset();
+  stageEl._runnerGame.spawnObstacle('air');
+  const airObsJump = stageEl._runnerGame.getState().obstacles[0];
+  assert.equal(airObsJump.category, 'air', '공중 장애물이 생성되어야 합니다');
+
+  // 2단 점프로 높이 뛰어오른 상태(y <= -70)에서 공중 장애물과 겹치게 이동
+  stageEl._runnerGame.jump();
+  stageEl._runnerGame.stepFrame();
+  stageEl._runnerGame.jump();
+  for (let i = 0; i < 8; i++) {
+    stageEl._runnerGame.stepFrame();
+  }
+  const highJumpState = stageEl._runnerGame.getState();
+  assert.ok(highJumpState.y <= -70, `점프 높이가 충분히 높아야 합니다 (현재 y=${highJumpState.y})`);
+  airObsJump.x = highJumpState.player.x;
+  stageEl._runnerGame.stepFrame();
+  assert.equal(
+    stageEl._runnerGame.getState().lives,
+    2,
+    '공중(숙이기) 장애물은 점프로 뛰어넘을 수 없으며 점프 시 충돌하여 하트가 감소해야 합니다'
+  );
+
+  // 반대로 납작 숙이기(duck(true)) 상태에서는 공중 장애물을 안전하게 통과해야 함
+  stageEl._runnerGame.reset();
+  stageEl._runnerGame.spawnObstacle('air');
+  const airObsDuck = stageEl._runnerGame.getState().obstacles[0];
+  stageEl._runnerGame.duck(true);
+  airObsDuck.x = stageEl._runnerGame.getState().player.x;
+  stageEl._runnerGame.stepFrame();
+  assert.equal(
+    stageEl._runnerGame.getState().lives,
+    3,
+    '납작 숙이기(duck(true)) 상태에서는 공중 장애물을 충돌 없이 통과해야 합니다'
+  );
+  stageEl._runnerGame.duck(false);
+
+  // 장애물 근처(145px 이내)에서는 일반 spawnItem()이 겹쳐서 생성되지 않아야 함
+  stageEl._runnerGame.reset();
+  stageEl._runnerGame.spawnObstacle('ground');
+  stageEl._runnerGame.spawnItem();
+  assert.equal(
+    stageEl._runnerGame.getState().items.length,
+    0,
+    '방금 생성된 장애물 근처(145px 이내)에는 아이템이 겹쳐서 생성되지 않아야 합니다'
+  );
+
   // cleanup() 호출 후 리소스 해제 확인
   const keydownCountBefore = env.winListeners.get('keydown')?.size || 0;
   assert.ok(keydownCountBefore >= 1, '마운트 중에는 keydown 리스너가 등록되어 있어야 합니다');
@@ -338,7 +385,7 @@ test('2. runner 게임 마운트 후 jump(), duck(true), stepFrame() 및 cleanup
   assert.equal(stageEl._runnerGame, null, 'cleanup() 후 _runnerGame 참조가 정리되어야 합니다');
 });
 
-test('3. berry 게임 마운트 후 열매 수집 시 점수 증가 및 진화 게이지 10 도달 시 다음 진화 단계(evolutionChain[1])로 변신 후 cleanup()이 동작한다', () => {
+test('3. berry 게임 마운트 후 열매 수집 시 점수 증가, 여유로운 진화 게이지(20칸) 도달 시 진화 및 단계별 균일한 캐릭터 크기 증가 후 cleanup()이 동작한다', () => {
   const stageEl = createMockElement('div');
   let cryCalls = 0;
   let rewardCalls = 0;
@@ -348,19 +395,19 @@ test('3. berry 게임 마운트 후 열매 수집 시 점수 증가 및 진화 �
       id: 1,
       name: 'bulbasaur',
       nameKr: '이상해씨',
-      spriteUrl: 'https://example.com/bulbasaur.png'
+      spriteUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png'
     },
     {
       id: 2,
       name: 'ivysaur',
       nameKr: '이상해풀',
-      spriteUrl: 'https://example.com/ivysaur.png'
+      spriteUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/2.png'
     },
     {
       id: 3,
       name: 'venusaur',
       nameKr: '이상해꽃',
-      spriteUrl: 'https://example.com/venusaur.png'
+      spriteUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/3.png'
     }
   ];
 
@@ -368,8 +415,8 @@ test('3. berry 게임 마운트 후 열매 수집 시 점수 증가 및 진화 �
     id: 1,
     nameKr: '이상해씨',
     nameEn: 'bulbasaur',
-    spriteUrl: 'https://example.com/bulbasaur.png',
-    runnerSpriteUrl: 'https://example.com/bulbasaur.gif',
+    spriteUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png',
+    runnerSpriteUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/1.gif',
     primaryType: 'grass',
     typeNameKr: '풀',
     typeColor: '#66BB6A',
@@ -396,6 +443,16 @@ test('3. berry 게임 마운트 후 열매 수집 시 점수 증가 및 진화 �
   assert.equal(typeof cleanup, 'function');
   assert.ok(stageEl._berryGame, 'stageEl._berryGame 테스트 훅이 노출되어야 합니다');
 
+  // 초기 진화 목표 게이지(20) 및 기본 단계 크기/공식 일러스트 통일 확인
+  const initBerryState = stageEl._berryGame.getState();
+  assert.equal(initBerryState.evolutionTarget, 20, '진화 목표 게이지는 20이어야 합니다');
+  assert.equal(initBerryState.heroScale, 0.88, '기본 단계(진화 전) 캐릭터 스케일은 0.88이어야 합니다');
+  assert.ok(
+    initBerryState.spriteUrl.includes('official-artwork/1.png'),
+    '진화 단계 간 크기 편차를 없애기 위해 정규화된 공식 일러스트(official-artwork)를 사용해야 합니다'
+  );
+  const stage0SizePx = initBerryState.heroSizePx;
+
   // 좌우 이동 확인
   const initialX = stageEl._berryGame.getState().playerX;
   stageEl._berryGame.moveLeft();
@@ -404,31 +461,42 @@ test('3. berry 게임 마운트 후 열매 수집 시 점수 증가 및 진화 �
   stageEl._berryGame.moveRight();
   assert.ok(stageEl._berryGame.getState().playerX > initialX, 'moveRight() 호출 시 오른쪽으로 이동해야 합니다');
 
-  // 일반 열매(+10점, 게이지 +1) 수집 확인
+  // 일반 열매(+10점, 게이지 +1) 2회 수집 확인 -> 게이지 2
+  stageEl._berryGame.collectItem('berry');
   stageEl._berryGame.collectItem('berry');
   let state = stageEl._berryGame.getState();
-  assert.equal(state.score, 10, '일반 열매 수집 시 +10점 증가해야 합니다');
-  assert.equal(state.evoGauge, 1, '일반 열매 수집 시 진화 게이지가 1 증가해야 합니다');
+  assert.equal(state.score, 20, '일반 열매 2개 수집 시 +20점 증가해야 합니다');
+  assert.equal(state.evoGauge, 2, '일반 열매 2개 수집 시 진화 게이지가 2 증가해야 합니다');
   assert.equal(state.nameKr, '이상해씨');
 
-  // 내 속성 스페셜 구슬(+30점, 게이지 +2, 울음소리 재생) 3회 수집 -> 총 게이지 1 + 6 = 7
-  stageEl._berryGame.collectItem('special');
-  stageEl._berryGame.collectItem('special');
-  stageEl._berryGame.collectItem('special');
+  // 내 속성 스페셜 구슬(+30점, 게이지 +2) 4회 수집 -> 총 게이지 2 + 8 = 10 (아직 진화하지 않아야 함!)
+  for (let i = 0; i < 4; i++) {
+    stageEl._berryGame.collectItem('special');
+  }
   state = stageEl._berryGame.getState();
-  assert.equal(state.score, 100, '스페셜 구슬 3개 추가 수집 후 점수는 100점이어야 합니다');
-  assert.equal(state.evoGauge, 7, '진화 게이지는 7이어야 합니다');
-  assert.ok(cryCalls >= 3, '스페셜 구슬 수집 시 포켓몬 울음소리가 재생되어야 합니다');
+  assert.equal(state.evoGauge, 10, '게이지 10에서는 아직 진화하지 않고 게이지가 유지되어야 합니다');
+  assert.equal(state.stageIndex, 0, '게이지 10에서는 아직 1단계(이상해씨)여야 합니다');
+  assert.ok(cryCalls >= 4, '스페셜 구슬 수집 시 포켓몬 울음소리가 재생되어야 합니다');
 
-  // 무지개 사탕(+50점, 게이지 +3) 수집 -> 게이지 10 도달 -> evolutionChain[1]('이상해풀')로 즉시 진화!
-  stageEl._berryGame.collectItem('candy');
+  // 무지개 사탕(+50점, 게이지 +2) 5회 추가 수집 -> 게이지 10 + 10 = 20 도달 -> evolutionChain[1]('이상해풀')로 진화!
+  for (let i = 0; i < 5; i++) {
+    stageEl._berryGame.collectItem('candy');
+  }
   state = stageEl._berryGame.getState();
-  assert.equal(state.score, 150, '무지개 사탕 수집 후 점수는 150점이어야 합니다');
-  assert.equal(state.evoGauge, 0, '게이지 10 도달 후 진화하여 게이지가 0으로 초기화되어야 합니다');
+  assert.equal(state.evoGauge, 0, '게이지 20 도달 후 진화하여 게이지가 0으로 초기화되어야 합니다');
   assert.equal(state.stageIndex, 1, '진화 단계 인덱스가 1(evolutionChain[1])이어야 합니다');
   assert.equal(state.currentStage.nameKr, '이상해풀', '다음 진화 단계인 이상해풀로 변신해야 합니다');
   assert.equal(state.nameKr, '이상해풀');
   assert.equal(state.pokemonId, 2);
+  assert.ok(
+    state.spriteUrl.includes('official-artwork/2.png'),
+    '1차 진화 후에도 동일한 공식 일러스트 규격(official-artwork/2.png)을 사용해야 합니다'
+  );
+  assert.equal(state.heroScale, 1.0, '1차 진화 후 캐릭터 스케일은 1.0으로 커져야 합니다');
+  assert.ok(
+    state.heroSizePx > stage0SizePx,
+    `1차 진화 후 캐릭터 크기(${state.heroSizePx}px)는 진화 전(${stage0SizePx}px)보다 일정하게 커져야 합니다`
+  );
   assert.ok(
     state.evolutionBannerText.includes('이상해씨') && state.evolutionBannerText.includes('이상해풀'),
     '진화 축하 배너 문구가 올바르게 생성되어야 합니다'

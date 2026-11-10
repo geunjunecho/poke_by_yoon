@@ -8,7 +8,7 @@
   'use strict';
 
   var NORMAL_BERRIES = ['🍎', '🍊', '🍇', '🍓'];
-  var EVOLUTION_TARGET = 10;
+  var EVOLUTION_TARGET = 20;
 
   function createSafeHelpers(helpers) {
     var h = helpers || {};
@@ -111,7 +111,7 @@
       '}',
       '.poke-berry-hero-img {',
       '  position: relative; z-index: 2; width: 88px; height: 88px; object-fit: contain; transform-origin: center bottom;',
-      '  image-rendering: pixelated; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.36)); transition: transform 0.08s ease;',
+      '  image-rendering: auto; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.36)); transition: transform 0.08s ease, width 0.22s ease, height 0.22s ease;',
       '}',
       '.poke-berry-evo-banner {',
       '  position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 6;',
@@ -343,11 +343,24 @@
 
   function resolveStageSprite(stage, fallbackUrl) {
     if (!stage) return fallbackUrl || '';
+    if (stage.artworkUrl && stage.artworkUrl.indexOf('official-artwork') !== -1) {
+      return stage.artworkUrl;
+    }
+    var rawSprite = stage.spriteUrl || stage.sprite_url || stage.artworkUrl || stage.runnerSpriteUrl || '';
+    // 진화 단계마다 여백 비율이 제각각인 배틀 GIF(showdown)나 96x96 도트 PNG 대신,
+    // 모든 진화 단계에서 캔버스 여백 비율이 일정하게 정규화된 공식 일러스트(official-artwork)로 통일하여 크기가 들쑥날쑥하지 않게 함
+    if (
+      stage.id &&
+      (!rawSprite || rawSprite.indexOf('raw.githubusercontent.com/PokeAPI/') !== -1)
+    ) {
+      return (
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' +
+        stage.id +
+        '.png'
+      );
+    }
     return (
-      stage.runnerSpriteUrl ||
-      stage.artworkUrl ||
-      stage.spriteUrl ||
-      stage.sprite_url ||
+      rawSprite ||
       (stage.id
         ? 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' +
           stage.id +
@@ -407,14 +420,18 @@
       stageIndex = foundIdx >= 0 ? foundIdx : 0;
     }
 
-    var initialStage = evoChain[stageIndex] || null;
+    var initialStage = evoChain[stageIndex] || {
+      id: ctxData.id,
+      nameKr: ctxData.nameKr,
+      artworkUrl: ctxData.artworkUrl,
+      spriteUrl: ctxData.spriteUrl
+    };
     var currentId = (initialStage && initialStage.id) || ctxData.id;
     var currentNameKr = resolveStageName(initialStage, ctxData.nameKr);
-    var currentSpriteUrl =
-      ctxData.runnerSpriteUrl ||
-      ctxData.spriteUrl ||
-      ctxData.artworkUrl ||
-      resolveStageSprite(initialStage, '');
+    var currentSpriteUrl = resolveStageSprite(
+      initialStage,
+      ctxData.artworkUrl || ctxData.spriteUrl || ctxData.runnerSpriteUrl || ''
+    );
 
     var W = 720;
     var GROUND_DEPTH = 52;
@@ -424,6 +441,14 @@
     var MOVE_STEP = 48;
     var renderScaleX = 1;
     var renderScaleY = 1;
+    var currentHeroScale = 0.88;
+    var currentHeroSizePx = 74;
+
+    function getStageVisualScale() {
+      if (isMegaPower || evolutionCount >= 2) return 1.14;
+      if (evolutionCount === 1) return 1.0;
+      return 0.88;
+    }
 
     var dpr = Math.min(2, (typeof window !== 'undefined' && window.devicePixelRatio) || 1);
 
@@ -613,12 +638,15 @@
       }
       HERO_BOTTOM_PCT = ((H - GROUND_Y) / H) * 100;
       heroEl.style.bottom = HERO_BOTTOM_PCT.toFixed(4) + '%';
-      var heroSizePx = Math.round(Math.max(58, Math.min(108, 84 * renderScaleY)));
-      heroEl.style.width = heroSizePx + 'px';
-      heroEl.style.height = heroSizePx + 'px';
-      heroImg.style.width = heroSizePx + 'px';
-      heroImg.style.height = heroSizePx + 'px';
-      shadowEl.style.width = Math.round(heroSizePx * 0.72) + 'px';
+      currentHeroScale = getStageVisualScale();
+      currentHeroSizePx = Math.round(
+        Math.max(54, Math.min(116, 84 * renderScaleY * currentHeroScale))
+      );
+      heroEl.style.width = currentHeroSizePx + 'px';
+      heroEl.style.height = currentHeroSizePx + 'px';
+      heroImg.style.width = currentHeroSizePx + 'px';
+      heroImg.style.height = currentHeroSizePx + 'px';
+      shadowEl.style.width = Math.round(currentHeroSizePx * 0.72) + 'px';
     }
 
     function syncHeroDom() {
@@ -742,7 +770,7 @@
       }
 
       var basePts = kind === 'candy' ? 50 : kind === 'special' ? 30 : 10;
-      var gaugeAdd = kind === 'candy' ? 3 : kind === 'special' ? 2 : 1;
+      var gaugeAdd = kind === 'candy' ? 2 : kind === 'special' ? 2 : 1;
       var earnedPts = basePts * scoreMultiplier;
 
       score += earnedPts;
@@ -802,9 +830,9 @@
         forcedKind ||
         (roll < 0.16
           ? 'bomb'
-          : roll < 0.28
+          : roll < 0.22
           ? 'candy'
-          : roll < 0.52
+          : roll < 0.38
           ? 'special'
           : 'berry');
       var emoji =
@@ -1039,7 +1067,7 @@
       nextSpawnIn -= 1;
       if (nextSpawnIn <= 0) {
         spawnFallingItem();
-        nextSpawnIn = 28 + Math.floor(Math.random() * 20);
+        nextSpawnIn = 34 + Math.floor(Math.random() * 22);
       }
 
       for (var i = items.length - 1; i >= 0; i--) {
@@ -1099,14 +1127,18 @@
       isMegaPower = false;
       scoreMultiplier = 1;
       stageIndex = 0;
-      var firstStage = evoChain[0] || null;
+      var firstStage = evoChain[0] || {
+        id: ctxData.id,
+        nameKr: ctxData.nameKr,
+        artworkUrl: ctxData.artworkUrl,
+        spriteUrl: ctxData.spriteUrl
+      };
       currentId = (firstStage && firstStage.id) || ctxData.id;
       currentNameKr = resolveStageName(firstStage, ctxData.nameKr);
-      currentSpriteUrl =
-        ctxData.runnerSpriteUrl ||
-        ctxData.spriteUrl ||
-        ctxData.artworkUrl ||
-        resolveStageSprite(firstStage, '');
+      currentSpriteUrl = resolveStageSprite(
+        firstStage,
+        ctxData.artworkUrl || ctxData.spriteUrl || ctxData.runnerSpriteUrl || ''
+      );
       heroImg.src = currentSpriteUrl;
       heroEl.classList.remove('evolved-aura');
       heroEl.classList.remove('mega-aura');
@@ -1169,6 +1201,8 @@
         spriteUrl: currentSpriteUrl,
         isMegaPower: isMegaPower,
         scoreMultiplier: scoreMultiplier,
+        heroScale: currentHeroScale,
+        heroSizePx: currentHeroSizePx,
         evolutionBannerText: evolutionBannerText,
         playerX: player.x,
         x: player.x,

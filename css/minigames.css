@@ -529,30 +529,36 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: clamp(8px, 2vh, 16px);
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .mg-result-card {
   width: 100%;
-  max-width: 480px;
+  max-width: 460px;
+  max-height: calc(100% - 8px);
   background: linear-gradient(165deg, #1e293b 0%, #0f172a 100%);
   border: 3px solid #FFD600;
-  border-radius: 26px;
-  padding: 22px 24px;
+  border-radius: clamp(20px, 3vh, 26px);
+  padding: clamp(12px, 2.2vh, 22px) clamp(14px, 2.5vw, 24px);
   text-align: center;
   box-shadow:
-    0 0 40px rgba(255, 214, 0, 0.3),
-    0 16px 40px rgba(0, 0, 0, 0.65);
+    0 0 32px rgba(255, 214, 0, 0.3),
+    0 14px 36px rgba(0, 0, 0, 0.65);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: clamp(5px, 1vh, 10px);
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .mg-result-stars {
   display: flex;
   gap: 10px;
-  font-size: 40px;
+  font-size: clamp(28px, 4.5vh, 38px);
   line-height: 1;
 }
 
@@ -567,31 +573,35 @@
 }
 
 .mg-result-title {
-  font-size: 26px;
+  font-size: clamp(20px, 3.2vh, 26px);
   font-weight: 900;
   color: #FFD600;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  word-break: keep-all;
 }
 
 .mg-result-message {
-  font-size: 15px;
+  font-size: clamp(13px, 2vh, 15px);
   font-weight: 700;
   color: #e2e8f0;
+  line-height: 1.3;
+  word-break: keep-all;
 }
 
 .mg-result-char-wrap {
-  width: 88px;
-  height: 88px;
+  width: clamp(62px, 10.5vh, 84px);
+  height: clamp(62px, 10.5vh, 84px);
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 214, 0, 0.25) 0%, transparent 70%);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .mg-result-char-img {
-  max-width: 80px;
-  max-height: 80px;
+  max-width: clamp(54px, 9.2vh, 76px);
+  max-height: clamp(54px, 9.2vh, 76px);
   object-fit: contain;
   animation: mg-float-avatar 2s ease-in-out infinite;
 }
@@ -600,10 +610,11 @@
   width: 100%;
   background: rgba(255, 255, 255, 0.07);
   border-radius: 16px;
-  padding: 10px 16px;
+  padding: clamp(7px, 1.2vh, 10px) 14px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+  box-sizing: border-box;
 }
 
 .mg-result-score-main {
@@ -614,19 +625,19 @@
 }
 
 .mg-result-score-label {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: #94a3b8;
 }
 
 .mg-result-score-value {
-  font-size: 30px;
+  font-size: clamp(22px, 3.6vh, 30px);
   font-weight: 900;
   color: #ffffff;
 }
 
 .mg-result-best-badge {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   color: #fde047;
   display: flex;
@@ -647,15 +658,19 @@
 .mg-result-actions {
   width: 100%;
   display: flex;
-  gap: 12px;
-  margin-top: 6px;
+  flex-wrap: nowrap;
+  gap: 10px;
+  margin-top: 4px;
 }
 
 .mg-result-actions .mg-ctrl-btn {
-  flex: 1;
-  min-height: 60px;
-  font-size: 17px;
-  padding: 10px 14px;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: clamp(44px, 6.4vh, 56px);
+  font-size: clamp(14px, 2vh, 17px);
+  padding: clamp(7px, 1.2vh, 10px) 10px;
+  white-space: nowrap;
+  word-break: keep-all;
 }
 
 .mg-btn-replay {

@@ -325,42 +325,71 @@
     }
   }
 
-  // 전경 공중 장애물 (숙이기 레이어): 머리 높이에 떠 있고 아래쪽 통과 터널이 명확히 보이는 스카이 배리어
+  // 전경 공중 장애물 (숙이기 전용 레이어): 천장부터 머리 높이까지 내려오는 상단 차단 게이트 (점프 불가, 아래 터널로만 통과)
   function drawAirHazardObstacle(ctx, obs, groundY, tick) {
     var bx = Math.round(obs.x);
     var bw = Math.round(obs.width);
     var bh = Math.round(obs.height);
-    var hoverBob = Math.round(Math.sin((tick || 0) * 0.15) * 2);
+    var hoverBob = Math.round(Math.sin((tick || 0) * 0.15) * 1.5);
     var by = Math.round(obs.y + hoverBob);
     var bottomEdge = by + bh;
+    var pillarTop = 0;
+    var pillarH = Math.max(0, by - pillarTop);
 
-    // 아래쪽 통과 가능 구역(숙이기 안전 터널) 가이드 표시: 바닥 그림자와 공중 고도선
+    // 1. 천장(y=0)부터 게이트 본체(by)까지 상공을 완전히 가로막는 이중 강철 기둥 & 레이저 배리어 필드 (점프로 절대 넘을 수 없음을 직관화)
+    if (pillarH > 0) {
+      ctx.save();
+      // 기둥 사이 반투명 레이저 차단막
+      ctx.fillStyle = 'rgba(21, 101, 192, 0.28)';
+      ctx.fillRect(bx + 8, pillarTop, bw - 16, pillarH);
+
+      // 가로 레이저 격자선
+      for (var ly = by - 16; ly >= 8; ly -= 22) {
+        ctx.fillStyle = '#0D47A1';
+        ctx.fillRect(bx + 10, ly - 1, bw - 20, 5);
+        ctx.fillStyle = '#80D8FF';
+        ctx.fillRect(bx + 10, ly, bw - 20, 3);
+      }
+
+      // 좌우 수직 강철 기둥 (외곽선 + 네온 코어)
+      ctx.fillStyle = '#181818';
+      ctx.fillRect(bx + 3, pillarTop, 11, pillarH);
+      ctx.fillRect(bx + bw - 14, pillarTop, 11, pillarH);
+      ctx.fillStyle = '#1E88E5';
+      ctx.fillRect(bx + 5, pillarTop, 7, pillarH);
+      ctx.fillRect(bx + bw - 12, pillarTop, 7, pillarH);
+      ctx.fillStyle = '#80D8FF';
+      ctx.fillRect(bx + 7, pillarTop, 3, pillarH);
+      ctx.fillRect(bx + bw - 10, pillarTop, 3, pillarH);
+      ctx.restore();
+    }
+
+    // 2. 아래쪽 통과 가능 구역(숙이기 안전 터널) 가이드 표시: 바닥 그림자와 통과 영역
     ctx.save();
-    ctx.fillStyle = 'rgba(2, 136, 209, 0.14)';
+    ctx.fillStyle = 'rgba(2, 136, 209, 0.13)';
     ctx.fillRect(bx + 4, bottomEdge, bw - 8, groundY - bottomEdge);
     ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
     ctx.fillRect(bx + 6, groundY - 2, bw - 12, 4);
     ctx.restore();
 
-    // 상단 플로팅 로터/날개 장식 (천장까지 이어지는 긴 선 대신 깔끔한 공중 부유 드론 형태)
-    ctx.fillStyle = '#181818';
-    ctx.fillRect(bx + Math.floor(bw * 0.5) - 5, by - 7, 10, 7);
-    ctx.fillStyle = '#80D8FF';
-    ctx.fillRect(bx + 6, by - 10, bw - 12, 4);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(bx + 10, by - 9, bw - 20, 2);
-
-    // 외곽선 본체
+    // 3. 게이트 하단 헤드 블록 외곽선 본체
     ctx.fillStyle = '#181818';
     ctx.fillRect(bx, by, bw, bh - 10);
 
-    // 네온 블루/퍼플 공중 배리어 본체
+    // 네온 블루 상단 차단 게이트 본체
     ctx.fillStyle = '#1E88E5';
     ctx.fillRect(bx + 3, by + 3, bw - 6, bh - 16);
     ctx.fillStyle = '#80D8FF';
-    ctx.fillRect(bx + 5, by + 5, bw - 10, 5);
+    ctx.fillRect(bx + 5, by + 5, bw - 10, 4);
 
-    // 중앙 노란색-검은색 주의 줄무늬
+    // 게이트 중앙 아래 방향 픽셀 화살표(▼) 표시 (숙이기 유도)
+    var midX = bx + Math.floor(bw * 0.5);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(midX - 6, by + 10, 12, 2);
+    ctx.fillRect(midX - 4, by + 12, 8, 2);
+    ctx.fillRect(midX - 2, by + 14, 4, 2);
+
+    // 하단 노란색-검은색 주의 줄무늬
     ctx.fillStyle = '#FFE840';
     ctx.fillRect(bx + 5, by + bh - 21, bw - 10, 6);
     ctx.fillStyle = '#181818';
@@ -368,7 +397,7 @@
       ctx.fillRect(sx, by + bh - 21, 5, 6);
     }
 
-    // 하단 아래쪽으로 뾰족하게 돋아난 가시 (서서 지나가면 부딪히고 숙이면 피해짐을 직관화)
+    // 4. 하단 아래쪽으로 뾰족하게 돋아난 가시 (서서 지나가거나 점프하면 부딪히고, 납작 숙여야만 통과)
     drawPixelSpikeDown(ctx, bx + 4, by + bh - 12, 14, 13);
     drawPixelSpikeDown(ctx, bx + Math.floor(bw * 0.5) - 7, by + bh - 12, 14, 15);
     drawPixelSpikeDown(ctx, bx + bw - 18, by + bh - 12, 14, 13);
@@ -849,12 +878,22 @@
         forcedCategory || (Math.random() < 0.56 ? 'ground' : 'air');
       var pool = category === 'ground' ? GROUND_OBSTACLES : AIR_OBSTACLES;
       var tpl = pool[Math.floor(Math.random() * pool.length)];
+      var spawnX = W + 44;
+      var obsCenter = spawnX + tpl.width * 0.5;
+
+      // 새로 생성되는 장애물과 겹치거나 너무 가까운 기존 아이템(145px 이내)은 제거하여 장애물에 아이템이 걸리지 않게 보장
+      for (var i = items.length - 1; i >= 0; i--) {
+        if (Math.abs(items[i].x - obsCenter) < 145) {
+          items.splice(i, 1);
+        }
+      }
+
       obstacles.push({
         category: category,
         spriteKind: tpl.spriteKind,
         emoji: tpl.emoji,
         label: tpl.label,
-        x: W + 44,
+        x: spawnX,
         y: category === 'ground' ? GROUND_Y - tpl.height : GROUND_Y - 76,
         width: tpl.width,
         height: tpl.height,
@@ -864,6 +903,26 @@
     }
 
     function spawnItem(forcedKind) {
+      var spawnX = W + 34;
+
+      // 주변 145px 이내에 장애물이 있으면 아이템 스폰을 보류하여 장애물과 아이템이 절대 겹치지 않도록 처리
+      if (!forcedKind) {
+        for (var i = 0; i < obstacles.length; i++) {
+          var obs = obstacles[i];
+          var obsCenter = obs.x + obs.width * 0.5;
+          if (Math.abs(obsCenter - spawnX) < 145) {
+            nextItemIn = 18;
+            return;
+          }
+        }
+        for (var j = 0; j < items.length; j++) {
+          if (Math.abs(items[j].x - spawnX) < 84) {
+            nextItemIn = 16;
+            return;
+          }
+        }
+      }
+
       var roll = Math.random();
       var kind = forcedKind || (roll < 0.14 ? 'star' : roll < 0.45 ? 'orb' : 'berry');
       var emoji =
@@ -884,7 +943,7 @@
         kind: kind,
         emoji: emoji,
         points: pts,
-        x: W + 34,
+        x: spawnX,
         y: itemY,
         radius: 22,
         collected: false
@@ -1007,9 +1066,8 @@
           triggerObstacleHit(obs);
           break;
         } else if (obs.category === 'air') {
-          // 숙여서 아래로 통과하거나, 2단 점프 등으로 공중 배리어 위쪽(y <= -66)을 완전히 뛰어넘으면 통과
+          // 공중(숙이기) 게이트 장애물은 반드시 납작 숙이기(isDucking && 지상 근처)로만 통과 가능! (점프하거나 서 있으면 충돌)
           if (player.isDucking && player.y > -20) continue;
-          if (player.y <= -66) continue;
           triggerObstacleHit(obs);
           break;
         }
