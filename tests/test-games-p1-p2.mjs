@@ -607,7 +607,62 @@ test('4. P1/P2 퍼센트 좌표 동기화, 그림자, 우측 방향 플립 및 �
     `DOM 점프 높이(${renderedTranslateY}px)가 논리 좌표(${scaledState.y})에 화면 스케일(${scaledState.renderScaleY})을 곱한 값과 일치해야 합니다`
   );
 
+  // window 전역 touchend / pointerup 리스너가 e.preventDefault()를 호출하여 결과 오버레이 버튼(한 번 더 놀기 / 다른 게임 고르기)의 합성 click을 막지 않아야 함
+  let windowTouchEndPrevented = false;
+  let windowPointerUpPrevented = false;
+  for (const fn of env.winListeners.get('touchend') || []) {
+    fn({
+      preventDefault() {
+        windowTouchEndPrevented = true;
+      }
+    });
+  }
+  for (const fn of env.winListeners.get('pointerup') || []) {
+    fn({
+      preventDefault() {
+        windowPointerUpPrevented = true;
+      }
+    });
+  }
+  assert.equal(
+    windowTouchEndPrevented,
+    false,
+    'window 전역 touchend 리스너는 결과 오버레이 버튼 클릭이 막히지 않도록 e.preventDefault()를 호출하면 안 됩니다'
+  );
+  assert.equal(
+    windowPointerUpPrevented,
+    false,
+    'window 전역 pointerup 리스너는 결과 오버레이 버튼 클릭이 막히지 않도록 e.preventDefault()를 호출하면 안 됩니다'
+  );
+
   cleanupRunner();
+
+  // 게임 오버 시 showResultOverlay에 전달된 onReplay / onRestart 콜백으로 즉시 재시작(lives=3, isGameOver=false)되어야 함
+  let capturedOverlayOpts = null;
+  const gameOverStage = createMockElement('div');
+  const cleanupGameOverRunner = globalThis.PokeGameRunner.mount(
+    gameOverStage,
+    { id: 25, nameKr: '피카츄' },
+    {
+      showResultOverlay(_stage, opts) {
+        capturedOverlayOpts = opts;
+      }
+    }
+  );
+  for (let hit = 0; hit < 3; hit++) {
+    gameOverStage._runnerGame.triggerObstacleHit();
+    for (let f = 0; f < 80; f++) {
+      gameOverStage._runnerGame.stepFrame();
+    }
+  }
+  assert.equal(gameOverStage._runnerGame.getState().isGameOver, true, '하트 3개 소진 시 isGameOver === true 여야 합니다');
+  assert.ok(capturedOverlayOpts, '게임 오버 시 showResultOverlay가 호출되어야 합니다');
+  assert.equal(typeof capturedOverlayOpts.onReplay, 'function', 'showResultOverlay에 onReplay 콜백이 전달되어야 합니다');
+  assert.equal(typeof capturedOverlayOpts.onRestart, 'function', 'showResultOverlay에 onRestart 콜백이 전달되어야 합니다');
+  capturedOverlayOpts.onReplay();
+  assert.equal(gameOverStage._runnerGame.getState().isGameOver, false, 'onReplay 실행 후 isGameOver === false로 초기화되어야 합니다');
+  assert.equal(gameOverStage._runnerGame.getState().lives, 3, 'onReplay 실행 후 하트가 3개로 회복되어야 합니다');
+  cleanupGameOverRunner();
 
   const berryStage = createMockElement('div');
   const cleanupBerry = globalThis.PokeGameBerry.mount(berryStage, { id: 1, nameKr: '이상해씨' }, {});

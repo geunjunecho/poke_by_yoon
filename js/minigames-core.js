@@ -498,6 +498,7 @@
       showResultOverlay(stageEl, options = {}) {
         if (!stageEl || typeof document === 'undefined') return;
         const {
+          gameId,
           score = 0,
           bestScore,
           highScore,
@@ -508,19 +509,20 @@
           summary = '',
           onReplay,
           onRestart,
+          onRetry,
           onBackToHub
         } = options || {};
 
         const finalMessage = message || summary;
-        const replayCallback = onReplay || onRestart;
+        const replayCallback = onReplay || onRestart || onRetry;
         const passedBest = typeof bestScore === 'number' && bestScore > 0 ? bestScore : (typeof highScore === 'number' && highScore > 0 ? highScore : 0);
-        const activeId = PokeMiniGames.activeGameId;
-        const autoNewRecord = activeId ? this.saveHighScore(activeId, score) : false;
+        const activeId = gameId || PokeMiniGames.activeGameId;
+        const autoNewRecord = activeId ? PokeMiniGames.helpers.saveHighScore(activeId, score) : false;
         const finalNewRecord = typeof isNewRecord === 'boolean' ? (isNewRecord || autoNewRecord) : autoNewRecord;
         const finalBest =
           passedBest > 0
             ? Math.max(passedBest, score)
-            : Math.max(activeId ? this.getHighScore(activeId) : 0, score);
+            : Math.max(activeId ? PokeMiniGames.helpers.getHighScore(activeId) : 0, score);
 
         const ctx = PokeMiniGames.charCtx || PokeMiniGames.buildCharContext();
         const starCount = Math.max(1, Math.min(3, Math.round(Number(stars) || 3)));
@@ -562,29 +564,41 @@
         const replayBtn = overlay.querySelector('.mg-btn-replay');
         const hubBtn = overlay.querySelector('.mg-btn-hub');
 
-        if (replayBtn) {
-          replayBtn.addEventListener('click', () => {
-            playSfx('pop');
-            overlay.remove();
-            if (typeof replayCallback === 'function') {
-              replayCallback();
-            } else if (PokeMiniGames.activeGameId) {
-              PokeMiniGames.launchGame(PokeMiniGames.activeGameId);
+        const bindActionBtn = (btn, actionFn) => {
+          if (!btn) return;
+          let handled = false;
+          const onActivate = (e) => {
+            if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+            if (e && (e.type === 'touchend' || e.type === 'click') && typeof e.preventDefault === 'function') {
+              e.preventDefault();
             }
-          });
-        }
+            if (handled) return;
+            handled = true;
+            actionFn();
+          };
+          btn.addEventListener('click', onActivate);
+          btn.addEventListener('touchend', onActivate);
+        };
 
-        if (hubBtn) {
-          hubBtn.addEventListener('click', () => {
-            playSfx('pop');
-            overlay.remove();
-            if (typeof onBackToHub === 'function') {
-              onBackToHub();
-            } else {
-              PokeMiniGames.showHubView();
-            }
-          });
-        }
+        bindActionBtn(replayBtn, () => {
+          playSfx('pop');
+          overlay.remove();
+          if (typeof replayCallback === 'function') {
+            replayCallback();
+          } else if (activeId) {
+            PokeMiniGames.launchGame(activeId);
+          }
+        });
+
+        bindActionBtn(hubBtn, () => {
+          playSfx('pop');
+          overlay.remove();
+          if (typeof onBackToHub === 'function') {
+            onBackToHub();
+          } else {
+            PokeMiniGames.showHubView();
+          }
+        });
 
         stageEl.appendChild(overlay);
       }

@@ -468,6 +468,7 @@
                 }
                 if (!stageEl) return null;
                 const {
+                    gameId = null,
                     score = 0,
                     bestScore = 0,
                     highScore = 0,
@@ -478,16 +479,18 @@
                     summary = '',
                     onReplay = null,
                     onRestart = null,
+                    onRetry = null,
                     onBackToHub = null
                 } = options || {};
 
                 const ctx = TpMiniGames.charCtx || TpMiniGames.buildCharContext(TpMiniGames.currentTp);
                 const safeStars = Math.max(1, Math.min(3, Math.round(Number(stars) || 3)));
                 const starHtml = '⭐'.repeat(safeStars) + '☆'.repeat(3 - safeStars);
-                const activeHigh = TpMiniGames.activeGameId ? TpMiniGames.helpers.getHighScore(TpMiniGames.activeGameId) : 0;
+                const targetGameId = gameId || TpMiniGames.activeGameId;
+                const activeHigh = targetGameId ? TpMiniGames.helpers.getHighScore(targetGameId) : 0;
                 const finalBest = Math.max(Number(score) || 0, Number(bestScore) || 0, Number(highScore) || 0, activeHigh);
                 const finalMsg = message || summary || `${ctx.name}${getWithParticle(ctx.name)} 함께해서 정말 즐거웠어~ 츄! 💕`;
-                const replayHandler = onReplay || onRestart;
+                const replayHandler = onReplay || onRestart || onRetry;
 
                 playSfx('win');
                 const rewardMsg = TpMiniGames.helpers.rewardCharacter(ctx.name);
@@ -527,33 +530,43 @@
 
                 stageEl.appendChild(overlay);
 
-                const replayBtn = overlay.querySelector('.tp-result-replay-btn');
-                if (replayBtn) {
-                    replayBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        playSfx('pop');
-                        overlay.remove();
-                        if (typeof replayHandler === 'function') {
-                            replayHandler();
-                        } else if (TpMiniGames.activeGameId) {
-                            TpMiniGames.launchGame(TpMiniGames.activeGameId);
+                const bindActionBtn = (btn, actionFn) => {
+                    if (!btn) return;
+                    let handled = false;
+                    const onActivate = (e) => {
+                        if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+                        if (e && (e.type === 'touchend' || e.type === 'click') && typeof e.preventDefault === 'function') {
+                            e.preventDefault();
                         }
-                    });
-                }
+                        if (handled) return;
+                        handled = true;
+                        actionFn();
+                    };
+                    btn.addEventListener('click', onActivate);
+                    btn.addEventListener('touchend', onActivate);
+                };
+
+                const replayBtn = overlay.querySelector('.tp-result-replay-btn');
+                bindActionBtn(replayBtn, () => {
+                    playSfx('pop');
+                    overlay.remove();
+                    if (typeof replayHandler === 'function') {
+                        replayHandler();
+                    } else if (targetGameId) {
+                        TpMiniGames.launchGame(targetGameId);
+                    }
+                });
 
                 const hubBtn = overlay.querySelector('.tp-result-hub-btn');
-                if (hubBtn) {
-                    hubBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        playSfx('pop');
-                        overlay.remove();
-                        if (typeof onBackToHub === 'function') {
-                            onBackToHub();
-                        } else {
-                            TpMiniGames.showHubView();
-                        }
-                    });
-                }
+                bindActionBtn(hubBtn, () => {
+                    playSfx('pop');
+                    overlay.remove();
+                    if (typeof onBackToHub === 'function') {
+                        onBackToHub();
+                    } else {
+                        TpMiniGames.showHubView();
+                    }
+                });
 
                 return overlay;
             },

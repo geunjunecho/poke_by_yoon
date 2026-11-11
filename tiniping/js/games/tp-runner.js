@@ -485,6 +485,7 @@
         '</div>'
       ].join('\n');
 
+      var wrapEl = stageEl.querySelector('.tp-runner-wrap');
       var heartsEl = stageEl.querySelector('.tp-runner-hearts');
       var scoreValEl = stageEl.querySelector('.tp-runner-score-val');
       var highValEl = stageEl.querySelector('.tp-runner-high-val');
@@ -902,9 +903,63 @@
         });
       }
 
+      function resetGame() {
+        tick = 0;
+        score = 0;
+        lives = maxLives;
+        speed = 4.6;
+        isGameOver = false;
+        if (wrapEl && wrapEl.style) {
+          wrapEl.style.pointerEvents = 'auto';
+        }
+        player.y = 0;
+        player.vy = 0;
+        player.isJumping = false;
+        player.isDucking = false;
+        player.duckHold = false;
+        player.jumpCount = 0;
+        player.jumpProgress = 0;
+        player.invincibleTimer = 0;
+        player.knockbackTimer = 0;
+        player.knockbackX = 0;
+        player.knockbackBounceY = 0;
+        player.knockbackTilt = 0;
+        player.bubbleTimer = 0;
+        if (duckBtn && duckBtn.classList) {
+          duckBtn.classList.remove('is-active');
+        }
+        if (jumpBtn && jumpBtn.classList) {
+          jumpBtn.classList.remove('is-active');
+        }
+        obstacles.length = 0;
+        items.length = 0;
+        particles.length = 0;
+        floatingTexts.length = 0;
+        nextObstacleTick = 55;
+        nextItemTick = 28;
+        applyPuppetTransform();
+        updateHud();
+        renderCanvas();
+        if (rafId != null && typeof cancelAnimationFrame === 'function') {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+        if (!isCleanedUp && typeof requestAnimationFrame === 'function') {
+          rafId = requestAnimationFrame(loop);
+        }
+      }
+
       function finishGame() {
         if (isGameOver) return;
         isGameOver = true;
+        player.isDucking = false;
+        player.duckHold = false;
+        if (duckBtn && duckBtn.classList) {
+          duckBtn.classList.remove('is-active');
+        }
+        if (wrapEl && wrapEl.style) {
+          wrapEl.style.pointerEvents = 'none';
+        }
         if (rafId != null && typeof cancelAnimationFrame === 'function') {
           cancelAnimationFrame(rafId);
           rafId = null;
@@ -922,7 +977,10 @@
           score: score,
           highScore: best,
           charCtx: ctxChar,
-          message: ctxChar.name + ' 친구가 무지개 구름길에서 ' + score + '점을 모았어요! 💖'
+          message: ctxChar.name + ' 친구가 무지개 구름길에서 ' + score + '점을 모았어요! 💖',
+          onReplay: resetGame,
+          onRestart: resetGame,
+          onRetry: resetGame
         });
       }
 
@@ -1285,24 +1343,36 @@
       var lastJumpPointerTime = 0;
 
       function onJumpPointerDown(e) {
+        if (isGameOver || isCleanedUp) return;
         if (e && e.preventDefault) e.preventDefault();
         lastJumpPointerTime = Date.now();
         jump();
       }
 
       function onJumpButtonClick(e) {
+        if (isGameOver || isCleanedUp) return;
         if (e && e.preventDefault) e.preventDefault();
         if (Date.now() - lastJumpPointerTime < 450) return;
         jump();
       }
 
       function onDuckStart(e) {
+        if (isGameOver || isCleanedUp) return;
         if (e && e.preventDefault) e.preventDefault();
         duck(true);
       }
 
       function onDuckEnd(e) {
+        if (isGameOver || isCleanedUp) return;
         if (e && e.preventDefault) e.preventDefault();
+        if (player.isDucking) {
+          duck(false);
+        }
+      }
+
+      // window 전역 pointerup/touchend 리스너: 절대 e.preventDefault()를 호출하지 않아야 결과 오버레이 버튼(한 번 더 놀기 / 다른 게임 고르기) 클릭이 막히지 않음
+      function onWindowDuckEnd() {
+        if (isGameOver || isCleanedUp) return;
         if (player.isDucking) {
           duck(false);
         }
@@ -1325,8 +1395,8 @@
       if (global.addEventListener) {
         global.addEventListener('keydown', onKeyDown);
         global.addEventListener('keyup', onKeyUp);
-        global.addEventListener('pointerup', onDuckEnd);
-        global.addEventListener('touchend', onDuckEnd);
+        global.addEventListener('pointerup', onWindowDuckEnd);
+        global.addEventListener('touchend', onWindowDuckEnd);
       }
 
       function getState() {
@@ -1365,7 +1435,8 @@
         getState: getState,
         spawnObstacle: spawnObstacle,
         spawnItem: spawnItem,
-        triggerObstacleHit: handleObstacleHit
+        triggerObstacleHit: handleObstacleHit,
+        reset: resetGame
       };
 
       applyPuppetTransform();
@@ -1400,8 +1471,8 @@
         if (global.removeEventListener) {
           global.removeEventListener('keydown', onKeyDown);
           global.removeEventListener('keyup', onKeyUp);
-          global.removeEventListener('pointerup', onDuckEnd);
-          global.removeEventListener('touchend', onDuckEnd);
+          global.removeEventListener('pointerup', onWindowDuckEnd);
+          global.removeEventListener('touchend', onWindowDuckEnd);
         }
       };
     }

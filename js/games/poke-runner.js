@@ -953,6 +953,14 @@
     function handleGameOver() {
       isGameOver = true;
       running = false;
+      player.isDucking = false;
+      player.duckKeyHeld = false;
+      if (duckBtn && duckBtn.classList) {
+        duckBtn.classList.remove('active');
+      }
+      if (wrap && wrap.style) {
+        wrap.style.pointerEvents = 'none';
+      }
       if (rafId !== null && typeof cancelAnimationFrame === 'function') {
         cancelAnimationFrame(rafId);
         rafId = null;
@@ -976,6 +984,9 @@
           score >= 100
             ? ctxData.nameKr + '와(과) 신나게 달려서 최고예요! 🌟'
             : '점프와 숙이기로 다시 한 번 달려볼까요?',
+        onReplay: function () {
+          resetGame();
+        },
         onRetry: function () {
           resetGame();
         },
@@ -1344,6 +1355,9 @@
       isGameOver = false;
       running = true;
       rewarded = false;
+      if (wrap && wrap.style) {
+        wrap.style.pointerEvents = 'auto';
+      }
       player.y = 0;
       player.vy = 0;
       player.isJumping = false;
@@ -1404,24 +1418,36 @@
     var lastJumpPointerTime = -1000;
 
     function onJumpPointerDown(e) {
+      if (!running || isGameOver) return;
       if (e && typeof e.preventDefault === 'function') e.preventDefault();
       lastJumpPointerTime = Date.now();
       jump();
     }
 
     function onJumpClick(e) {
+      if (!running || isGameOver) return;
       if (e && typeof e.preventDefault === 'function') e.preventDefault();
       if (Date.now() - lastJumpPointerTime < 300) return;
       jump();
     }
 
     function onDuckStart(e) {
+      if (!running || isGameOver) return;
       if (e && typeof e.preventDefault === 'function') e.preventDefault();
       duck(true);
     }
 
     function onDuckEnd(e) {
+      if (!running || isGameOver) return;
       if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      if (player.isDucking) {
+        duck(false);
+      }
+    }
+
+    // window 전역 pointerup/touchend 리스너: 절대 e.preventDefault()를 호출하지 않아야 결과 오버레이 버튼(한 번 더 놀기 / 다른 게임 고르기) 클릭이 막히지 않음
+    function onWindowDuckEnd() {
+      if (!running || isGameOver) return;
       if (player.isDucking) {
         duck(false);
       }
@@ -1440,6 +1466,7 @@
     }
 
     function onKeyUp(e) {
+      if (!running || isGameOver) return;
       var code = e.code || e.key;
       if (code === 'ArrowDown') {
         duck(false);
@@ -1462,8 +1489,8 @@
     if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
       window.addEventListener('keydown', onKeyDown);
       window.addEventListener('keyup', onKeyUp);
-      window.addEventListener('pointerup', onDuckEnd);
-      window.addEventListener('touchend', onDuckEnd);
+      window.addEventListener('pointerup', onWindowDuckEnd);
+      window.addEventListener('touchend', onWindowDuckEnd);
     }
 
     stageEl._runnerGame = {
@@ -1504,8 +1531,8 @@
       if (typeof window !== 'undefined' && typeof window.removeEventListener === 'function') {
         window.removeEventListener('keydown', onKeyDown);
         window.removeEventListener('keyup', onKeyUp);
-        window.removeEventListener('pointerup', onDuckEnd);
-        window.removeEventListener('touchend', onDuckEnd);
+        window.removeEventListener('pointerup', onWindowDuckEnd);
+        window.removeEventListener('touchend', onWindowDuckEnd);
       }
       stageEl._runnerGame = null;
     };

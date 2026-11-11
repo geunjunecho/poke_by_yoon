@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pokedex-v11';
+const CACHE_NAME = 'pokedex-v13';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -87,9 +87,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets: network first, cache fallback (prevents stale HTML/JS on deploy)
+  // Static assets: network first (bypassing HTTP cache), cache fallback
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: 'no-cache' })
       .then((response) => {
         if (response && response.ok && event.request.method === 'GET') {
           const clone = response.clone();
@@ -99,6 +99,6 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => caches.match(event.request, { ignoreSearch: true }))
   );
 });
